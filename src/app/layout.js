@@ -15,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${interSans.variable}`} style={{ margin: 0, padding: 0 }}>
+      <body className={`${interSans.variable}`}>
         <ThemeRegistry>
           <div style={{ display: "flex", minHeight: "100vh" }}>
             <Navbar />

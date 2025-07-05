@@ -16,42 +16,53 @@ const theme = createTheme({
             main: '#FFFFFF',
             paper: '#EAE9DA',
         },
+        status: {
+            error: '#FF0000',
+            warning: '#FFA500',
+            info: '#0000FF',
+            success: '#008000',
+        }
     },
     typography: {
         // light: 400, regular: 500, semibold: 600, bold: 700
         h1: {
             fontWeight: 600,
-            fontSize: '30px',
+            fontSize: `${30 / 1.5}px`,
         },
         h2: {
             fontWeight: 500,
-            fontSize: '30px',
+            fontSize: `${30 / 1.5}px`,
         },
         money: {
-            fontSize: '30px',
+            fontSize: `${30 / 1.5}px`,
             fontWeight: 600,
             textTransform: 'uppercase',
         },
         olevium: {
             fontWeight: 400,
-            fontSize: '40px',
+            fontSize: `${40 / 1.5}px`,
         },
         primaryLink: {
             fontWeight: 600,
-            fontSize: '20px',
+            fontSize: `${20 / 1.5}px`,
             textTransform: 'uppercase',
         },
-        labelHint: {
-            fontSize: '15px',
-            fontWeight: 500,
-        },
         primaryButton: {
-            fontSize: '20px',
+            fontSize: `${20 / 1.5}px`,
             fontWeight: 600,
             textTransform: 'uppercase',
         },
-        columnes: {
-            fontSize: '25px',
+        navigation: {
+            fontSize: `${20 / 1.5}px`,
+            fontWeight: 500,
+            // textTransform: 'uppercase',
+        },
+        labelHint: {
+            fontSize: `${15 / 1.5}px`,
+            fontWeight: 500,
+        },
+        columns: {
+            fontSize: `${25 / 1.5}px`,
             fontWeight: 600,
         },
     },
