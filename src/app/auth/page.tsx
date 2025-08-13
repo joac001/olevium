@@ -25,7 +25,7 @@ export default function AuthPage() {
         if (cache.get('token')) {
             router.push('/');
         }
-    }, [cache, router]);
+    }, [router]);
 
     const [activeTab, setActiveTab] = useState<number>(0);
     const [showPassword, setShowPassword] = useState<boolean>(false);

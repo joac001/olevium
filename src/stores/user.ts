@@ -8,7 +8,7 @@ const useUserStore = create((set) => ({
         try {
             const response = await axios.get('/users/me');
             set({ user: response.data });
-        } catch (error) {
+        } catch {
             set({ user: null });
         }
     },

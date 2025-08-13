@@ -34,7 +34,7 @@ const Menu = () => {
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [menuOpen]);
+    }, [menuOpen, handleMenuToggle]);
 
     return (
         <Box style={{ position: 'relative', display: 'inline-block' }}>

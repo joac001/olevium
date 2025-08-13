@@ -6,7 +6,11 @@ import cache from '@/services/cache';
 import { AuthStoreType } from '@/types/store';
 
 function getDisplayName<T>(WrappedComponent: ComponentType<T>): string {
-    return (WrappedComponent as any).displayName || (WrappedComponent as any).name || 'Component';
+    return (
+        (WrappedComponent as { displayName?: string }).displayName ||
+        (WrappedComponent as { name?: string }).name ||
+        'Component'
+    );
 }
 
 function withAuth<T extends object>(WrappedComponent: ComponentType<T>): React.FC<React.PropsWithChildren<T>> {

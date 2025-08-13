@@ -20,7 +20,7 @@ export default function CTAVerify() {
         if (!registeredUserName || !registeredUserEmail) {
             router.push('/auth');
         }
-    }, [loggedIn, router]);
+    }, [loggedIn, router, registeredUserName, registeredUserEmail]);
 
     return (
         <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'start', mt: 10, height: '100vh' }}>
