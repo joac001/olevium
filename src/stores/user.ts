@@ -2,7 +2,7 @@ import axios from "@/services/axios";
 // import cache from "@/services/cache";
 import { create } from 'zustand'
 
-const useAuthStore = create((set) => ({
+const useUserStore = create((set) => ({
     user: null,
     mountUser: async () => {
         try {
@@ -14,4 +14,4 @@ const useAuthStore = create((set) => ({
     },
 }));
 
-export default useAuthStore;
+export default useUserStore;

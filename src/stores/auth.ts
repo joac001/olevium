@@ -3,6 +3,7 @@ import cache from "@/services/cache";
 import { create } from 'zustand'
 
 const useAuthStore = create((set) => ({
+    loggedIn: false,
     registeredUserName: null,
     registeredUserEmail: null,
     login: async (args = {}) => {
@@ -10,6 +11,7 @@ const useAuthStore = create((set) => ({
             const response = await axios.post('/auth/login', args);
             cache.set("token", response.data.access_token);
             cache.set("refresh_token", response.data.refresh_token);
+            set({ loggedIn: true });
             return response.data;
         }
         catch (error) {

@@ -7,19 +7,30 @@ import {
     FormGroup,
     Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { LoginPkg, RegisterPkg } from "@/types/form";
 import { isValidEmail, isSecurePassword } from "@/utils/validation";
 import RegisterTab from "@/components/RegisterTab";
 import LoginTab from "@/components/LoginTab";
 import useAuthStore from "@/stores/auth";
-import { useRouter } from "next/router";
+import cache from "@/services/cache";
+import { AuthStoreType } from "@/types/store";
 
 export default function AuthPage() {
+
+    const router = useRouter();
+
+    useEffect(() => {
+        if (cache.get('token')) {
+            router.push('/');
+        }
+    }, [cache, router]);
+
     const [activeTab, setActiveTab] = useState<number>(0);
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
-    const { login, register } = useAuthStore() as { login: (data: LoginPkg) => void; register: (data: RegisterPkg) => void };
+    const { login, register } = useAuthStore() as AuthStoreType;
 
     const [form, setForm] = useState({
         name: '',
@@ -29,7 +40,6 @@ export default function AuthPage() {
         repeatPassword: ''
     });
 
-    const router = useRouter();
 
     const handleClickShowPassword = () => {
         setShowPassword((prev) => !prev);
@@ -106,7 +116,7 @@ export default function AuthPage() {
                 repeatPassword: ''
             });
 
-            // TODO: Redirect to verify email page
+            router.push('/auth/cta-verify');
         } catch (error) {
             alert(error);
         }

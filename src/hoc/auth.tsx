@@ -1,22 +1,31 @@
-import { useRouter } from 'next/navigation';
+'use client';
+import { useRouter, usePathname } from 'next/navigation';
 import React, { useEffect, ComponentType } from 'react';
+import useAuthStore from '@/stores/auth';
 import cache from '@/services/cache';
+import { AuthStoreType } from '@/types/store';
 
 function getDisplayName<T>(WrappedComponent: ComponentType<T>): string {
     return (WrappedComponent as any).displayName || (WrappedComponent as any).name || 'Component';
 }
 
 function withAuth<T extends object>(WrappedComponent: ComponentType<T>): React.FC<React.PropsWithChildren<T>> {
+
     const AuthComponent: React.FC<React.PropsWithChildren<T>> = (props) => {
+        const { loggedIn } = useAuthStore() as AuthStoreType;
         const router = useRouter();
+        const pathname = usePathname();
+
+        // Permitir acceso libre a cualquier ruta bajo /auth (incluye subrutas)
+        const isAuthRoute = pathname?.startsWith('/auth');
 
         useEffect(() => {
-            if (!cache.get('token')) {
+            if (!cache.get('token') || (!loggedIn && !isAuthRoute)) {
                 router.push('/auth');
             }
-        }, [router]);
+        }, [loggedIn, router, isAuthRoute]);
 
-        return cache.get('token') ? <WrappedComponent {...props} /> : null;
+        return !loggedIn ? null : <WrappedComponent {...props} />;
     };
 
     AuthComponent.displayName = `WithAuth(${getDisplayName(WrappedComponent)})`;

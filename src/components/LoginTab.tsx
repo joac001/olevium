@@ -40,7 +40,6 @@ export default function LoginTab({
             <InputLabel sx={{ color: 'prim.contrastText', alignSelf: 'start' }}>Contraseña</InputLabel>
             <OutlinedInput
                 type={showPassword ? 'text' : 'password'}
-                placeholder="unaContraseñaSegura"
                 fullWidth
                 sx={{ mb: 2 }}
                 value={password}
