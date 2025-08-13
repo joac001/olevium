@@ -2,13 +2,14 @@
 import { Link, Box } from '@mui/material';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import Glass from "@/components/global/Glass";
+import withAuth from '@/hoc/auth';
 
 import { useState, useRef, useEffect } from "react";
 
 import menuOptions from "@/types/menu";
 
 
-export default function Menu() {
+const Menu = () => {
     // Referencia al contenedor del menú para detectar clics fuera
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -97,3 +98,5 @@ export default function Menu() {
         </Box>
     );
 }
+
+export default withAuth(Menu);

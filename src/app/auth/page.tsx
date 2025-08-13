@@ -12,10 +12,14 @@ import { LoginPkg, RegisterPkg } from "@/types/form";
 import { isValidEmail, isSecurePassword } from "@/utils/validation";
 import RegisterTab from "@/components/RegisterTab";
 import LoginTab from "@/components/LoginTab";
+import useAuthStore from "@/stores/auth";
+import { useRouter } from "next/router";
 
 export default function AuthPage() {
     const [activeTab, setActiveTab] = useState<number>(0);
     const [showPassword, setShowPassword] = useState<boolean>(false);
+
+    const { login, register } = useAuthStore() as { login: (data: LoginPkg) => void; register: (data: RegisterPkg) => void };
 
     const [form, setForm] = useState({
         name: '',
@@ -24,6 +28,8 @@ export default function AuthPage() {
         password: '',
         repeatPassword: ''
     });
+
+    const router = useRouter();
 
     const handleClickShowPassword = () => {
         setShowPassword((prev) => !prev);
@@ -72,13 +78,64 @@ export default function AuthPage() {
         }
     };
 
-    const handleLogin = (data: LoginPkg) => {
-        console.log("LOGIN", data);
+    const handleLogin = async (data: LoginPkg) => {
+        try {
+            await login(data);
+            setForm({
+                name: '',
+                lastName: '',
+                email: '',
+                password: '',
+                repeatPassword: ''
+            });
+
+            router.push('/');
+        } catch (error) {
+            alert(error);
+        }
     };
 
-    const handleRegister = (data: RegisterPkg) => {
-        console.log("REGISTER", data);
+    const handleRegister = async (data: RegisterPkg) => {
+        try {
+            await register(data);
+            setForm({
+                name: '',
+                lastName: '',
+                email: '',
+                password: '',
+                repeatPassword: ''
+            });
+
+            // TODO: Redirect to verify email page
+        } catch (error) {
+            alert(error);
+        }
     };
+
+    const Tab = (title: string, index: number) => {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    padding: 1,
+                    margin: 0,
+                    borderRadius: 2,
+                    backgroundColor: activeTab === index ? 'glass.paper' : 'transparent',
+                    cursor: 'pointer',
+                }}
+                role="button"
+                tabIndex={index}
+                onClick={() => setActiveTab(index)}
+            >
+                <Typography variant="link" sx={{ color: 'prim.contrastText', fontWeight: 600, letterSpacing: 0.5 }}>
+                    {title}
+                </Typography>
+            </Box>
+        );
+    }
 
     return (
         <Container
@@ -102,46 +159,9 @@ export default function AuthPage() {
                     userSelect: 'none',
                 }}
             >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        padding: 1,
-                        margin: 0,
-                        borderRadius: 2,
-                        backgroundColor: activeTab === 0 ? 'glass.paper' : 'transparent',
-                        cursor: 'pointer',
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setActiveTab(0)}
-                >
-                    <Typography variant="link" sx={{ color: 'prim.contrastText', fontWeight: 600, letterSpacing: 0.5 }}>
-                        Iniciar sesión
-                    </Typography>
-                </Box>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        padding: 1,
-                        margin: 0,
-                        borderRadius: 2,
-                        backgroundColor: activeTab === 1 ? 'glass.paper' : 'transparent',
-                        cursor: 'pointer',
-                    }}
-                    role="button"
-                    tabIndex={1}
-                    onClick={() => setActiveTab(1)}
-                >
-                    <Typography variant="link" sx={{ color: 'prim.contrastText', fontWeight: 600, letterSpacing: 0.5 }}>
-                        Registrarse
-                    </Typography>
-                </Box>
+                {Tab('Iniciar sesión', 0)}
+                {Tab('Registrarse', 1)}
+
             </Box>
 
             <Glass
@@ -156,27 +176,33 @@ export default function AuthPage() {
             >
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                     <FormGroup sx={{ width: '100%' }}>
-                        {activeTab === 1 && (
+                        {activeTab === 1 ?
                             <RegisterTab
                                 name={form.name}
                                 lastName={form.lastName}
+                                email={form.email}
+                                password={form.password}
                                 repeatPassword={form.repeatPassword}
                                 showPassword={showPassword}
                                 onChangeName={handleChange('name')}
                                 onChangeLastName={handleChange('lastName')}
+                                onChangeEmail={handleChange('email')}
+                                onChangePassword={handleChange('password')}
                                 onChangeRepeatPassword={handleChange('repeatPassword')}
+                                onTogglePassword={handleClickShowPassword}
                             />
-                        )}
 
-                        <LoginTab
-                            email={form.email}
-                            password={form.password}
-                            showPassword={showPassword}
-                            onChangeEmail={handleChange('email')}
-                            onChangePassword={handleChange('password')}
-                            onTogglePassword={handleClickShowPassword}
-                        />
+                            :
 
+                            <LoginTab
+                                email={form.email}
+                                password={form.password}
+                                showPassword={showPassword}
+                                onChangeEmail={handleChange('email')}
+                                onChangePassword={handleChange('password')}
+                                onTogglePassword={handleClickShowPassword}
+                            />
+                        }
                         <Button
                             type="submit"
                             variant="contained"
