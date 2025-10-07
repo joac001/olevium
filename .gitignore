@@ -13,9 +13,6 @@
 # testing
 /coverage
 
-# Archivo de ayuda memoria para Copilot
-context.md
-
 # next.js
 /.next/
 /out/
