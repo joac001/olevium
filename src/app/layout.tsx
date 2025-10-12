@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 
 const links: NavLink[] = [
   { icon: "fas fa-home", label: "Inicio", href: "/" } as NavLink,
-  { icon: "fas fa-user", label: "Perfil", href: "/profile" } as NavLink,
-  { icon: "fas fa-line-chart", label: "Estadisticas", href: "/stats" } as NavLink,
-  { icon: "fas fa-commenting-o", label: "Whatsapp", href: "/wpp" } as NavLink,
-  { icon: "fas fa-cog", label: "Configuracion", href: "/config" } as NavLink,
-  { icon: "fas fa-power-off", label: "Cerrar Sesion", href: "/logout" } as NavLink,
+  { icon: "fas fa-user", label: "Perfil", href: "/" } as NavLink,
+  { icon: "fas fa-line-chart", label: "Estadisticas", href: "/" } as NavLink,
+  { icon: "fas fa-commenting-o", label: "Whatsapp", href: "/" } as NavLink,
+  { icon: "fas fa-cog", label: "Configuracion", href: "/" } as NavLink,
+  { icon: "fas fa-power-off", label: "Cerrar Sesion", href: "/" } as NavLink,
 ];
 
 export default function RootLayout({
