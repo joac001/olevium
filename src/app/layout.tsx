@@ -44,7 +44,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`}>
         <>
-          <NavBar title="Aplicación" links={links} />
+          <NavBar title="Olevium" links={links} />
           <NotificationProvider>
             <ModalProvider>
               {children}

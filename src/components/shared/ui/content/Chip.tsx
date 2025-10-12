@@ -5,7 +5,7 @@ import { ColorKey } from "@/types/ColorKey";
 interface ChipProps {
     text?: string;
     color?: ColorKey;
-    icon?: string; // opcional: "fas fa-check"
+    icon?: string;
     title?: string;
 }
 
@@ -24,7 +24,7 @@ export default function Chip({
                 text
                     ? 'h-6 md:h-7 px-2 md:px-3 text-xs md:text-sm gap-1.5'
                     : 'h-3 w-3 p-0 border-2 border-[color:var(--bn-ring)]',
-                `bg-[var(--bn-surface)] text-[color:var(--bn-foreground)]`,
+                `bg-[var(--bn-surface)] text-[color:var(--bn-text)]`,
                 'shadow-[0_6px_14px_-4px_var(--chip-shadow)]'
             )}
         >

@@ -4,18 +4,18 @@
 @tailwind utilities;
 
 :root {
-  /* Amber 100 */
-  --background: oklch(92.4% 0.12 95.746);
-  --foreground: #272727;
-  --foreground-contrast: #ffffff;
+  /* Teal 950 */
+  --background: oklch(27.7% 0.046 192.524);
+  --foreground: #ffffff;
+  --foreground-contrast: #272727;
 
-  /* Amber */
+  /* Emerald */
   /* 700 */
-  --color-primary-dark: oklch(55.5% 0.163 48.998);
+  --color-primary-dark:oklch(50.8% 0.118 165.612);
   /* 600 */
-  --color-primary: oklch(79.231% 0.15073 62.204);
+  --color-primary:oklch(59.6% 0.145 163.225);
   /* 500 */
-  --color-primary-light: oklch(76.9% 0.188 70.08);
+  --color-primary-light: oklch(69.6% 0.17 162.48);
   --color-primary-foreground: var(--foreground);
   --color-primary-soft: color-mix(in srgb, var(--color-primary) 55%, var(--color-primary-light) 45%);
   --color-primary-strong: color-mix(in srgb, var(--color-primary) 85%, var(--color-primary-dark) 15%);
@@ -27,7 +27,7 @@
   --color-secondary: oklch(51.1% 0.262 276.966);
   /* 500 */
   --color-secondary-light: oklch(58.5% 0.233 277.117);
-  --color-secondary-foreground: var(--foreground-contrast);
+  --color-secondary-foreground: var(--foreground);
   --color-secondary-soft: color-mix(in srgb, var(--color-secondary) 60%, var(--color-secondary-light) 40%);
   --color-secondary-strong: color-mix(in srgb, var(--color-secondary) 80%, var(--color-secondary-dark) 20%);
 
@@ -42,13 +42,13 @@
   --color-accent-soft: color-mix(in srgb, var(--color-accent) 58%, var(--color-accent-light) 42%);
   --color-accent-strong: color-mix(in srgb, var(--color-accent) 82%, var(--color-accent-dark) 18%);
 
-  /* Emerald */
+  /* Green */
+  /* 800 */
+  --color-success-dark: oklch(44.8% 0.119 151.328);
+  /* 700 */
+  --color-success: oklch(52.7% 0.154 150.069);
   /* 600 */
-  --color-success-dark: oklch(59.6% 0.145 163.225);
-  /* 500 */
-  --color-success: oklch(69.6% 0.17 162.48);
-  /* 400 */
-  --color-success-light: oklch(76.5% 0.177 163.223);
+  --color-success-light: oklch(62.7% 0.194 149.214);
   --color-success-foreground: var(--foreground);
   --color-success-soft: color-mix(in srgb, var(--color-success) 50%, var(--color-success-light) 50%);
   --color-success-strong: color-mix(in srgb, var(--color-success) 75%, var(--color-success-dark) 25%);
@@ -70,7 +70,7 @@
   /* 300 */
   --color-warning: oklch(90.5% 0.182 98.111);
   --color-warning-light: oklch(94.5% 0.129 101.54);
-  --color-warning-foreground: var(--foreground);
+  --color-warning-foreground: var(--foreground-contrast);
   --color-warning-soft: color-mix(in srgb, var(--color-warning) 50%, var(--color-warning-light) 50%);
   --color-warning-strong: color-mix(in srgb, var(--color-warning) 75%, var(--color-warning-dark) 25%);
 
@@ -86,14 +86,14 @@
   --color-danger-strong: color-mix(in srgb, var(--color-danger) 70%, var(--color-danger-dark) 30%);
 
 
-  /* Amber */
+  /* Teal */
   /* TODO: Revisar el bg de surface*/
-  /* 200 */
-  --surface-dark: oklch(92.4% 0.12 95.746);
-  /* 100 */
-  --surface-base: oklch(96.2% 0.059 95.617);
-  /* 50 */
-  --surface-highlight: oklch(98.7% 0.022 95.277);
+  /* 950 */
+  --surface-dark: oklch(27.7% 0.046 192.524);
+  /* 800 */
+  --surface-base: oklch(38.6% 0.063 188.416);
+  /* 700 */
+  --surface-highlight: oklch(43.7% 0.078 188.216);
   --surface: linear-gradient(135deg,
       color-mix(in srgb, var(--surface-highlight) 45%, var(--surface-base) 55%) 0%,
       color-mix(in srgb, var(--surface-base) 80%, var(--surface-dark) 20%) 100%);
@@ -272,67 +272,67 @@
 /* BANNER */
 [data-banner="primary"] {
   --bn-surface: var(--color-primary-light);
-  --bn-icon-from: var(--color-primary);
-  --bn-icon-to: var(--color-primary-dark);
+  --bn-icon-from: var(--color-primary-soft);
+  --bn-icon-to: var(--color-primary-light);
   --bn-text: var(--color-primary-foreground);
-  --bn-ring: var(--color-primary-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="secondary"] {
-  --bn-surface: var(--color-secondary-dark);
-  --bn-icon-from: var(--color-secondary);
-  --bn-icon-to: var(--color-secondary-dark);
+  --bn-surface: var(--color-secondary-light);
+  --bn-icon-from: var(--color-secondary-soft);
+  --bn-icon-to: var(--color-secondary-light);
   --bn-text: var(--color-secondary-foreground);
-  --bn-ring: var(--color-secondary-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="success"] {
-  --bn-surface: var(--color-success-strong);
-  --bn-icon-from: var(--color-success);
-  --bn-icon-to: var(--color-success-dark);
+  --bn-surface: var(--color-success-light);
+  --bn-icon-from: var(--color-success-soft);
+  --bn-icon-to: var(--color-success-light);
   --bn-text: var(--color-success-foreground);
-  --bn-ring: var(--color-success-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="accent"] {
-  --bn-surface: var(--color-accent-soft);
-  --bn-icon-from: var(--color-accent);
-  --bn-icon-to: var(--color-accent-dark);
+  --bn-surface: var(--color-accent-light);
+  --bn-icon-from: var(--color-accent-soft);
+  --bn-icon-to: var(--color-accent-light);
   --bn-text: var(--color-accent-foreground);
-  --bn-ring: var(--color-accent-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="info"] {
-  --bn-surface: var(--color-info);
-  --bn-icon-from: var(--color-info);
-  --bn-icon-to: var(--color-info-dark);
+  --bn-surface: var(--color-info-light);
+  --bn-icon-from: var(--color-info-soft);
+  --bn-icon-to: var(--color-info-light);
   --bn-text: var(--color-info-foreground);
-  --bn-ring: var(--color-info-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="warning"] {
-  --bn-surface: var(--color-warning-strong);
-  --bn-icon-from: var(--color-warning);
-  --bn-icon-to: var(--color-warning-dark);
+  --bn-surface: var(--color-warning-light);
+  --bn-icon-from: var(--color-warning-soft);
+  --bn-icon-to: var(--color-warning-light);
   --bn-text: var(--color-warning-foreground);
-  --bn-ring: var(--color-warning-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="danger"],
 [data-banner="error"] {
-  --bn-surface: var(--color-danger);
-  --bn-icon-from: var(--color-danger);
-  --bn-icon-to: var(--color-danger-dark);
+  --bn-surface: var(--color-danger-light);
+  --bn-icon-from: var(--color-danger-soft);
+  --bn-icon-to: var(--color-danger-light);
   --bn-text: var(--color-danger-foreground);
-  --bn-ring: var(--color-danger-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 [data-banner="neutral"] {
   --bn-surface: color-mix(in srgb, var(--surface-muted) 85%, #ffffff 15%);
-  --bn-icon-from: color-mix(in srgb, var(--surface-dark) 72%, #000000 28%);
-  --bn-icon-to: color-mix(in srgb, var(--surface) 55%, #000000 45%);
+  --bn-icon-from: color-mix(in srgb, var(--surface-highlight) 72%, #474747 28%);
+  --bn-icon-to: color-mix(in srgb, var(--surface-highlight) 55%, #616161 45%);
   --bn-text: var(--color-surface-foreground);
-  --bn-ring: var(--color-neutral-strong);
+  --bn-ring: var(--bn-surface);
 }
 
 body {

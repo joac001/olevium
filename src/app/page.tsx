@@ -155,7 +155,7 @@ export default function Home() {
                     <Typography variant="caption">Typography</Typography>
                     <Box className="flex flex-row w-fit gap-4">
                         <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                        <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
+                        <Button type="secondary" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                     </Box>
                 </Card>
 
@@ -167,7 +167,7 @@ export default function Home() {
                     <Typography variant="caption">Typography</Typography>
                     <Box className="flex flex-row w-fit gap-4">
                         <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                        <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
+                        <Button type="secondary" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                     </Box>
                 </Card>
             </Box>
@@ -179,7 +179,7 @@ export default function Home() {
                 <Typography variant="caption">Typography</Typography>
                 <Box className="flex flex-row w-fit gap-4">
                     <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                    <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
+                    <Button type="secondary" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                 </Box>
             </Card>
 
@@ -198,13 +198,13 @@ export default function Home() {
 
             <Box className="my-4 flex flex-row gap-2">
                 <Button type="primary" text="Notificacion primary" onClick={() => handleShowNotification("primary")} />
-                <Button type="primary" text="Notificacion secondary" onClick={() => handleShowNotification("secondary")} />
-                <Button type="primary" text="Notificacion success" onClick={() => handleShowNotification("success")} />
-                <Button type="primary" text="Notificacion accent" onClick={() => handleShowNotification("accent")} />
-                <Button type="primary" text="Notificacion info" onClick={() => handleShowNotification("info")} />
-                <Button type="primary" text="Notificacion warning" onClick={() => handleShowNotification("warning")} />
-                <Button type="primary" text="Notificacion danger" onClick={() => handleShowNotification("danger")} />
-                <Button type="primary" text="Notificacion neutral" onClick={() => handleShowNotification("neutral")} />
+                <Button type="secondary" text="Notificacion secondary" onClick={() => handleShowNotification("secondary")} />
+                <Button type="success" text="Notificacion success" onClick={() => handleShowNotification("success")} />
+                <Button type="accent" text="Notificacion accent" onClick={() => handleShowNotification("accent")} />
+                <Button type="info" text="Notificacion info" onClick={() => handleShowNotification("info")} />
+                <Button type="warning" text="Notificacion warning" onClick={() => handleShowNotification("warning")} />
+                <Button type="danger" text="Notificacion danger" onClick={() => handleShowNotification("danger")} />
+                <Button type="neutral" text="Notificacion neutral" onClick={() => handleShowNotification("neutral")} />
             </Box>
 
             <Box className="">
