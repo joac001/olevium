@@ -11,7 +11,7 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 type IconType = string | IconComponent;
 
 export interface NavLink {
-    icon: IconType;      // "fas fa-home"  O  un componente SVG
+    icon: IconType;
     label: string;
     href: string;
 }
@@ -19,23 +19,6 @@ export interface NavLink {
 interface NavBarProps {
     title: string;
     links: NavLink[];
-}
-
-/** Renderiza ícono según el tipo recibido */
-function RenderIcon({
-    icon,
-    className,
-    size = 18,
-}: {
-    icon: IconType;
-    className?: string;
-    size?: number;
-}) {
-    if (typeof icon === "string") {
-        return <i className={[icon, className].filter(Boolean).join(" ")} aria-hidden="true" />;
-    }
-    const SvgIcon = icon;
-    return <SvgIcon className={className} width={size} height={size} />;
 }
 
 export default function NavBar({ title, links }: NavBarProps) {
@@ -75,29 +58,22 @@ export default function NavBar({ title, links }: NavBarProps) {
     const navLinkHidden = "-translate-x-full opacity-0";
 
     // estados visuales (usa tus tokens/variables)
-    const navLinkActive =
-        "text-[color:var(--color-primary-foreground)] shadow-[0_18px_32px_rgba(11,23,16,0.35)]";
-    const navLinkInactive =
-        "text-[color:var(--text-primary)] shadow-[0_10px_26px_rgba(11,23,16,0.32)] hover:shadow-[0_14px_32px_rgba(11,23,16,0.38)]";
+    const navLink =
+        "text-[color:var(--color-primary-foreground)] shadow-[0_8px_16px_var(--shadow-soft)]";
 
     const shellGlassStyle: CSSProperties = {
-        backgroundImage: 'var(--surface)',
-        backgroundColor: 'var(--surface-tint)',
-        backdropFilter: 'blur(var(--glass-blur, 18px))'
-    };
-
-    const chipBaseStyle: CSSProperties = {
+        backgroundColor: 'var(--navbar-bg)',
         backdropFilter: 'blur(var(--glass-blur, 18px))',
-        backgroundColor: 'var(--surface-tint)'
+        backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--surface-muted) 35%, transparent 65%) 0%, transparent 100%)',
     };
 
     const inactiveChipStyle: CSSProperties = {
-        ...chipBaseStyle,
-        backgroundImage: 'var(--surface)'
+        ...shellGlassStyle,
+        backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--surface-muted) 35%, transparent 65%), var(--surface-tint) 100%)',
     };
 
     const activeChipStyle: CSSProperties = {
-        ...chipBaseStyle,
+        ...shellGlassStyle,
         backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 35%, transparent 65%) 0%, color-mix(in srgb, var(--color-primary) 82%, transparent 18%) 100%)'
     };
 
@@ -106,7 +82,7 @@ export default function NavBar({ title, links }: NavBarProps) {
             {/* Top bar */}
             <div
                 ref={navRef}
-                className="sticky top-2 mb-2 z-navbar rounded-2xl mx-3 md:mx-4 text-[color:var(--text-primary)] shadow-[0_28px_48px_rgba(11,23,16,0.35)] transition-all duration-300"
+                className="sticky top-2 mb-2 z-navbar rounded-2xl mx-3 md:mx-4 text-[color:var(--text-primary)] shadow-xl transition-all duration-300"
                 style={shellGlassStyle}
                 role="navigation"
                 aria-label="Barra de navegación"
@@ -123,15 +99,15 @@ export default function NavBar({ title, links }: NavBarProps) {
                         >
                             <div className="space-y-1">
                                 <span
-                                    className={`block w-4 h-0.5 bg-[color:var(--text-secondary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "rotate-45 translate-y-1.5" : ""
+                                    className={`block w-4 h-0.5 bg-[color:var(--text-primary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "rotate-45 translate-y-1.5" : ""
                                         }`}
                                 />
                                 <span
-                                    className={`block w-4 h-0.5 bg-[color:var(--text-secondary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "opacity-0" : ""
+                                    className={`block w-4 h-0.5 bg-[color:var(--text-primary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "opacity-0" : ""
                                         }`}
                                 />
                                 <span
-                                    className={`block w-4 h-0.5 bg-[color:var(--text-secondary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "-rotate-45 -translate-y-1.5" : ""
+                                    className={`block w-4 h-0.5 bg-[color:var(--text-primary)] transition-all duration-300 group-hover:bg-[var(--color-primary)] ${isOpen ? "-rotate-45 -translate-y-1.5" : ""
                                         }`}
                                 />
                             </div>
@@ -162,7 +138,7 @@ export default function NavBar({ title, links }: NavBarProps) {
                             className={[
                                 navLinkBase,
                                 isOpen ? navLinkShown : navLinkHidden,
-                                isActive ? navLinkActive : navLinkInactive,
+                                navLink,
                                 "hover:scale-105",
                             ].join(" ")}
                             style={{
@@ -173,17 +149,12 @@ export default function NavBar({ title, links }: NavBarProps) {
                             }}
                             aria-current={isActive ? "page" : undefined}
                         >
-                            {/* Ícono: gris por defecto; blanco si activo */}
-                            <RenderIcon
-                                icon={link.icon}
-                                className={[
-                                    "group-hover:text-[color:var(--text-primary)]",
-                                ].join(" ")}
-                                size={18}
+                            <i
+                                className={`fas fa-${link.icon}`}
                             />
 
                             <Typography variant="link">{link.label}</Typography>
-                            {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary-foreground)]" />}
+                            {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--text-inverted)]" />}
                         </button>
                     );
                 })}

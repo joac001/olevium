@@ -13,6 +13,7 @@ import ClientForm from "./_homeComponents/ClientForm";
 import { useModal } from "@/context/ModalContext";
 import { useNotification } from "@/context/NotificationContext";
 import Chip from "@/components/shared/ui/content/Chip";
+import { ColorKey } from "@/types/ColorKey";
 
 export default function Home() {
 
@@ -20,18 +21,24 @@ export default function Home() {
     const { showNotification } = useNotification();
 
     const abA: ActionButtonProps[] = [
-        { icon: 'fas fa-plus', color: 'success', text: 'Agregar' } as ActionButtonProps,
-        { icon: 'fas fa-download', color: 'accent', text: 'Descargar' } as ActionButtonProps
+        { icon: 'fas fa-plus', type: 'primary', text: 'Primary' } as ActionButtonProps,
+        { icon: 'fas fa-download', type: 'secondary', text: 'Secondary' } as ActionButtonProps,
+        { icon: 'fas fa-plus', type: 'success', text: 'Success' } as ActionButtonProps,
+        { icon: 'fas fa-download', type: 'accent', text: 'Accent' } as ActionButtonProps,
+        { icon: 'fas fa-plus', type: 'info', text: 'Info' } as ActionButtonProps,
+        { icon: 'fas fa-download', type: 'warning', text: 'Warning' } as ActionButtonProps,
+        { icon: 'fas fa-plus', type: 'danger', text: 'Danger' } as ActionButtonProps,
+        { icon: 'fas fa-download', type: 'neutral', text: 'Neutral' } as ActionButtonProps,
     ]
 
     const abB: ActionButtonProps[] = [
-        { icon: 'fas fa-ban', color: 'danger', text: 'Eliminar' } as ActionButtonProps,
+        { icon: 'fas fa-ban', type: 'danger', text: 'Eliminar' } as ActionButtonProps,
     ]
 
     const abC: ActionButtonProps[] = [
-        { icon: 'fas fa-plus', color: 'info', text: 'Agregar' } as ActionButtonProps,
-        { icon: 'fas fa-warning', color: 'warning', text: 'Denunciar' } as ActionButtonProps,
-        { icon: 'fas fa-download', color: 'accent', text: 'Descargar' } as ActionButtonProps
+        { icon: 'fas fa-plus', type: 'info', text: 'Agregar' } as ActionButtonProps,
+        { icon: 'fas fa-warning', type: 'warning', text: 'Denunciar' } as ActionButtonProps,
+        { icon: 'fas fa-download', type: 'neutral', text: 'Descargar' } as ActionButtonProps
     ]
 
     const options: DropMenuOption[] = [
@@ -131,8 +138,8 @@ export default function Home() {
         showModal(<ModalContent />);
     }
 
-    const handleShowNotification = () => {
-        showNotification('fas fa-bell', 'neutral', 'Notificacion', 'Esta es una notificacion de ejemplo');
+    const handleShowNotification = (type: ColorKey) => {
+        showNotification('fas fa-bell', type, 'Notificacion', 'Esta es una notificacion de ejemplo');
     }
 
 
@@ -148,7 +155,7 @@ export default function Home() {
                     <Typography variant="caption">Typography</Typography>
                     <Box className="flex flex-row w-fit gap-4">
                         <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                        <Button type="accent" text="Show notification" onClick={handleShowNotification} />
+                        <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                     </Box>
                 </Card>
 
@@ -160,7 +167,7 @@ export default function Home() {
                     <Typography variant="caption">Typography</Typography>
                     <Box className="flex flex-row w-fit gap-4">
                         <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                        <Button type="accent" text="Show notification" onClick={handleShowNotification} />
+                        <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                     </Box>
                 </Card>
             </Box>
@@ -172,7 +179,7 @@ export default function Home() {
                 <Typography variant="caption">Typography</Typography>
                 <Box className="flex flex-row w-fit gap-4">
                     <Button type="primary" text="Open modal" onClick={handleOpenModal} />
-                    <Button type="accent" text="Show notification" onClick={handleShowNotification} />
+                    <Button type="accent" text="Show notification" onClick={() => handleShowNotification("neutral")} />
                 </Box>
             </Card>
 
@@ -189,11 +196,26 @@ export default function Home() {
                 <Chip color="danger" />
             </Box>
 
+            <Box className="my-4 flex flex-row gap-2">
+                <Button type="primary" text="Notificacion primary" onClick={() => handleShowNotification("primary")} />
+                <Button type="primary" text="Notificacion secondary" onClick={() => handleShowNotification("secondary")} />
+                <Button type="primary" text="Notificacion success" onClick={() => handleShowNotification("success")} />
+                <Button type="primary" text="Notificacion accent" onClick={() => handleShowNotification("accent")} />
+                <Button type="primary" text="Notificacion info" onClick={() => handleShowNotification("info")} />
+                <Button type="primary" text="Notificacion warning" onClick={() => handleShowNotification("warning")} />
+                <Button type="primary" text="Notificacion danger" onClick={() => handleShowNotification("danger")} />
+                <Button type="primary" text="Notificacion neutral" onClick={() => handleShowNotification("neutral")} />
+            </Box>
+
             <Box className="">
-                <Banner icon="fas fa-info" title="Ejemplo Informacion" description="Banner de ejemplo para alguna informacion" color="info" />
-                <Banner icon="fas fa-warning" title="Ejemplo Advertencia" description="Banner de ejemplo para alguna advertencia" color="warning" />
-                <Banner icon="fas fa-check" title="Ejemplo Exito" description="Banner de ejemplo para alguna advertencia" color="success" />
-                <Banner icon="fas fa-times" title="Ejemplo Error" description="Banner de ejemplo para alguna advertencia" color="danger" />
+                <Banner icon="fas fa-sun" title="Ejemplo" description="Banner de ejemplo primary" color="primary" />
+                <Banner icon="fas fa-check" title="Ejemplo" description="Banner de ejemplo secondary" color="secondary" />
+                <Banner icon="fas fa-check" title="Ejemplo" description="Banner de ejemplo success" color="success" />
+                <Banner icon="fas fa-star" title="Ejemplo" description="Banner de ejemplo accent" color="accent" />
+                <Banner icon="fas fa-info" title="Ejemplo" description="Banner de ejemplo info" color="info" />
+                <Banner icon="fas fa-warning" title="Ejemplo" description="Banner de ejemplo warning" color="warning" />
+                <Banner icon="fas fa-times" title="Ejemplo" description="Banner de ejemplo danger" color="danger" />
+                <Banner icon="fas fa-peace" title="Ejemplo" description="Banner de ejemplo neutral" color="neutral" />
             </Box>
 
             <ClientForm dropdownOptions={options} />

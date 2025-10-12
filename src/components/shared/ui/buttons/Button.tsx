@@ -1,5 +1,6 @@
+import { ColorKey } from "@/types/ColorKey";
 export interface ButtonProps {
-    type?: 'primary' | 'accent' | 'neutral' | 'success';
+    type?: ColorKey;
     text: string;
     disabled?: boolean;
     onClick?: () => void;
@@ -7,7 +8,7 @@ export interface ButtonProps {
 }
 
 export default function Button({
-    type, // 'primary' | 'accent' | 'neutral' | 'success'
+    type,
     text,
     disabled = false,
     onClick,
@@ -28,7 +29,7 @@ export default function Button({
             onClick={onClick}
             disabled={disabled}
         >
-            <span className="font-semibold text-md md:text-lg md:font-bold text-pretty">{text}</span>
+            <span className="font-medium text-md md:text-lg text-pretty">{text}</span>
         </button>
     );
 }

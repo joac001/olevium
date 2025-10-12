@@ -41,11 +41,11 @@ export interface DropMenuRef {
 const CONTROL_BASE = [
     'flex w-full items-center justify-between px-3 py-2 text-md md:text-lg transition-all duration-200 ease-in-out',
     'bg-[var(--surface-muted)] border backdrop-blur-sm',
-    'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)]',
+    'focus:outline-none focus:ring-2 focus:ring-[var(--interactive-ring)]',
 ].join(' ');
 
 const CONTROL_BORDER_OK =
-    'border-[var(--border-soft)] hover:border-[var(--color-primary-soft)]';
+    'border-[var(--border-soft)]';
 const CONTROL_BORDER_ERROR = 'border-[var(--color-danger)] hover:border-[var(--color-danger-strong)]';
 const CONTROL_DISABLED = 'cursor-not-allowed opacity-50';
 const CONTROL_ENABLED = 'cursor-pointer';

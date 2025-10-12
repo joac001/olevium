@@ -193,7 +193,7 @@ const Input = forwardRef<InputRef, InputProps>(({
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
     const hiddenDateInputRef = useRef<HTMLInputElement>(null);
 
-    const disabledClass = disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-text';
+    const disabledClass = disabled ? 'opacity-75 cursor-not-allowed' : 'cursor-text';
     const inputClass = `w-full p-2 rounded-lg text-[var(--text-primary)] bg-[var(--surface-muted)] focus:outline-none border-2 ${isValid ? `border-[var(--border-soft)] focus:ring-2 focus:ring-[var(--interactive-ring)]` : 'border-[var(--color-danger)] focus:ring-2 focus:ring-[var(--color-danger)]'} ${disabledClass}`;
 
     // Función para validar el input combinando validación por defecto y personalizada

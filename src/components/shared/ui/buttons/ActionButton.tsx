@@ -3,29 +3,15 @@
 import { KeyboardEvent } from "react";
 import Box from "@/components/shared/ui/content/Box";
 import Tooltip from "@/components/shared/ui/text/Tooltip";
-
-type ColorKey =
-    | "primary"
-    | "secondary" // alias -> accent
-    | "accent"
-    | "success"
-    | "warning"
-    | "error"     // alias -> danger
-    | "danger"
-    | "info"
-    | "neutral";
-
+import { ColorKey } from "@/types/ColorKey";
 export interface ActionButtonProps {
     icon: string;           // ej: "fas fa-plus"
-    color?: ColorKey;       // default: accent (azul)
+    type?: ColorKey;       // default: accent (azul)
     text?: string;          // etiqueta (se oculta en mobile)
     onClick?: () => void;
     tooltip?: string;       // tooltip explícito (desktop); en mobile se usa el texto
     className?: string;     // opcional extra classes
 }
-
-const normalize = (c: ColorKey = "accent") =>
-    c === "secondary" ? "accent" : c === "error" ? "danger" : c;
 
 function ActionCore({
     icon,
@@ -37,7 +23,7 @@ function ActionCore({
     icon: string;
     text?: string;
     onClick?: () => void;
-    variant: Exclude<ColorKey, "secondary" | "error">;
+    variant: ColorKey;
     className?: string;
 }) {
     const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -76,20 +62,18 @@ function ActionCore({
 
 export default function ActionButton({
     icon,
-    color = "accent",
+    type = "accent",
     text,
     onClick,
     tooltip,
     className,
 }: ActionButtonProps) {
-    const variant = normalize(color);
-
     const button = (
         <ActionCore
             icon={icon}
             text={text}
             onClick={onClick}
-            variant={variant}
+            variant={type}
             className={className}
         />
     );

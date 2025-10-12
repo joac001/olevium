@@ -83,7 +83,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
                 {/* Botón de cerrar */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--color-accent-soft)] rounded-full transition-colors duration-200"
+                    className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--color-info-light)] rounded-full transition-colors duration-200"
                     aria-label="Cerrar modal"
                 >
                     <i className="fas fa-times text-[color:var(--text-primary)]"></i>
