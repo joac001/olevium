@@ -154,7 +154,7 @@ export default function NavBar({ title, links }: NavBarProps) {
                             />
 
                             <Typography variant="link">{link.label}</Typography>
-                            {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--text-inverted)]" />}
+                            {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />}
                         </button>
                     );
                 })}

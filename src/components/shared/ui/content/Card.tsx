@@ -5,7 +5,7 @@ import Typography from "@/components/shared/ui/text/Typography";
 import Box from "@/components/shared/ui/content/Box";
 
 interface CardProps {
-    title: string;
+    title?: string;
     subtitle?: string;
     actions?: ActionButtonProps[];
     children: ReactNode;

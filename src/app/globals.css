@@ -5,7 +5,8 @@
 
 :root {
   /* Teal 950 */
-  --background: oklch(27.7% 0.046 192.524);
+  --background: rgb(7 15 38 / 1);
+   /* oklch(27.7% 0.046 192.524); */
   --foreground: #ffffff;
   --foreground-contrast: #272727;
 
@@ -87,7 +88,7 @@
 
 
   /* Teal */
-  /* TODO: Revisar el bg de surface*/
+  /* TODO: Revisar el bg de surface */
   /* 950 */
   --surface-dark: oklch(27.7% 0.046 192.524);
   /* 800 */

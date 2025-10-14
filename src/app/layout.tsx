@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ModalProvider } from "@/context/ModalContext";
-import NavBar, { NavLink } from "@/components/layout/NavBar";
+import {NavBar, NavLink } from "@/components/layout/";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 
 const links: NavLink[] = [
   { icon: "fas fa-home", label: "Inicio", href: "/" } as NavLink,
-  { icon: "fas fa-user", label: "Perfil", href: "/" } as NavLink,
-  { icon: "fas fa-line-chart", label: "Estadisticas", href: "/" } as NavLink,
-  { icon: "fas fa-commenting-o", label: "Whatsapp", href: "/" } as NavLink,
-  { icon: "fas fa-cog", label: "Configuracion", href: "/" } as NavLink,
-  { icon: "fas fa-power-off", label: "Cerrar Sesion", href: "/" } as NavLink,
+  { icon: "fas fa-user", label: "Perfil", href: "/#perfil" } as NavLink,
+  { icon: "fas fa-line-chart", label: "Estadisticas", href: "/#estadisticas" } as NavLink,
+  { icon: "fas fa-commenting-o", label: "Whatsapp", href: "/#whatsapp" } as NavLink,
+  { icon: "fas fa-cog", label: "Configuracion", href: "/#configuracion" } as NavLink,
+  { icon: "fas fa-power-off", label: "Cerrar Sesion", href: "/#cerrar-sesion" } as NavLink,
 ];
 
 export default function RootLayout({
@@ -43,14 +43,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <>
-          <NavBar title="Olevium" links={links} />
+        <NavBar title="Olevium" links={links} />
           <NotificationProvider>
-            <ModalProvider>
-              {children}
-            </ModalProvider>
+            <ModalProvider>{children}</ModalProvider>
           </NotificationProvider>
-        </>
       </body>
     </html>
   );
