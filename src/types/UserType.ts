@@ -1,10 +1,12 @@
 export type UserType = {
-    id?: string;
+    id?: string | number;
+    name?: string;
     firstName?: string;
     lastName?: string;
+    email?: string;
+    password?: string;
     accessToken?: string;
     refreshToken?: string;
-    email: string;
-    password: string;
+    createdAt?: string;
     // Add other user properties as needed
-}
+};
