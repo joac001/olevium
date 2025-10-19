@@ -42,7 +42,7 @@ function ActionCore({
             onClick={onClick}
             onKeyDown={handleKeyDown}
             className={[
-                "flex items-center w-fit h-fit min-w-0 rounded-full",
+                "flex items-center w-fit h-fit min-w-0 rounded-xl",
                 "backdrop-blur-md",
                 // colores vía variables de botón
                 "bg-[var(--btn-bg)] hover:bg-[var(--btn-hover)] text-[color:var(--btn-foreground,var(--text-primary))]",
