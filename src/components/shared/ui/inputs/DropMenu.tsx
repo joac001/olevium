@@ -16,15 +16,15 @@ export interface DropMenuOption {
     label?: string;
 }
 
-interface DropMenuProps {
+export interface DropMenuProps {
     options: DropMenuOption[];
     disabled?: boolean;
     placeholder?: string;
     label?: string;
-    name?: string; // Para FormData
-    defaultValue?: string | number | null; // Para formularios no controlados
+    name?: string;
+    defaultValue?: string | number | null;
     onValueChange?: (value: string | number | null) => void;
-    value?: string | number | null; // Controlado
+    value?: string | number | null;
     onValidationChange?: (isValid: boolean, errorMessage: string | null) => void;
     required?: boolean;
     customErrorMessage?: string | null;

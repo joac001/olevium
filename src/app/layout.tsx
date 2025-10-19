@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Inter } from "next/font/google";
-
-import { NotificationProvider } from "@/context/NotificationContext";
-import { ModalProvider } from "@/context/ModalContext";
+import { Providers } from "./providers";
 import {NavBar, NavLink } from "@/components/layout/";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -43,10 +41,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <NavBar title="Olevium" links={links} />
-          <NotificationProvider>
-            <ModalProvider>{children}</ModalProvider>
-          </NotificationProvider>
+        <Providers>
+          <NavBar title="Olevium" links={links} />
+          {children}
+        </Providers>
       </body>
     </html>
   );
