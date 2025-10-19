@@ -10,14 +10,8 @@ import {NavBar, NavLink } from "@/components/layout/";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cecilia AI",
-  description: "Asistente inteligente automatizado",
-  icons: [
-    {
-      rel: "icon",
-      url: "/images/favicon.ico",
-    },
-  ],
+  title: "Olevium",
+  description: "Asistente financiero",
 };
 
 const links: NavLink[] = [
