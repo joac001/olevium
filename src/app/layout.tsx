@@ -3,9 +3,8 @@ import "./globals.css";
 
 import { Manrope } from "next/font/google";
 
-import { NotificationProvider } from "@/context/NotificationContext";
-import { ModalProvider } from "@/context/ModalContext";
-import {NavBar, NavLink } from "@/components/layout/";
+import { NavBar, NavLink } from "@/components/layout/";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -39,10 +38,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${manrope.className} antialiased`}>
-        <NavBar title="Olevium" links={links} />
-          <NotificationProvider>
-            <ModalProvider>{children}</ModalProvider>
-          </NotificationProvider>
+        <ClientProviders>
+          <NavBar title="Olevium" links={links} />
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );
