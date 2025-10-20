@@ -9,14 +9,18 @@ import {
     useImperativeHandle,
     KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import type { CSSProperties } from "react";
+import clsx from "clsx";
+
 import Box from '@/components/shared/ui/content/Box';
+import FieldWrapper from "./FieldWrapper";
 
 export interface DropMenuOption {
     value: string | number;
     label?: string;
 }
 
-interface DropMenuProps {
+export interface DropMenuProps {
     options: DropMenuOption[];
     disabled?: boolean;
     placeholder?: string;
@@ -37,27 +41,12 @@ export interface DropMenuRef {
     focus: () => void;
 }
 
-/** Tokens de estilo basados en tu theme (variables CSS) */
-const CONTROL_BASE = [
-    'flex w-full items-center justify-between px-3 py-2 text-md md:text-lg transition-all duration-200 ease-in-out',
-    'bg-[var(--surface-muted)] border backdrop-blur-sm',
-    'focus:outline-none focus:ring-2 focus:ring-[var(--interactive-ring)]',
-].join(' ');
-
-const CONTROL_BORDER_OK =
-    'border-[var(--border-soft)]';
-const CONTROL_BORDER_ERROR = 'border-[var(--color-danger)] hover:border-[var(--color-danger-strong)]';
-const CONTROL_DISABLED = 'cursor-not-allowed opacity-50';
-const CONTROL_ENABLED = 'cursor-pointer';
-
 const MENU_PANEL_BASE =
-    'absolute left-0 right-0 z-50 max-h-60 overflow-y-auto ' +
-    'border border-[var(--border-soft)] shadow-xl backdrop-blur-md ' +
-    'bg-[var(--card-bg)]';
+    'absolute left-0 right-0 z-50 max-h-60 overflow-y-auto rounded-2xl border shadow-[0_32px_48px_-34px_rgba(3,14,30,0.85)] backdrop-blur-md';
 
-const OPTION_BASE = 'p-2 md:p-3 text-md md:text-lg text-pretty transition-all duration-150 ease-out text-[color:var(--text-muted)] cursor-pointer';
-const OPTION_HOVER = 'hover:bg-[color:var(--color-primary-soft)]/50';
-const OPTION_SELECTED = 'bg-[color:var(--color-primary-soft)]/60 text-[color:var(--color-primary-foreground)]';
+const OPTION_BASE = 'p-2.5 md:p-3 text-sm md:text-base transition-all duration-150 ease-out text-[color:var(--text-secondary)] cursor-pointer';
+const OPTION_HOVER = 'hover:bg-[color:var(--field-hover)] hover:text-[color:var(--text-primary)]';
+const OPTION_SELECTED = 'bg-[color:var(--field-active)] text-[color:var(--text-primary)]';
 
 const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
     {
@@ -88,6 +77,11 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
     const buttonRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const hiddenInputRef = useRef<HTMLInputElement>(null);
+    const menuStyle: CSSProperties = {
+        backgroundImage:
+            "linear-gradient(135deg, color-mix(in srgb, var(--field-surface) 78%, transparent 22%) 0%, color-mix(in srgb, var(--field-surface) 52%, transparent 48%) 100%)",
+        borderColor: "color-mix(in srgb, var(--field-border) 72%, transparent 28%)",
+    };
 
     const isEmpty = (val: string | number | null): boolean =>
         val === null || val === undefined || val === '';
@@ -250,106 +244,97 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
         focus: () => buttonRef.current?.focus(),
     }));
 
-    const controlClasses = [
-        CONTROL_BASE,
-        isOpen ? 'rounded-t-lg rounded-b-none' : 'rounded-lg',
-        isValid ? CONTROL_BORDER_OK : CONTROL_BORDER_ERROR,
-        disabled ? CONTROL_DISABLED : CONTROL_ENABLED,
-    ].join(' ');
-
     return (
-        <Box className="relative w-full">
-            {/* input oculto para FormData */}
-            <input
-                ref={hiddenInputRef}
-                type="hidden"
-                name={name}
-                value={selectedValue ?? ''}
-                required={required}
-            />
-
-            {label && (
-                <Box className="flex flex-row">
-                    <label className="text-md font-medium text-[color:var(--text-primary)]">{label}</label>
-                    {required && (
-                        <span className="pl-1 text-sm text-[color:var(--color-danger)]">
-                            *
-                        </span>
-                    )}
-                </Box>
-            )}
-
-            <div ref={dropdownRef}>
-                {/* “botón” del select */}
-                <div
-                    ref={buttonRef}
-                    role="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={isOpen}
-                    tabIndex={disabled ? -1 : 0}
-                    className={controlClasses}
-                    onClick={handleToggle}
-                    onKeyDown={onControlKeyDown}
-                >
-                    <span className={selectedValue === null ? 'text-[color:var(--text-muted)]' : 'text-[color:var(--text-primary)]'}>
-                        {selectedLabel}
-                    </span>
-                    <i
-                        className={[
-                            'fas fa-angle-down text-sm md:text-md transition-all duration-300',
-                            isOpen ? 'rotate-180' : '',
-                        ].join(' ')}
+        <FieldWrapper
+            label={label}
+            required={required}
+            disabled={disabled}
+            isValid={isValid}
+            errorMessage={errorMessage}
+        >
+            {({ containerClassName, controlClassName, labelId }) => (
+                <Box className="relative w-full">
+                    <input
+                        ref={hiddenInputRef}
+                        type="hidden"
+                        name={name}
+                        value={selectedValue ?? ''}
+                        required={required}
                     />
-                </div>
 
-                {/* lista */}
-                {isOpen && !disabled && (
-                    <div
-                        ref={listRef}
-                        role="listbox"
-                        aria-activedescendant={activeIndex >= 0 ? `dm-opt-${activeIndex}` : undefined}
-                        tabIndex={-1}
-                        onKeyDown={onListKeyDown}
-                        className={[
-                            MENU_PANEL_BASE,
-                            isOpen ? 'rounded-b-lg rounded-t-none' : 'rounded-lg',
-                        ].join(' ')}
-                    >
-                        {options.length === 0 ? (
-                            <Box className={`${OPTION_BASE} text-center`}>
-                                No hay opciones disponibles
-                            </Box>
-                        ) : (
-                            options.map((option, index) => {
-                                const selected = selectedValue === option.value;
-                                const classes = [
-                                    OPTION_BASE,
-                                    OPTION_HOVER,
-                                    selected ? OPTION_SELECTED : '',
-                                ].join(' ');
-                                return (
-                                    <div
-                                        key={`${option.value}-${index}`}
-                                        id={`dm-opt-${index}`}
-                                        data-index={index}
-                                        role="option"
-                                        aria-selected={selected}
-                                        className={classes}
-                                        onClick={() => handleSelectOption(option)}
-                                    >
-                                        {option.label || option.value}
-                                    </div>
-                                );
-                            })
+                    <div ref={dropdownRef} className={containerClassName}>
+                        <div
+                            ref={buttonRef}
+                            role="button"
+                            aria-haspopup="listbox"
+                            aria-expanded={isOpen}
+                            aria-labelledby={labelId}
+                            tabIndex={disabled ? -1 : 0}
+                            className={clsx(
+                                controlClassName,
+                                "flex w-full items-center justify-between gap-3",
+                                isOpen ? "rounded-t-2xl rounded-b-none" : "rounded-2xl",
+                            )}
+                            onClick={handleToggle}
+                            onKeyDown={onControlKeyDown}
+                        >
+                            <span className={selectedValue === null ? 'text-[color:var(--text-muted)]' : 'text-[color:var(--text-primary)]'}>
+                                {selectedLabel}
+                            </span>
+                            <i
+                                className={clsx(
+                                    'fas fa-angle-down text-sm md:text-base transition-transform duration-300',
+                                    isOpen ? 'rotate-180' : '',
+                                )}
+                            />
+                        </div>
+
+                        {isOpen && !disabled && (
+                            <div
+                                ref={listRef}
+                                role="listbox"
+                                aria-activedescendant={activeIndex >= 0 ? `dm-opt-${activeIndex}` : undefined}
+                                tabIndex={-1}
+                                onKeyDown={onListKeyDown}
+                                className={clsx(
+                                    MENU_PANEL_BASE,
+                                    isOpen ? 'rounded-b-2xl rounded-t-none' : 'rounded-2xl',
+                                )}
+                                style={menuStyle}
+                            >
+                                {options.length === 0 ? (
+                                    <Box className={`${OPTION_BASE} text-center`}>
+                                        No hay opciones disponibles
+                                    </Box>
+                                ) : (
+                                    options.map((option, index) => {
+                                        const selected = selectedValue === option.value;
+                                        const classes = clsx(
+                                            OPTION_BASE,
+                                            OPTION_HOVER,
+                                            selected ? OPTION_SELECTED : '',
+                                        );
+                                        return (
+                                            <div
+                                                key={`${option.value}-${index}`}
+                                                id={`dm-opt-${index}`}
+                                                data-index={index}
+                                                role="option"
+                                                aria-selected={selected}
+                                                className={classes}
+                                                onClick={() => handleSelectOption(option)}
+                                            >
+                                                {option.label || option.value}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         )}
                     </div>
-                )}
-            </div>
-
-            {!isValid && errorMessage && (
-                <Box className="text-xs md:text-md font-light text-[color:var(--color-danger)]">{errorMessage}</Box>
+                </Box>
             )}
-        </Box>
+        </FieldWrapper>
     );
 });
 

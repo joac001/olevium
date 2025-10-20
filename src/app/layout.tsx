@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ModalProvider } from "@/context/ModalContext";
 import {NavBar, NavLink } from "@/components/layout/";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Cecilia AI",
@@ -22,11 +22,6 @@ export const metadata: Metadata = {
 
 const links: NavLink[] = [
   { icon: "fas fa-home", label: "Inicio", href: "/" } as NavLink,
-  { icon: "fas fa-user", label: "Perfil", href: "/#perfil" } as NavLink,
-  { icon: "fas fa-line-chart", label: "Estadisticas", href: "/#estadisticas" } as NavLink,
-  { icon: "fas fa-commenting-o", label: "Whatsapp", href: "/#whatsapp" } as NavLink,
-  { icon: "fas fa-cog", label: "Configuracion", href: "/#configuracion" } as NavLink,
-  { icon: "fas fa-power-off", label: "Cerrar Sesion", href: "/#cerrar-sesion" } as NavLink,
 ];
 
 export default function RootLayout({
@@ -42,7 +37,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${manrope.className} antialiased`}>
         <NavBar title="Olevium" links={links} />
           <NotificationProvider>
             <ModalProvider>{children}</ModalProvider>

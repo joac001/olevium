@@ -115,19 +115,19 @@ export default function NavBar({ title, links }: NavBarProps) {
 
                         <Typography variant="h1">{title}</Typography>
                     </Box>
-
-                    {/* status decorativo */}
-                    {/*
-                    <Box className="hidden md:flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
-                        <div className="w-2 h-2 rounded-full bg-[var(--border-light)]" />
-                        <div className="w-2 h-2 rounded-full bg-[var(--color-secondary)]" />
-                    </Box> */}
                 </Box>
             </div>
 
             {/* Side menu */}
-            <div id="app-sidemenu" ref={menuRef} className="fixed top-20 left-2 z-navbar space-y-2">
+            <div
+                id="app-sidemenu"
+                ref={menuRef}
+                className={[
+                    "fixed top-22 left-4 z-navbar space-y-2 transition-opacity duration-200",
+                    isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+                ].join(" ")}
+                aria-hidden={!isOpen}
+            >
                 {links.map((link, index) => {
                     const isActive = pathname === link.href;
 

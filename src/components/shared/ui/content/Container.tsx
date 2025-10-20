@@ -1,5 +1,5 @@
-'use client';
 import type { ReactNode } from "react";
+import clsx from "clsx";
 import Box from "@/components/shared/ui/content/Box";
 
 interface ContainerProps {
@@ -7,12 +7,14 @@ interface ContainerProps {
     className?: string;
 }
 
-
-export default function Container({ children, className = "" }: ContainerProps) {
-    const classes = `${className} flex flex-1 h-full flex-col overflow-y-auto p-2 md:p-3 lg:p-6 gap-1`.trim();
-
+export default function Container({ children, className }: ContainerProps) {
     return (
-        <Box className={classes}>
+        <Box
+            className={clsx(
+                "mx-auto flex h-full w-full max-w-7xl flex-col gap-6 overflow-y-auto px-4 py-6 md:gap-8 md:px-6 lg:gap-10 lg:px-8",
+                className,
+            )}
+        >
             {children}
         </Box>
     );

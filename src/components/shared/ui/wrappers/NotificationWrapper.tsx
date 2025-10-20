@@ -2,6 +2,8 @@
 
 import React, { ReactNode, useEffect, useState } from "react";
 
+import OverlayBase from "@/components/shared/ui/wrappers/OverlayBase";
+
 const normalize = (c: string) =>
     c === "secondary" ? "accent" : c === "error" ? "danger" : c;
 
@@ -48,8 +50,6 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
         }
     }, [isOpen, duration, onClose]);
 
-    if (!visible) return null;
-
     const {
         color = "info",
         icon = "info-circle",
@@ -60,28 +60,29 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
     const variant = normalize(color);
 
     return (
-        <div
-            role="status"
-            aria-live="polite"
-            data-ntf={variant}
-            className={[
-                "fixed top-5 left-1/2 -translate-x-1/2 z-notification",
-                "max-w-md w-fit rounded-xl px-3 py-2 md:px-4 md:py-3",
-                "shadow-[0_10px_25px_-5px_rgba(0,0,0,.12),_0_8px_10px_-6px_rgba(0,0,0,.12)]",
-                // 👇 usa el canal color:
-                "bg-[color:var(--ntf-bg)] text-[color:var(--ntf-fg)]",
-                "transition-all duration-500 ease-in-out",
-                isFadingOut ? "opacity-0 -translate-y-full" : "opacity-100 translate-y-0",
-            ].join(" ")}
-        >
-            <div className="flex items-start gap-3">
-                <i className={`${icon} text-lg md:text-xl mt-0.5`} />
-                <div className="text-pretty">
-                    {!!title && <h2 className="text-base md:text-lg font-semibold">{title}</h2>}
-                    {!!description && <p className="text-sm md:text-base font-normal opacity-90">{description}</p>}
+        <OverlayBase shouldRender={visible}>
+            <div
+                role="status"
+                aria-live="polite"
+                data-ntf={variant}
+                className={[
+                    "fixed top-5 left-1/2 -translate-x-1/2 z-notification",
+                    "max-w-md w-fit rounded-xl px-3 py-2 md:px-4 md:py-3",
+                    "shadow-[0_10px_25px_-5px_rgba(0,0,0,.12),_0_8px_10px_-6px_rgba(0,0,0,.12)]",
+                    "bg-[color:var(--ntf-bg)] text-[color:var(--ntf-fg)]",
+                    "transition-all duration-500 ease-in-out",
+                    isFadingOut ? "opacity-0 -translate-y-full" : "opacity-100 translate-y-0",
+                ].join(" ")}
+            >
+                <div className="flex items-start gap-3">
+                    <i className={`${icon} mt-0.5 text-lg md:text-xl`} />
+                    <div className="text-pretty">
+                        {!!title && <h2 className="text-base font-semibold md:text-lg">{title}</h2>}
+                        {!!description && <p className="text-sm font-normal opacity-90 md:text-base">{description}</p>}
+                    </div>
                 </div>
             </div>
-        </div>
+        </OverlayBase>
     );
 };
 

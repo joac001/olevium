@@ -1,6 +1,10 @@
+import type { CSSProperties } from "react";
+import clsx from "clsx";
+
+import AccentSurface from "@/components/shared/ui/content/AccentSurface";
 import Typography from "@/components/shared/ui/text/Typography";
-import Box from "@/components/shared/ui/content/Box";
 import { ColorKey } from "@/types/ColorKey";
+
 export interface BannerProps {
     icon: string;
     color: ColorKey;
@@ -9,35 +13,40 @@ export interface BannerProps {
 }
 
 export default function Banner({ icon, color, title, description }: BannerProps) {
-    return (
-        <Box
-            data-banner={color}
-            className={[
-                "flex w-full items-center gap-4 my-2",
-                "rounded-2xl p-2 md:p-3",
-                // colores/estilos via variables
-                "bg-gradient-to-b from-[var(--bn-surface)]/80 to-[var(--bn-surface)]/60 text-[color:var(--bn-text))]",
-                "shadow-[0_10px_25px_-5px_rgba(0,0,0,.12),_0_8px_10px_-6px_rgba(0,0,0,.12)]",
-            ].join(" ")}
-        >
+    const bannerStyle: CSSProperties = {
+        borderColor: "color-mix(in srgb, var(--bn-ring) 45%, transparent 55%)",
+    };
+    const iconStyle: CSSProperties = {
+        backgroundImage: "linear-gradient(135deg, var(--bn-icon-from) 0%, var(--bn-icon-to) 100%)",
+    };
 
+    return (
+        <AccentSurface
+            tone={color}
+            className={clsx(
+                "flex w-full flex-col gap-3 rounded-[var(--radius-lg)] border p-3 shadow-[var(--elevation-low)] backdrop-blur-md sm:flex-row sm:items-center sm:gap-4 md:p-4",
+            )}
+            style={bannerStyle}
+        >
             {/* Icono en pastilla */}
             <div
-                className={[
-                    "flex items-center justify-center ml-2",
-                    "h-11 w-11 md:h-12 md:w-12 rounded-xl text-[color:var(--bn-text)]",
-                    "bg-gradient-to-br from-[var(--bn-icon-from)] to-[var(--bn-icon-to)] opacity-70",
-                    "shadow-[0_8px_20px_rgba(0,0,0,0.12)]",
-                ].join(" ")}
+                className={clsx(
+                    "flex h-10 w-10 items-center justify-center self-start rounded-[var(--radius-sm)] text-base text-[color:var(--bn-text)] shadow-[0_16px_32px_-18px_rgba(5,20,35,0.65)] sm:h-11 sm:w-11 sm:text-lg",
+                )}
+                style={iconStyle}
             >
                 <i className={icon} />
             </div>
 
             {/* Texto */}
-            <div className="flex flex-col text-left">
-                <Typography variant="subtitle">{title}</Typography>
-                <Typography variant="body">{description}</Typography>
+            <div className="flex flex-1 flex-col gap-1 text-left sm:gap-1.5">
+                <Typography variant="h2" className="text-[color:var(--bn-text)] leading-tight">
+                    {title}
+                </Typography>
+                <Typography variant="body" className="text-[color:var(--bn-text)] opacity-90">
+                    {description}
+                </Typography>
             </div>
-        </Box>
+        </AccentSurface>
     );
 }

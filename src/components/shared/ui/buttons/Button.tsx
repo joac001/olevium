@@ -1,10 +1,21 @@
-import { ColorKey } from "@/types/ColorKey";
+import type { CSSProperties, ReactNode } from "react";
+import clsx from "clsx";
+
+import type { ColorKey } from "@/types/ColorKey";
+import ButtonBase from "./ButtonBase";
+
 export interface ButtonProps {
     type?: ColorKey;
     text: string;
     disabled?: boolean;
     onClick?: () => void;
-    htmlType?: 'button' | 'submit' | 'reset';
+    htmlType?: "button" | "submit" | "reset";
+    icon?: ReactNode | string;
+    iconPosition?: "start" | "end";
+    fullWidth?: boolean;
+    className?: string;
+    style?: CSSProperties;
+    ariaLabel?: string;
 }
 
 export default function Button({
@@ -12,24 +23,45 @@ export default function Button({
     text,
     disabled = false,
     onClick,
-    htmlType = 'button',
+    htmlType = "button",
+    icon,
+    iconPosition = "start",
+    fullWidth = false,
+    className,
+    style,
+    ariaLabel,
 }: ButtonProps) {
+    const isIconAfter = icon && iconPosition === "end";
+    const buttonStyle: CSSProperties | undefined = type
+        ? style
+        : {
+            backgroundImage:
+                "linear-gradient(135deg, color-mix(in srgb, var(--surface-muted) 82%, transparent 18%) 0%, color-mix(in srgb, var(--surface-muted) 60%, transparent 40%) 100%)",
+            ...style,
+        };
+
+    const renderIcon = () => {
+        if (!icon) return null;
+        if (typeof icon === "string") {
+            return <i className={clsx(icon, "text-base md:text-lg")} aria-hidden />;
+        }
+        return icon;
+    };
+
     return (
-        <button
-            type={htmlType}
-            data-variant={type ?? undefined}
-            className={`
-        flex w-fit h-fit backdrop-blur-md
-        ${type ? 'bg-[var(--btn-bg)] hover:bg-[var(--btn-hover)] text-[color:var(--btn-foreground,var(--text-primary))]' : 'bg-transparent text-[color:var(--text-primary)]'}
-        ${type ? 'bg-[image:var(--btn-bg-gradient)]' : ''}
-        rounded-full px-3 py-2 md:px-3 md:py-1
-        transition-all duration-100 ease-in-out
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}
-      `}
-            onClick={onClick}
+        <ButtonBase
+            variant={type}
             disabled={disabled}
+            onClick={onClick}
+            htmlType={htmlType}
+            className={className}
+            style={buttonStyle}
+            fullWidth={fullWidth}
+            ariaLabel={ariaLabel ?? text}
+            leadingIcon={!isIconAfter ? renderIcon() : undefined}
+            trailingIcon={isIconAfter ? renderIcon() : undefined}
         >
-            <span className="font-medium text-md md:text-lg text-pretty">{text}</span>
-        </button>
+            <span className="text-sm font-medium text-pretty md:text-base">{text}</span>
+        </ButtonBase>
     );
 }

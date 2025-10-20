@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import { KeyboardEvent } from "react";
+import clsx from "clsx";
+
 import Box from "@/components/shared/ui/content/Box";
 import Tooltip from "@/components/shared/ui/text/Tooltip";
 import { ColorKey } from "@/types/ColorKey";
+import ButtonBase from "./ButtonBase";
 export interface ActionButtonProps {
     icon: string;           // ej: "fas fa-plus"
     type?: ColorKey;       // default: accent (azul)
@@ -11,6 +13,7 @@ export interface ActionButtonProps {
     onClick?: () => void;
     tooltip?: string;       // tooltip explícito (desktop); en mobile se usa el texto
     className?: string;     // opcional extra classes
+    disabled?: boolean;
 }
 
 function ActionCore({
@@ -19,44 +22,27 @@ function ActionCore({
     onClick,
     variant,
     className = "",
+    disabled = false,
 }: {
     icon: string;
     text?: string;
     onClick?: () => void;
     variant: ColorKey;
     className?: string;
+    disabled?: boolean;
 }) {
-    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onClick?.();
-        }
-    };
-
     return (
-        <Box
-            role="button"
-            tabIndex={0}
-            aria-label={text || "Acción"}
-            data-variant={variant}
+        <ButtonBase
+            variant={variant}
+            htmlType="button"
             onClick={onClick}
-            onKeyDown={handleKeyDown}
-            className={[
-                "flex items-center w-fit h-fit min-w-0 rounded-xl",
-                "backdrop-blur-md",
-                // colores vía variables de botón
-                "bg-[var(--btn-bg)] hover:bg-[var(--btn-hover)] text-[color:var(--btn-foreground,var(--text-primary))]",
-                "bg-[image:var(--btn-bg-gradient)]",
-                // sizing
-                "py-1 px-2 md:py-2 md:px-4",
-                // efectos
-                "transition-transform duration-100 ease-in-out hover:scale-105",
-                className,
-            ].join(" ")}
+            disabled={disabled}
+            className={clsx("min-w-0 px-3 py-2 text-sm font-medium tracking-tight md:px-3.5 md:py-2.5", className)}
+            leadingIcon={<i className={clsx(icon, "text-base md:text-lg")} aria-hidden="true" />}
+            ariaLabel={text || "Acción"}
         >
-            <i className={`${icon} text-md md:text-lg m-1`} aria-hidden="true" />
-            {text && <Box className="hidden md:inline">{text}</Box>}
-        </Box>
+            {text && <span className="hidden whitespace-nowrap text-sm md:inline">{text}</span>}
+        </ButtonBase>
     );
 }
 
@@ -67,6 +53,7 @@ export default function ActionButton({
     onClick,
     tooltip,
     className,
+    disabled,
 }: ActionButtonProps) {
     const button = (
         <ActionCore
@@ -75,6 +62,7 @@ export default function ActionButton({
             onClick={onClick}
             variant={type}
             className={className}
+            disabled={disabled}
         />
     );
 
@@ -95,7 +83,7 @@ export default function ActionButton({
                     {button}
                 </Tooltip>
             </Box>
-            <Box className="hidden md:block cursor-pointer">{button}</Box>
+            <Box className="hidden md:block">{button}</Box>
         </>
     );
 }

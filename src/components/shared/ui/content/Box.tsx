@@ -1,13 +1,25 @@
-import type { HTMLAttributes } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import clsx from "clsx";
 
-type BoxProps = HTMLAttributes<HTMLDivElement>;
+type BoxComponent = ElementType;
 
-export default function Box({ children, className, ...rest }: BoxProps) {
-    const classes = `${className} max-w-full`.trim();
+export type BoxProps<T extends BoxComponent = "div"> = {
+    as?: T;
+    className?: string;
+    children?: ReactNode;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "color" | "className" | "children">;
+
+export default function Box<T extends BoxComponent = "div">({
+    as,
+    className,
+    children,
+    ...rest
+}: BoxProps<T>) {
+    const Component = (as ?? "div") as BoxComponent;
 
     return (
-        <div {...rest} className={classes}>
+        <Component {...rest} className={clsx("max-w-full", className)}>
             {children}
-        </div>
+        </Component>
     );
 }

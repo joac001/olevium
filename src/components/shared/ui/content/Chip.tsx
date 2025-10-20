@@ -1,35 +1,37 @@
-'use client';
-
+import type { CSSProperties } from "react";
 import clsx from 'clsx';
+import AccentSurface from "@/components/shared/ui/content/AccentSurface";
 import { ColorKey } from "@/types/ColorKey";
 interface ChipProps {
     text?: string;
     color?: ColorKey;
     icon?: string;
-    title?: string;
 }
 
 export default function Chip({
     text,
     color = 'neutral',
     icon,
-    title,
 }: ChipProps) {
+    const chipStyle: CSSProperties = {
+        borderColor: "color-mix(in srgb, var(--bn-ring) 45%, transparent 55%)",
+    };
+
     return (
-        <span
-            data-banner={color}
-            title={title}
+        <AccentSurface
+            tone={color}
+            as="span"
             className={clsx(
-                'inline-flex items-center justify-center select-none rounded-full',
+                'inline-flex items-center justify-center gap-1.5 select-none rounded-full border backdrop-blur-md',
                 text
-                    ? 'h-6 md:h-7 px-2 md:px-3 text-xs md:text-sm gap-1.5'
-                    : 'h-3 w-3 p-0 border-2 border-[color:var(--bn-ring)]',
-                `bg-[var(--bn-surface)] text-[color:var(--bn-text)]`,
-                'shadow-[0_6px_14px_-4px_var(--chip-shadow)]'
+                    ? 'h-6 px-3 text-[0.65rem] font-semibold uppercase tracking-[0.14em] md:h-7 md:px-3.5 md:text-xs'
+                    : 'h-3 w-3 border-2',
+                'shadow-[0_10px_24px_-18px_rgba(2,16,30,0.65)]'
             )}
+            style={chipStyle}
         >
             {icon && text && <i className={icon} aria-hidden />}
             {text ? text : null}
-        </span>
+        </AccentSurface>
     );
 }
