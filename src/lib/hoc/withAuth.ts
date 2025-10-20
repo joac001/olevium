@@ -4,9 +4,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth';
 
-export function withAuth<P extends Record<string, unknown>>(
+export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>
-): React.ComponentType<P> {
+): React.FC<P> {
   const ComponentWithAuth = (props: P) => {
     const router = useRouter();
     const pathname = usePathname();

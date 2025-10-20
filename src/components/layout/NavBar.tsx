@@ -17,7 +17,7 @@ export interface NavLink {
     href: string;
 }
 
-interface NavBarProps {
+export interface NavBarProps {
     title: string;
     links: NavLink[];
 }
@@ -173,4 +173,4 @@ function NavBar({ title, links }: NavBarProps) {
     );
 }
 
-export default withAuth(NavBar);
+export default withAuth<NavBarProps>(NavBar);
