@@ -10,8 +10,8 @@ import {NavBar, NavLink } from "@/components/layout/";
 const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cecilia AI",
-  description: "Asistente inteligente automatizado",
+  title: "Olevium",
+  description: "Asistente financiero inteligente",
   icons: [
     {
       rel: "icon",

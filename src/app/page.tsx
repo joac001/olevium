@@ -1,29 +1,18 @@
-import Link from 'next/link';
-import { Container, Box, Typography, Card, Button } from "@/components/shared/ui";
+import { Container, Box, Typography } from "@/components/shared/ui";
+import WelcomePanel from "./_homeComponents/WelcomePanel";
 
-export default function Page() {
+export default function HomePage() {
   return (
-    <Container className="p-6">
-      <Box className="text-center mb-8">
-        <Typography variant="h1">Olevium Project</Typography>
-        <Box className="mt-4">
-          <Typography variant="body">
-            Bienvenido al sistema de componentes Olevium
+    <Container className="py-10">
+      <Box className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+        <Box className="space-y-2">
+          <Typography variant="h1">Bienvenido a Olevium</Typography>
+          <Typography variant="body" className="text-[color:var(--text-muted)]">
+            Gestiona tus finanzas personales con insights personalizados y herramientas inteligentes.
           </Typography>
         </Box>
-      </Box>
 
-      <Box className="flex justify-center">
-        <Card title="Navegación" subtitle="Explora los componentes disponibles" size="fit">
-          <Box className="p-4">
-            <Link href="/components">
-              <Button 
-                type="primary" 
-                text="Ver Catálogo de Componentes" 
-              />
-            </Link>
-          </Box>
-        </Card>
+        <WelcomePanel />
       </Box>
     </Container>
   );

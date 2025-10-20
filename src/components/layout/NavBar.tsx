@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 import Box from "@/components/shared/ui/content/Box";
 import Typography from "@/components/shared/ui/text/Typography";
+import { withAuth } from "@/lib/hoc/withAuth";
 
 /** Acepta ícono como clases (FA) o como componente React (Lucide u otros) */
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -21,7 +22,7 @@ interface NavBarProps {
     links: NavLink[];
 }
 
-export default function NavBar({ title, links }: NavBarProps) {
+function NavBar({ title, links }: NavBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const navRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -171,3 +172,5 @@ export default function NavBar({ title, links }: NavBarProps) {
         </>
     );
 }
+
+export default withAuth(NavBar);

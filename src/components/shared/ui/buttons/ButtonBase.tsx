@@ -34,7 +34,7 @@ export default function ButtonBase({
             type={htmlType}
             data-variant={variant ?? undefined}
             className={clsx(
-                "inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-bg)] px-3.5 py-2 text-sm font-medium leading-none",
+                "inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-hover)] px-3.5 py-2 text-sm font-medium leading-none",
                 "transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)]",
                 variant
                     ? "bg-[var(--btn-bg)] bg-[image:var(--btn-bg-gradient)] text-[color:var(--btn-foreground,var(--text-primary))] hover:bg-[var(--btn-hover)]"

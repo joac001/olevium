@@ -37,7 +37,7 @@ export default function Button({
         : {
             backgroundImage:
                 "linear-gradient(135deg, color-mix(in srgb, var(--surface-muted) 82%, transparent 18%) 0%, color-mix(in srgb, var(--surface-muted) 60%, transparent 40%) 100%)",
-            ...style,
+                ...style,
         };
 
     const renderIcon = () => {
