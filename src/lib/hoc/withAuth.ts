@@ -27,7 +27,7 @@ export function withAuth<P extends Record<string, unknown>>(
 
     const isPublicRoute = useMemo(() => {
       if (!pathname) return false;
-      const publicPrefixes = ["/auth", "/verifyCTA"];
+      const publicPrefixes = ["/auth", "/verify-cta", "/verify-email"];
       return publicPrefixes.some((prefix) => pathname.startsWith(prefix));
     }, [pathname]);
 

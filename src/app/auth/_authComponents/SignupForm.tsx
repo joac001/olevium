@@ -85,7 +85,7 @@ export default function SignupForm() {
 
         showNotification("fa-solid fa-circle-check", "success", "Cuenta creada", "Te redirigimos para continuar.");
 
-        router.push("/auth/verifyCTA");
+        router.push("/auth/verify-cta");
       } catch (error) {
         const message = extractErrorMessage(error);
         showNotification("fa-solid fa-triangle-exclamation", "danger", "Error en el registro", message);
