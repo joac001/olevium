@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 const links: NavLink[] = [
   { icon: "fas fa-home", label: "Inicio", href: "/" } as NavLink,
+  { icon: "fas fa-wallet", label: "Cuentas", href: "/accounts" } as NavLink,
 ];
 
 export default function RootLayout({
