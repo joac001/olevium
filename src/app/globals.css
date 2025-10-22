@@ -99,7 +99,7 @@
       color-mix(in srgb, var(--surface-base) 80%, var(--surface-dark) 20%) 100%);
   --surface-tint: color-mix(in srgb, var(--surface-base) 58%, var(--surface-highlight) 22%);
   --surface-muted: color-mix(in srgb, var(--surface-base) 80%, #000000 20%);
-  --surface-overlay: rgba(5, 25, 33, 0.78);
+  --surface-overlay: color-mix(in srgb, black 50%, transparent 50%);
 
 
   --card-glass: linear-gradient(140deg,

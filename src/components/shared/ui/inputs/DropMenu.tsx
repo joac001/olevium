@@ -42,7 +42,7 @@ export interface DropMenuRef {
 }
 
 const MENU_PANEL_BASE =
-    'absolute left-0 right-0 z-50 max-h-60 overflow-y-auto rounded-2xl border shadow-[0_32px_48px_-34px_rgba(3,14,30,0.85)] backdrop-blur-md';
+    'absolute left-0 right-0 z-50 max-h-60 overflow-y-auto rounded-2xl border shadow-[0_32px_48px_-34px_rgba(3,14,30,0.85)] backdrop-blur-xs font-bold';
 
 const OPTION_BASE = 'p-2.5 md:p-3 text-sm md:text-base transition-all duration-150 ease-out text-[color:var(--text-secondary)] cursor-pointer';
 const OPTION_HOVER = 'hover:bg-[color:var(--field-hover)] hover:text-[color:var(--text-primary)]';

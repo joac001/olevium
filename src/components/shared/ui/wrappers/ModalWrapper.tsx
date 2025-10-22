@@ -61,7 +61,6 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
     };
 
     const panelStyle: React.CSSProperties = {
-        backgroundColor: "color-mix(in srgb, var(--surface-base) 78%, var(--background) 22%)",
         backdropFilter: "blur(var(--glass-blur, 18px))",
     };
 
@@ -72,7 +71,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
                 onClick={handleOverlayClick}
             >
                 <div
-                    className={`relative mx-4 w-full max-h-[90vh] max-w-4xl overflow-hidden rounded-lg bg-transparent text-[color:var(--text-primary)] shadow-2xl transition-all duration-300 ease-in-out ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}
+                    className={`relative mx-4 w-full max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl text-[color:var(--text-primary)] shadow-2xl transition-all duration-300 ease-in-out ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}
                     style={panelStyle}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -84,7 +83,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
                         <i className="fas fa-times text-[color:var(--text-primary)]" />
                     </button>
 
-                    <div className="max-h-[90vh] overflow-y-auto p-6">
+                    <div className="max-h-[90vh] overflow-y-auto">
                         {children}
                     </div>
                 </div>

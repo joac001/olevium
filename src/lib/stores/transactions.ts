@@ -1,0 +1,160 @@
+'use client';
+
+import { AxiosError } from "axios";
+import { create } from "zustand";
+
+import { http } from "@/lib/utils/axios";
+import type {
+  AccountTransaction,
+  ApiTransactionCategory,
+  ApiTransactionType,
+  ApiUserTransaction,
+  TransactionCategory,
+  TransactionType,
+  UserTransactionCreateInput,
+} from "@/types";
+import { useAccountsStore } from "@/lib/stores/accounts";
+
+const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
+  transactionId: payload.transaction_id,
+  accountId: payload.account_id,
+  amount: payload.amount,
+  date: payload.date,
+  createdAt: payload.created_at,
+  categoryId: payload.category_id ?? null,
+  category: payload.category ?? null,
+  description: payload.description ?? null,
+});
+
+const mapTransactionType = (payload: ApiTransactionType): TransactionType => ({
+  typeId: payload.type_id,
+  name: payload.name,
+  createdAt: payload.created_at,
+});
+
+const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
+  categoryId: payload.category_id,
+  userId: payload.user_id ?? null,
+  typeId: payload.type_id,
+  description: payload.description,
+  color: payload.color ?? null,
+  createdAt: payload.created_at,
+  isDefault: payload.is_default,
+});
+
+const normalizeError = (error: unknown): Error => {
+  if (error instanceof AxiosError) {
+    const payload = error.response?.data as { detail?: string; message?: string; error?: string } | undefined;
+    const detail = payload?.detail ?? payload?.message ?? payload?.error;
+    if (detail) {
+      return new Error(detail);
+    }
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error("No se pudo completar la operación sobre transacciones.");
+};
+
+interface TransactionsState {
+  accountTransactions: Record<number, AccountTransaction[]>;
+  transactionTypes: TransactionType[];
+  categories: TransactionCategory[];
+  loading: boolean;
+  fetchAccountTransactions: (accountId: number) => Promise<AccountTransaction[]>;
+  fetchTransactionTypes: () => Promise<TransactionType[]>;
+  fetchCategories: () => Promise<TransactionCategory[]>;
+  createTransaction: (payload: UserTransactionCreateInput) => Promise<AccountTransaction>;
+  reset: () => void;
+}
+
+export const useTransactionsStore = create<TransactionsState>((set, get) => ({
+  accountTransactions: {},
+  transactionTypes: [],
+  categories: [],
+  loading: false,
+
+  fetchAccountTransactions: async (accountId) => {
+    set({ loading: true });
+    try {
+      const { data } = await http.get<ApiUserTransaction[]>(`/transactions/by_account/${accountId}`);
+      const transactions = data.map(mapTransaction);
+      set((prev) => ({
+        loading: false,
+        accountTransactions: { ...prev.accountTransactions, [accountId]: transactions },
+      }));
+      return transactions;
+    } catch (error) {
+      set({ loading: false });
+      throw normalizeError(error);
+    }
+  },
+
+  fetchTransactionTypes: async () => {
+    const cached = get().transactionTypes;
+    if (cached.length) return cached;
+
+    try {
+      const { data } = await http.get<ApiTransactionType[]>(`/transactions/types`);
+      const mapped = data.map(mapTransactionType);
+      set({ transactionTypes: mapped });
+      return mapped;
+    } catch (error) {
+      throw normalizeError(error);
+    }
+  },
+
+  fetchCategories: async () => {
+    const cached = get().categories;
+    if (cached.length) return cached;
+
+    try {
+      const { data } = await http.get<ApiTransactionCategory[]>(`/categories/`);
+      const mapped = data.map(mapCategory);
+      set({ categories: mapped });
+      return mapped;
+    } catch (error) {
+      throw normalizeError(error);
+    }
+  },
+
+  createTransaction: async ({ accountId, amount, date, typeId, categoryId, category, description }) => {
+    try {
+      const payload: Record<string, unknown> = {
+        account_id: accountId,
+        amount,
+        date,
+        type_id: typeId,
+      };
+
+      if (categoryId !== undefined) payload.category_id = categoryId;
+      if (category !== undefined) payload.category = category;
+      if (description !== undefined) payload.description = description;
+
+      const { data } = await http.post<ApiUserTransaction>("/transactions/", payload);
+      const mapped = mapTransaction(data);
+
+      set((prev) => ({
+        accountTransactions: {
+          ...prev.accountTransactions,
+          [accountId]: [mapped, ...(prev.accountTransactions[accountId] ?? [])],
+        },
+      }));
+
+      useAccountsStore.getState().applyBalanceDelta(accountId, amount);
+      return mapped;
+    } catch (error) {
+      throw normalizeError(error);
+    }
+  },
+
+  reset: () =>
+    set({
+      accountTransactions: {},
+      transactionTypes: [],
+      categories: [],
+      loading: false,
+    }),
+}));
