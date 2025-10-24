@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 
 import { Box, Typography } from "@/components/shared/ui";
-import { formatAmount, formatDate } from "@/lib/utils/parser";
+import { formatAmount } from "@/lib/utils/parser";
 import type { Account, AccountType } from "@/types";
 
 interface AccountsTableProps {
@@ -76,9 +76,6 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
                   <Box className="text-left">
                     <Typography variant="h2" className="text-base md:text-lg">
                       {account.name}
-                    </Typography>
-                    <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
-                      Creada el {formatDate(account.createdAt, "dd Mes aaaa")}
                     </Typography>
                     <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
                       {account.currency}

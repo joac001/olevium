@@ -9,6 +9,7 @@ import {
     useImperativeHandle,
     KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import clsx from "clsx";
 
@@ -42,7 +43,7 @@ export interface DropMenuRef {
 }
 
 const MENU_PANEL_BASE =
-    'absolute left-0 right-0 z-50 max-h-60 overflow-y-auto rounded-2xl border shadow-[0_32px_48px_-34px_rgba(3,14,30,0.85)] backdrop-blur-xs font-bold';
+    'z-1300 overflow-y-auto rounded-2xl border shadow-[0_32px_48px_-34px_rgba(3,14,30,0.85)] backdrop-blur-xs font-bold';
 
 const OPTION_BASE = 'p-2.5 md:p-3 text-sm md:text-base transition-all duration-150 ease-out text-[color:var(--text-secondary)] cursor-pointer';
 const OPTION_HOVER = 'hover:bg-[color:var(--field-hover)] hover:text-[color:var(--text-primary)]';
@@ -64,6 +65,7 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
     },
     ref
 ) {
+    const [mounted, setMounted] = useState(false);
     const [selectedValue, setSelectedValue] = useState<string | number | null>(
         value ?? defaultValue ?? null
     );
@@ -72,7 +74,9 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
     const [isValid, setIsValid] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState<number>(-1);
-
+    
+    const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
+    const [openDirection, setOpenDirection] = useState<'down' | 'up'>('down');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
@@ -82,9 +86,36 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
             "linear-gradient(135deg, color-mix(in srgb, var(--field-surface) 78%, transparent 22%) 0%, color-mix(in srgb, var(--field-surface) 52%, transparent 48%) 100%)",
         borderColor: "color-mix(in srgb, var(--field-border) 72%, transparent 28%)",
     };
+    const isPanelPositioned = typeof panelStyle.top === "number";
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const isEmpty = (val: string | number | null): boolean =>
         val === null || val === undefined || val === '';
+
+    const updatePanelPosition = useCallback(() => {
+        if (!buttonRef.current) return;
+        const rect = buttonRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const spacing = 12;
+        const spaceBelow = viewportHeight - rect.bottom - spacing;
+        const spaceAbove = rect.top - spacing;
+        const prefersOpenUp = spaceBelow < 160 && spaceAbove > spaceBelow;
+        const availableSpace = prefersOpenUp ? spaceAbove : spaceBelow;
+        const maxHeight = Math.max(120, Math.min(320, availableSpace > 0 ? availableSpace : 320));
+        const top = prefersOpenUp
+            ? Math.max(spacing, rect.top - maxHeight)
+            : Math.min(viewportHeight - spacing - 1, rect.bottom);
+        setPanelStyle({
+            position: "fixed",
+            top,
+            left: rect.left,
+            width: rect.width,
+            maxHeight,
+        });
+        setOpenDirection(prefersOpenUp ? "up" : "down");
+    }, []);
 
     const performValidation = useCallback(
         (val: string | number | null): { isValid: boolean; errorMessage: string | null } => {
@@ -126,19 +157,49 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
 
     const handleToggle = () => {
         if (disabled) return;
-        setIsOpen((o) => !o);
+        setIsOpen((prev) => {
+            const next = !prev;
+            if (!prev) {
+                requestAnimationFrame(updatePanelPosition);
+            }
+            return next;
+        });
     };
 
     // Click fuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (
+                dropdownRef.current &&
+                dropdownRef.current.contains(target)
+            ) {
+                return;
+            }
+            if (listRef.current && listRef.current.contains(target)) {
+                return;
+            }
+            if (isOpen) {
                 setIsOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        updatePanelPosition();
+        const handleWindowInteraction = () => {
+            updatePanelPosition();
+        };
+        window.addEventListener("resize", handleWindowInteraction);
+        window.addEventListener("scroll", handleWindowInteraction, true);
+        return () => {
+            window.removeEventListener("resize", handleWindowInteraction);
+            window.removeEventListener("scroll", handleWindowInteraction, true);
+        };
+    }, [isOpen, updatePanelPosition]);
 
     // Controlado desde el padre
     useEffect(() => {
@@ -289,7 +350,7 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
                             />
                         </div>
 
-                        {isOpen && !disabled && (
+                        {mounted && isOpen && !disabled && createPortal(
                             <div
                                 ref={listRef}
                                 role="listbox"
@@ -300,7 +361,11 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
                                     MENU_PANEL_BASE,
                                     isOpen ? 'rounded-b-2xl rounded-t-none' : 'rounded-2xl',
                                 )}
-                                style={menuStyle}
+                                style={{
+                                    ...menuStyle,
+                                    ...panelStyle,
+                                    visibility: isPanelPositioned ? "visible" : "hidden",
+                                }}
                             >
                                 {options.length === 0 ? (
                                     <Box className={`${OPTION_BASE} text-center`}>
@@ -329,7 +394,8 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
                                         );
                                     })
                                 )}
-                            </div>
+                            </div>,
+                            document.body
                         )}
                     </div>
                 </Box>
