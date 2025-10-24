@@ -16,17 +16,17 @@ import type {
 interface AccountsState {
   accounts: Account[];
   accountTypes: AccountType[];
-  accountDetails: Record<number, AccountDetail>;
+  accountDetails: Record<string, AccountDetail>;
   loading: boolean;
   loadingTypes: boolean;
   creating: boolean;
   fetchAccounts: () => Promise<Account[]>;
   fetchAccountTypes: () => Promise<AccountType[]>;
-  fetchAccountDetail: (accountId: number) => Promise<AccountDetail>;
+  fetchAccountDetail: (accountId: string) => Promise<AccountDetail>;
   createAccount: (input: AccountCreateInput) => Promise<Account>;
-  updateAccount: (accountId: number, payload: Partial<AccountCreateInput>) => Promise<AccountDetail>;
-  deleteAccount: (accountId: number) => Promise<void>;
-  applyBalanceDelta: (accountId: number, delta: number) => void;
+  updateAccount: (accountId: string, payload: Partial<AccountCreateInput>) => Promise<AccountDetail>;
+  deleteAccount: (accountId: string) => Promise<void>;
+  applyBalanceDelta: (accountId: string, delta: number) => void;
   reset: () => void;
 }
 
@@ -113,7 +113,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         balance: input.balance,
       };
 
-      const { data } = await http.post<Record<string, unknown>>("/accounts/", payload);
+      const { data } = await http.post<ApiUserAccount>("/accounts/", payload);
       const account = mapAccount(data);
       set((prev) => ({ accounts: [account, ...prev.accounts], creating: false }));
       return account;
@@ -143,7 +143,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
 
   updateAccount: async (accountId, payload) => {
     try {
-      const { data } = await http.put<Record<string, unknown>>(`/accounts/${accountId}`, {
+      const { data } = await http.put<ApiUserAccount>(`/accounts/${accountId}`, {
         ...(payload.name ? { name: payload.name } : {}),
         ...(payload.typeId !== undefined ? { type_id: payload.typeId } : {}),
         ...(payload.currency ? { currency: payload.currency } : {}),

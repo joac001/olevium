@@ -82,6 +82,7 @@ interface InputProps {
     required?: boolean;
     icon?: string;
     rows?: number;
+    step?: number | string;
 }
 
 export interface InputRef {
@@ -106,6 +107,7 @@ const Input = forwardRef<InputRef, InputProps>(({
     required = false,
     icon,
     rows,
+    step,
 }, ref) => {
     const [inputType, setInputType] = useState<InputType>(type);
     const [inputValue, setInputValue] = useState<string | number>(() => (
@@ -278,6 +280,7 @@ const Input = forwardRef<InputRef, InputProps>(({
                             placeholder={resolvedPlaceholder}
                             disabled={disabled}
                             required={required}
+                            step={step}
                             className={clsx(
                                 icon ? "pl-11 md:pl-12" : "",
                                 controlClassName,

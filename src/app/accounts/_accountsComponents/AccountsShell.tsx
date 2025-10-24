@@ -6,6 +6,7 @@ import { Box, Card, Typography } from "@/components/shared/ui";
 import { useNotification } from "@/context/NotificationContext";
 import { useModal } from "@/context/ModalContext";
 import { useAccountsStore } from "@/lib/stores/accounts";
+import { formatAmount } from "@/lib/utils/parser";
 import AccountsTable from "./AccountsTable";
 import CreateAccountForm from "./CreateAccountForm";
 
@@ -38,16 +39,6 @@ export default function AccountsShell() {
       return accumulator;
     }, {});
   }, [accounts]);
-
-  const formatByCurrency = useCallback((currency: string, amount: number) => {
-    const normalized = currency && currency.length === 3 ? currency : undefined;
-    return new Intl.NumberFormat("es-AR", {
-      style: normalized ? "currency" : "decimal",
-      currency: normalized ?? "ARS",
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }).format(amount);
-  }, []);
 
   const handleOpenCreateAccount = useCallback(
     (typeId?: number) => {
@@ -82,7 +73,7 @@ export default function AccountsShell() {
                   {currency}
                 </Typography>
                 <Typography variant="h2" className="text-lg font-semibold">
-                  {formatByCurrency(currency, amount)}
+                  {formatAmount(amount,currency)}
                 </Typography>
               </Box>
             ))}

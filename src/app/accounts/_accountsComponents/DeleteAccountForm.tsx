@@ -8,7 +8,7 @@ import { useNotification } from "@/context/NotificationContext";
 import { useAccountsStore } from "@/lib/stores/accounts";
 
 interface DeleteAccountFormProps {
-  accountId: number;
+  accountId: string;
   accountName: string;
   onSuccess?: () => void;
 }

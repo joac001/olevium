@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Box, Card, Typography } from "@/components/shared/ui";
+import { formatAmount, formatDate } from "@/lib/utils/parser";
 import { useNotification } from "@/context/NotificationContext";
 import { useModal } from "@/context/ModalContext";
 import { useAccountsStore } from "@/lib/stores/accounts";
@@ -15,7 +16,7 @@ import DeleteAccountForm from "./DeleteAccountForm";
 import CreateTransactionForm from "./CreateTransactionForm";
 
 interface AccountDetailShellProps {
-  accountId: number;
+  accountId: string;
 }
 
 export default function AccountDetailShell({ accountId }: AccountDetailShellProps) {
@@ -27,8 +28,6 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const accounts = useAccountsStore((state) => state.accounts);
   const accountTypes = useAccountsStore((state) => state.accountTypes);
   const accountTransactionsMap = useTransactionsStore((state) => state.accountTransactions);
-  const transactionTypes = useTransactionsStore((state) => state.transactionTypes);
-  const categories = useTransactionsStore((state) => state.categories);
   const transactions = accountTransactionsMap[accountId] ?? [];
 
   const fetchAccountDetail = useAccountsStore((state) => state.fetchAccountDetail);
@@ -126,8 +125,6 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
       <Card tone="accent" title="Registrar transacción">
         <CreateTransactionForm
           accountId={resolvedAccount.accountId}
-          transactionTypes={transactionTypes}
-          categories={categories}
           onSuccess={() => {
             hideModal();
             fetchAccountTransactions(resolvedAccount.accountId).catch((error) => {
@@ -138,7 +135,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
         />
       </Card>,
     );
-  }, [categories, fetchAccountTransactions, hideModal, resolvedAccount, showModal, transactionTypes, showNotification]);
+  }, [fetchAccountTransactions, hideModal, resolvedAccount, showModal, showNotification]);
 
   if (loadingDetail || !resolvedAccount) {
     return (
@@ -153,12 +150,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
       <Card
         tone="neutral"
         title={resolvedAccount.name}
-        subtitle={`Saldo actual: ${new Intl.NumberFormat("es-AR", {
-          style: resolvedAccount.currency ? "currency" : "decimal",
-          currency: resolvedAccount.currency ?? "ARS",
-          maximumFractionDigits: 2,
-          minimumFractionDigits: 2,
-        }).format(resolvedAccount.balance)}`}
+        subtitle={`Saldo actual: ${formatAmount(resolvedAccount.balance, resolvedAccount.currency)}`}
         actions={[
           {
             icon: "fas fa-pen",
@@ -176,13 +168,13 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
       >
         <Box className="space-y-3">
           <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Tipo de cuenta: <span className="font-semibold text-[color:var(--text-primary)]">{typeLabel}</span>
+            Tipo de cuenta: <span className="font-semibold text-[color:var(--text-primary)]">{typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}</span>
           </Typography>
           <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
             Moneda: <span className="font-semibold text-[color:var(--text-primary)]">{resolvedAccount.currency ?? "Sin moneda"}</span>
           </Typography>
           <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Creada el {new Intl.DateTimeFormat("es-AR", { dateStyle: "medium" }).format(new Date(resolvedAccount.createdAt))}
+            Creada el {formatDate(resolvedAccount.createdAt, "dd/mm/aaaa")}
           </Typography>
         </Box>
       </Card>

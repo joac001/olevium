@@ -1,71 +1,77 @@
+import type { Iso8601DateTimeString, Nullable, Ulid } from "./common";
+
 export interface ApiCategoryData {
   description: string;
   type_id: number;
-  color?: string | null;
-  icon?: string | null;
+  color?: Nullable<string>;
+  icon?: Nullable<string>;
 }
 
 export interface ApiUserTransaction {
-  transaction_id: number;
-  user_id: number;
-  account_id: number;
+  transaction_id: Ulid;
+  user_id: Ulid;
+  account_id: Ulid;
   amount: number;
-  date: string;
-  category_id: number | null;
-  category?: string | null;
-  description?: string | null;
-  created_at: string;
+  type_id: number;
+  date: Iso8601DateTimeString;
+  category_id: Nullable<Ulid>;
+  category?: Nullable<string>;
+  type_name?: Nullable<string>;
+  description?: Nullable<string>;
+  created_at: Iso8601DateTimeString;
 }
 
 export interface ApiTransactionType {
   type_id: number;
   name: string;
-  created_at: string;
+  created_at: Iso8601DateTimeString;
 }
 
 export interface ApiTransactionCategory {
-  category_id: number;
-  user_id: number | null;
+  category_id: Ulid;
+  user_id: Nullable<Ulid>;
   type_id: number;
   description: string;
-  color?: string | null;
-  created_at: string;
+  color: Nullable<string>;
+  created_at: Iso8601DateTimeString;
   is_default: boolean;
 }
 
 export interface AccountTransaction {
-  transactionId: number;
-  accountId: number;
+  transactionId: Ulid;
+  accountId: Ulid;
   amount: number;
-  date: string;
-  createdAt: string;
-  categoryId: number | null;
-  category: string | null;
-  description: string | null;
+  typeId: number;
+  date: Iso8601DateTimeString;
+  createdAt: Iso8601DateTimeString;
+  categoryId: Nullable<Ulid>;
+  category: Nullable<string>;
+  typeName: Nullable<string>;
+  description: Nullable<string>;
 }
 
 export interface TransactionType {
   typeId: number;
   name: string;
-  createdAt: string;
+  createdAt: Iso8601DateTimeString;
 }
 
 export interface TransactionCategory {
-  categoryId: number;
-  userId: number | null;
+  categoryId: Ulid;
+  userId: Nullable<Ulid>;
   typeId: number;
   description: string;
-  color?: string | null;
-  createdAt: string;
+  color: Nullable<string>;
+  createdAt: Iso8601DateTimeString;
   isDefault: boolean;
 }
 
 export interface UserTransactionCreateInput {
-  accountId: number;
+  accountId: Ulid;
   amount: number;
-  date: string;
+  date: Iso8601DateTimeString;
   typeId: number;
-  categoryId?: number | null;
-  category?: ApiCategoryData | null;
-  description?: string | null;
+  categoryId?: Nullable<Ulid>;
+  category?: Nullable<ApiCategoryData>;
+  description?: Nullable<string>;
 }

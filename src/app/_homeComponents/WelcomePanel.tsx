@@ -4,26 +4,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { Box, Card, Typography, Button } from "@/components/shared/ui";
+import { formatDate } from "@/lib/utils/parser";
 import { useNotification } from "@/context/NotificationContext";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUserStore } from "@/lib/stores/user";
-
-const formatDate = (iso: string | undefined) => {
-  if (!iso) {
-    return "Fecha no disponible";
-  }
-
-  try {
-    const date = new Date(iso);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }).format(date);
-  } catch {
-    return iso;
-  }
-};
 
 export default function WelcomePanel() {
   const router = useRouter();
@@ -76,7 +60,7 @@ export default function WelcomePanel() {
               Has iniciado sesión con <span className="font-semibold text-[color:var(--text-primary)]">{user.email}</span>.
             </Typography>
             <Typography variant="body" className="text-[color:var(--text-muted)]">
-              Formas parte de Olevium desde el <span className="font-semibold text-[color:var(--text-primary)]">{formatDate(user.created_at)}</span>.
+              Formas parte de Olevium desde el <span className="font-semibold text-[color:var(--text-primary)]">{formatDate(user.created_at ?? "", "dd Mes aaaa") || "Fecha no disponible"}</span>.
             </Typography>
           </Box>
         ) : (

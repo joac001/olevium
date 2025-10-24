@@ -19,10 +19,12 @@ const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   transactionId: payload.transaction_id,
   accountId: payload.account_id,
   amount: payload.amount,
+  typeId: payload.type_id,
   date: payload.date,
   createdAt: payload.created_at,
   categoryId: payload.category_id ?? null,
   category: payload.category ?? null,
+  typeName: payload.type_name ?? null,
   description: payload.description ?? null,
 });
 
@@ -59,11 +61,11 @@ const normalizeError = (error: unknown): Error => {
 };
 
 interface TransactionsState {
-  accountTransactions: Record<number, AccountTransaction[]>;
+  accountTransactions: Record<string, AccountTransaction[]>;
   transactionTypes: TransactionType[];
   categories: TransactionCategory[];
   loading: boolean;
-  fetchAccountTransactions: (accountId: number) => Promise<AccountTransaction[]>;
+  fetchAccountTransactions: (accountId: string) => Promise<AccountTransaction[]>;
   fetchTransactionTypes: () => Promise<TransactionType[]>;
   fetchCategories: () => Promise<TransactionCategory[]>;
   createTransaction: (payload: UserTransactionCreateInput) => Promise<AccountTransaction>;

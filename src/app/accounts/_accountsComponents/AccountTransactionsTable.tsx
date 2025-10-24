@@ -3,7 +3,9 @@
 import { useMemo } from "react";
 
 import { Box, Typography } from "@/components/shared/ui";
+import { formatAmount, formatDate } from "@/lib/utils/parser";
 import type { AccountTransaction } from "@/types";
+import { useTransactionsStore } from "@/lib/stores/transactions";
 
 interface AccountTransactionsTableProps {
   transactions: AccountTransaction[];
@@ -11,26 +13,10 @@ interface AccountTransactionsTableProps {
   currency: string | null;
 }
 
-const formatAmount = (value: number, currency: string | null) => {
-  const normalized = currency && currency.length === 3 ? currency : undefined;
-  return new Intl.NumberFormat("es-AR", {
-    style: normalized ? "currency" : "decimal",
-    currency: normalized ?? "ARS",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  }).format(value);
-};
-
-const formatDate = (isoDate: string) => {
-  try {
-    return new Intl.DateTimeFormat("es-AR", { dateStyle: "medium" }).format(new Date(isoDate));
-  } catch {
-    return "";
-  }
-};
-
 export default function AccountTransactionsTable({ transactions, loading, currency }: AccountTransactionsTableProps) {
   const hasTransactions = transactions.length > 0;
+
+  const { categories, transactionTypes } = useTransactionsStore();
 
   const ordered = useMemo(
     () => [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -51,7 +37,6 @@ export default function AccountTransactionsTable({ transactions, loading, curren
     );
   }
 
-  // TODO: Hacer esta tabla responsive para pantallas chicas
   return (
     <Box className="space-y-2 p-4 overflow-hidden rounded-3xl border border-[color:var(--surface-muted)]">
       {/* HEADER */}
@@ -65,8 +50,6 @@ export default function AccountTransactionsTable({ transactions, loading, curren
       {/* DATA */}
       <Box className="">
         {ordered.map((transaction) => {
-          // TODO: Cambiar a que use si es entrada o salida porque seimpre se muestran como numeros positivos
-          const isPositive = transaction.amount >= 0;
           return (
             <Box
               key={transaction.transactionId}
@@ -78,18 +61,20 @@ export default function AccountTransactionsTable({ transactions, loading, curren
                 </Typography>
               ) : (
                 <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-                  Sin descripción
+                  -
                 </Typography>
               )}
               <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
                 {transaction.category ?? "Sin categoría"}
               </Typography>
               <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
-                {formatDate(transaction.date)}
+                {new Date(transaction.date).getFullYear() === new Date().getFullYear() 
+                  ? formatDate(transaction.date, "dd/mm") 
+                  : formatDate(transaction.date, "dd/mm/aa")}
               </Typography>
               <Typography
                 variant="body"
-                className={`text-base font-semibold ${isPositive ? "[color:var(--color-success-light)]" : "[color:var(--color-error-light)]"}`}
+                className={`text-base font-semibold ${transaction.typeId === 2 ? "[color:var(--color-success-light)]" : "[color:var(--color-danger-light)]"}`}
               >
                 {formatAmount(transaction.amount, currency)}
               </Typography>

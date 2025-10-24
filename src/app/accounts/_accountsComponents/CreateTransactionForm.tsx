@@ -7,23 +7,14 @@ import type { DropMenuOption } from "@/components/shared/ui";
 import { useTransactionsStore } from "@/lib/stores/transactions";
 import { useNotification } from "@/context/NotificationContext";
 import { useTransactionData } from "@/context/TransactionContext";
+import { formatDateToISO } from "@/lib/utils/parser";
 
 interface CreateTransactionFormProps {
-  accountId: number;
+  accountId: string;
   onSuccess?: () => void;
 }
 
 const CUSTOM_CATEGORY_VALUE = "__custom__";
-
-const formatDateToISO = (date: string) => {
-  const parsed = Date.parse(date);
-  if (Number.isNaN(parsed)) {
-    return new Date().toISOString();
-  }
-  const iso = new Date(parsed);
-  iso.setUTCHours(0, 0, 0, 0);
-  return iso.toISOString();
-};
 
 export default function CreateTransactionForm({ accountId, onSuccess }: CreateTransactionFormProps) {
   const { showNotification } = useNotification();
@@ -31,36 +22,29 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
   const createTransaction = useTransactionsStore((state) => state.createTransaction);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedType, setSelectedType] = useState<number | null>(transactionTypes[0]?.typeId ?? null);
-  const [selectedCategory, setSelectedCategory] = useState<string | number>(transactionTypes.length ? categories.find((c) => !transactionTypes[0]?.typeId || !c.typeId || c.typeId === transactionTypes[0]?.typeId)?.categoryId ?? CUSTOM_CATEGORY_VALUE : CUSTOM_CATEGORY_VALUE);
+  const [selectedType, setSelectedType] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>(CUSTOM_CATEGORY_VALUE);
   const [customCategoryName, setCustomCategoryName] = useState("");
   const [customCategoryDescription, setCustomCategoryDescription] = useState("");
 
   useEffect(() => {
     if (!selectedType && transactionTypes.length) {
       setSelectedType(transactionTypes[0].typeId);
+      // Seleccionar la primera categoría compatible para evitar estados inválidos
+      const firstCategory = categories.find((category) => !category.typeId || category.typeId === transactionTypes[0].typeId);
+      setSelectedCategory(firstCategory?.categoryId ?? CUSTOM_CATEGORY_VALUE);
     }
-  }, [selectedType, transactionTypes]);
+  }, [categories, selectedType, transactionTypes]);
 
   useEffect(() => {
-    if (selectedCategory === CUSTOM_CATEGORY_VALUE) {
+    if (!selectedType) {
+      setSelectedCategory(CUSTOM_CATEGORY_VALUE);
       return;
     }
-    if (typeof selectedCategory === "number") {
-      const exists = categories.some((category) => {
-        if (category.categoryId !== selectedCategory) {
-          return false;
-        }
-        if (!selectedType || !category.typeId) {
-          return true;
-        }
-        return category.typeId === selectedType;
-      });
-      if (!exists) {
-        setSelectedCategory(CUSTOM_CATEGORY_VALUE);
-      }
-    }
-  }, [categories, selectedCategory, selectedType]);
+
+    const firstForType = categories.find((category) => !category.typeId || category.typeId === selectedType);
+    setSelectedCategory(firstForType?.categoryId ?? CUSTOM_CATEGORY_VALUE);
+  }, [categories, selectedType]);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
@@ -70,6 +54,8 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
       })),
     [transactionTypes],
   );
+
+  const typeDisabled = transactionTypesLoading && transactionTypes.length === 0;
 
   const categoryOptions: DropMenuOption[] = useMemo(() => {
     const base: DropMenuOption[] = [
@@ -85,6 +71,8 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
 
     return [...base, ...filtered];
   }, [categories, selectedType]);
+
+  const categoryDisabled = categoriesLoading && categories.length === 0;
 
   const buttons = useMemo(
     () => [
@@ -129,11 +117,13 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
       }
 
       const isCustom = categoryValue === CUSTOM_CATEGORY_VALUE || selectedCategory === CUSTOM_CATEGORY_VALUE;
-      let categoryId: number | undefined;
+      let categoryId: string | null | undefined;
       if (!isCustom) {
-        const parsed = typeof categoryValue === "string" ? Number(categoryValue) : selectedCategory;
-        if (typeof parsed === "number" && !Number.isNaN(parsed)) {
-          categoryId = parsed;
+        const raw = typeof categoryValue === "string" && categoryValue.length
+          ? categoryValue
+          : selectedCategory;
+        if (raw && raw !== CUSTOM_CATEGORY_VALUE) {
+          categoryId = raw;
         }
       }
 
@@ -214,16 +204,22 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
           icon="fas fa-calendar-days"
         />
 
-       <DropMenu
+        <DropMenu
           name="typeId"
           label="Tipo de transacción"
           options={typeOptions}
           required
-          disabled={transactionTypesLoading || !typeOptions.length}
+          disabled={typeDisabled}
           onValueChange={(value) => {
             const normalized = typeof value === "number" ? value : Number(value);
-            setSelectedType(Number.isFinite(normalized) ? normalized : null);
-            setSelectedCategory(CUSTOM_CATEGORY_VALUE);
+            const nextType = Number.isFinite(normalized) ? normalized : null;
+            setSelectedType(nextType);
+            if (nextType !== null) {
+              const firstForType = categories.find((category) => !category.typeId || category.typeId === nextType);
+              setSelectedCategory(firstForType?.categoryId ?? CUSTOM_CATEGORY_VALUE);
+            } else {
+              setSelectedCategory(CUSTOM_CATEGORY_VALUE);
+            }
           }}
           value={selectedType ?? undefined}
         />
@@ -233,10 +229,10 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
           label="Categoría"
           placeholder={categoriesLoading ? "Cargando categorías..." : "Selecciona una categoría"}
           options={categoryOptions}
-          disabled={categoriesLoading || !categoryOptions.length}
+          disabled={categoryDisabled}
           value={selectedCategory}
           onValueChange={(value) => {
-            if (typeof value === "number" || typeof value === "string") {
+            if (typeof value === "string") {
               setSelectedCategory(value);
             }
           }}

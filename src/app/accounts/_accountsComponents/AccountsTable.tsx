@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 
 import { Box, Typography } from "@/components/shared/ui";
+import { formatAmount, formatDate } from "@/lib/utils/parser";
 import type { Account, AccountType } from "@/types";
 
 interface AccountsTableProps {
@@ -13,16 +14,6 @@ interface AccountsTableProps {
   onAddAccount?: (typeId: number) => void;
   disableAdd?: boolean;
 }
-
-const formatAmount = (value: number, currency: string | null) => {
-  const normalized = currency && currency.length === 3 ? currency : undefined;
-  return new Intl.NumberFormat("es-AR", {
-    style: normalized ? "currency" : "decimal",
-    currency: normalized ?? "ARS",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  }).format(value);
-};
 
 export default function AccountsTable({ accounts, accountTypes, loading, onAddAccount, disableAdd }: AccountsTableProps) {
   const hasAccounts = accounts.length > 0;
@@ -57,12 +48,12 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
 
         return (
           <Box key={type.typeId} className="rounded-3xl border border-[color:var(--surface-muted)] p-4 md:p-5">
-            <Box className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <Box className="flex flex-col gap-2">
               <Typography variant="h2" className="text-lg md:text-xl">
-                {type.name}
+                {type.name.charAt(0).toUpperCase() + type.name.slice(1)}
               </Typography>
-              <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-                Total: <span className="font-semibold text-[color:var(--text-primary)]">{totalsLabel || "Sin cuentas registradas"}</span>
+              <Typography variant="caption" className="text-sm text-[color:var(--text-muted)]">
+                {totalsLabel || "Sin cuentas registradas"}
               </Typography>
             </Box>
 
@@ -76,12 +67,6 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
                 <span className="leading-none">+</span>
               </button>
 
-              {list.length === 0 && (
-                <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-                  Todavía no registraste cuentas de este tipo.
-                </Typography>
-              )}
-
               {list.map((account) => (
                 <Link
                   key={account.accountId}
@@ -93,7 +78,10 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
                       {account.name}
                     </Typography>
                     <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
-                      Creada el {new Intl.DateTimeFormat("es-AR", { dateStyle: "medium" }).format(new Date(account.createdAt))}
+                      Creada el {formatDate(account.createdAt, "dd Mes aaaa")}
+                    </Typography>
+                    <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
+                      {account.currency}
                     </Typography>
                   </Box>
                   <Typography
