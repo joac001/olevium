@@ -76,6 +76,9 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
     return [...base, ...filtered];
   }, [categories, selectedType]);
 
+  const typeDisabled = transactionTypesLoading && transactionTypes.length === 0;
+  const categoryDisabled = categoriesLoading && categories.length === 0;
+
   const buttons = useMemo(
     () => [
       {
@@ -212,7 +215,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
           label="Tipo de transacción"
           options={typeOptions}
           required
-          disabled={transactionTypesLoading || !typeOptions.length}
+          disabled={typeDisabled}
           onValueChange={(value) => {
             const normalized = typeof value === "number" ? value : Number(value);
             const nextType = Number.isFinite(normalized) ? normalized : null;
@@ -232,7 +235,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
           label="Categoría"
           placeholder={categoriesLoading ? "Cargando categorías..." : "Selecciona una categoría"}
           options={categoryOptions}
-          disabled={categoriesLoading || !categoryOptions.length}
+          disabled={categoryDisabled}
           value={selectedCategory}
           onValueChange={(value) => {
             if (typeof value === "string") {
