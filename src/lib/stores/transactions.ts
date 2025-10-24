@@ -159,6 +159,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     const state = get();
     let previousAccountId: string | null = null;
     let previousTransaction: AccountTransaction | null = null;
+    
     for (const [accId, txs] of Object.entries(state.accountTransactions)) {
       const found = txs.find((tx) => tx.transactionId === transactionId);
       if (found) {
@@ -169,15 +170,14 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
 
     try {
-      const body: Record<string, unknown> = {
-        amount: payload.amount,
-        date: payload.date,
-        account_id: payload.accountId,
-        type_id: payload.typeId,
-      };
-
+      // Construir body solo con campos definidos
+      const body: Record<string, unknown> = {};
+      
+      if (payload.amount !== undefined) body.amount = payload.amount;
+      if (payload.date !== undefined) body.date = payload.date;
       if (payload.categoryId !== undefined) body.category_id = payload.categoryId;
-      if (payload.category !== undefined) body.category = payload.category;
+      if (payload.accountId !== undefined) body.account_id = payload.accountId;
+      if (payload.typeId !== undefined) body.type_id = payload.typeId;
       if (payload.description !== undefined) body.description = payload.description;
 
       const { data } = await http.put<ApiUserTransaction>(`/transactions/${transactionId}`, body);
