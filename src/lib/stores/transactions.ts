@@ -12,6 +12,7 @@ import type {
   TransactionCategory,
   TransactionType,
   UserTransactionCreateInput,
+  UserTransactionUpdateInput,
 } from "@/types";
 import { useAccountsStore } from "@/lib/stores/accounts";
 
@@ -69,6 +70,8 @@ interface TransactionsState {
   fetchTransactionTypes: () => Promise<TransactionType[]>;
   fetchCategories: () => Promise<TransactionCategory[]>;
   createTransaction: (payload: UserTransactionCreateInput) => Promise<AccountTransaction>;
+  updateTransaction: (transactionId: string, payload: UserTransactionUpdateInput) => Promise<AccountTransaction>;
+  deleteTransaction: (transactionId: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -147,6 +150,98 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       useAccountsStore.getState().applyBalanceDelta(accountId, amount);
       return mapped;
+    } catch (error) {
+      throw normalizeError(error);
+    }
+  },
+
+  updateTransaction: async (transactionId, payload) => {
+    const state = get();
+    let previousAccountId: string | null = null;
+    let previousTransaction: AccountTransaction | null = null;
+    for (const [accId, txs] of Object.entries(state.accountTransactions)) {
+      const found = txs.find((tx) => tx.transactionId === transactionId);
+      if (found) {
+        previousAccountId = accId;
+        previousTransaction = found;
+        break;
+      }
+    }
+
+    try {
+      const body: Record<string, unknown> = {
+        amount: payload.amount,
+        date: payload.date,
+        account_id: payload.accountId,
+        type_id: payload.typeId,
+      };
+
+      if (payload.categoryId !== undefined) body.category_id = payload.categoryId;
+      if (payload.category !== undefined) body.category = payload.category;
+      if (payload.description !== undefined) body.description = payload.description;
+
+      const { data } = await http.put<ApiUserTransaction>(`/transactions/${transactionId}`, body);
+      const mapped = mapTransaction(data);
+
+      set((prev) => {
+        const accountId = mapped.accountId;
+        const current = prev.accountTransactions[accountId] ?? [];
+        return {
+          accountTransactions: {
+            ...prev.accountTransactions,
+            [accountId]: current.map((tx) => (tx.transactionId === transactionId ? mapped : tx)),
+          },
+        };
+      });
+
+      if (previousTransaction) {
+        const accountsStore = useAccountsStore.getState();
+        if (previousAccountId && previousAccountId !== mapped.accountId) {
+          accountsStore.applyBalanceDelta(previousAccountId, -previousTransaction.amount);
+          accountsStore.applyBalanceDelta(mapped.accountId, mapped.amount);
+        } else {
+          const delta = mapped.amount - previousTransaction.amount;
+          accountsStore.applyBalanceDelta(mapped.accountId, delta);
+        }
+      }
+
+      return mapped;
+    } catch (error) {
+      throw normalizeError(error);
+    }
+  },
+
+  deleteTransaction: async (transactionId) => {
+    const state = get();
+    let targetAccountId: string | null = null;
+    let targetTransaction: AccountTransaction | null = null;
+    for (const [accId, txs] of Object.entries(state.accountTransactions)) {
+      const found = txs.find((tx) => tx.transactionId === transactionId);
+      if (found) {
+        targetAccountId = accId;
+        targetTransaction = found;
+        break;
+      }
+    }
+
+    try {
+      await http.delete(`/transactions/${transactionId}`);
+      set((prev) => {
+        if (!targetAccountId) {
+          return prev;
+        }
+        const txs = prev.accountTransactions[targetAccountId] ?? [];
+        return {
+          accountTransactions: {
+            ...prev.accountTransactions,
+            [targetAccountId]: txs.filter((tx) => tx.transactionId !== transactionId),
+          },
+        };
+      });
+
+      if (targetAccountId && targetTransaction) {
+        useAccountsStore.getState().applyBalanceDelta(targetAccountId, -targetTransaction.amount);
+      }
     } catch (error) {
       throw normalizeError(error);
     }

@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Type Check Auth Files",
+			"type": "shell",
+			"command": "npx tsc --noEmit --skipLibCheck src/lib/utils/axios.ts src/lib/stores/auth.ts src/lib/hoc/withAuth.ts"
+		}
+	]
+}

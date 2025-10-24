@@ -66,6 +66,7 @@ type AuthState = {
   refreshSession: () => Promise<void>;
   tryHydrate: () => Promise<void>;
   logout: () => Promise<void>;
+  clearSession: () => void;
   setTokens: (tokens: {
     accessToken: string | null;
     refreshToken: string | null;
@@ -113,6 +114,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     tokenStorage.save({ accessToken, refreshToken, tokenType });
   },
 
+  clearSession: () => {
+    set({
+      accessToken: null,
+      refreshToken: null,
+      tokenType: null,
+      user: null,
+      loading: false, // Asegurar que loading se resetee
+    });
+    tokenStorage.clear();
+    useUserStore.getState().reset();
+  },
+
   login: async (email, password) => {
     set({ loading: true });
     try {
@@ -157,6 +170,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshSession: async () => {
     const { accessToken, refreshToken } = get();
 
+    console.log("Refreshing session...");
+
     if (!refreshToken) {
       throw new Error("No refresh token available");
     }
@@ -183,14 +198,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         refreshToken: tokens.refreshToken,
         tokenType: tokens.tokenType,
         user: tokens.user ?? prev.user ?? null,
+        loading: false, // Asegurar que loading se resetee
       }));
       tokenStorage.save(tokens);
     } catch (error) {
+      // Limpiar tokens inválidos pero no hacer logout automático aquí
+      set({
+        accessToken: null,
+        refreshToken: null,
+        tokenType: null,
+        loading: false,
+      });
+      tokenStorage.clear();
       throw normalizeAuthError(error);
     }
   },
 
   tryHydrate: async () => {
+    const { loading } = get();
+    if (loading) return; // Evitar múltiples ejecuciones simultáneas
+    
     set({ loading: true });
     try {
       const stored = tokenStorage.read();
@@ -200,6 +227,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           refreshToken: null,
           tokenType: null,
           user: null,
+          loading: false,
         });
         useUserStore.getState().reset();
         return;
@@ -210,37 +238,65 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         refreshToken: stored.refreshToken,
         tokenType: stored.tokenType,
         user: prev.user,
+        loading: stored.accessToken ? false : true, // Solo mantener loading si necesitamos refresh
       }));
 
+      // Solo hacer refresh si no hay access token
       if (!stored.accessToken) {
-        await get().refreshSession();
+        try {
+          await get().refreshSession();
+        } catch (error) {
+          // Si falla el refresh durante hydrate, limpiar todo
+          console.warn("Failed to refresh during hydrate:", error);
+          set({
+            accessToken: null,
+            refreshToken: null,
+            tokenType: null,
+            user: null,
+            loading: false,
+          });
+          tokenStorage.clear();
+          useUserStore.getState().reset();
+          throw error;
+        }
       }
-    } catch {
+    } catch (error) {
       set({
         accessToken: null,
         refreshToken: null,
         tokenType: null,
         user: null,
+        loading: false,
       });
       tokenStorage.clear();
       useUserStore.getState().reset();
+      throw error;
     } finally {
       set({ loading: false });
     }
   },
 
   logout: async () => {
+    const { accessToken } = get();
+    
     try {
-      const config: AxiosRequestConfig & { skipAuthRefresh?: boolean } = { skipAuthRefresh: true };
-      await http.post("/auth/logout", undefined, config);
+      if (accessToken) {
+        const config: AxiosRequestConfig & { skipAuthRefresh?: boolean } = { 
+          skipAuthRefresh: true 
+        };
+        await http.post("/auth/logout", undefined, config);
+      }
     } catch (error) {
-      throw normalizeAuthError(error);
+      // Log el error pero continúa con la limpieza local
+      console.warn("Error during logout:", error);
     } finally {
+      // Siempre limpiar la sesión local
       set({
         accessToken: null,
         refreshToken: null,
         tokenType: null,
         user: null,
+        loading: false,
       });
       tokenStorage.clear();
       useUserStore.getState().reset();

@@ -11,12 +11,11 @@ const manrope = Manrope({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Olevium",
   description: "Asistente financiero inteligente",
-  icons: [
-    {
-      rel: "icon",
-      url: "/images/favicon.ico",
-    },
-  ],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 const links: NavLink[] = [

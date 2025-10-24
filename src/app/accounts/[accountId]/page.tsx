@@ -5,13 +5,13 @@ import { Container, Box } from "@/components/shared/ui";
 import AccountDetailShell from "../_accountsComponents/AccountDetailShell";
 
 interface AccountDetailPageProps {
-  params: {
+  params: Promise<{
     accountId: string;
-  };
+  }>;
 }
 
-export default function AccountDetailPage({ params }: AccountDetailPageProps) {
-  const rawAccountId = params.accountId;
+export default async function AccountDetailPage({ params }: AccountDetailPageProps) {
+  const { accountId: rawAccountId } = await params;
 
   if (typeof rawAccountId !== "string" || rawAccountId.trim().length === 0) {
     notFound();

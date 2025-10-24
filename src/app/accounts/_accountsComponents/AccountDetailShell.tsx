@@ -57,7 +57,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
     }
   }, [account, accountId, fetchAccountDetail, router, showNotification]);
 
-  useEffect(() => {
+  const reloadTransactions = useCallback(() => {
     setLoadingTransactions(true);
     fetchAccountTransactions(accountId)
       .catch((error) => {
@@ -66,6 +66,10 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
       })
       .finally(() => setLoadingTransactions(false));
   }, [accountId, fetchAccountTransactions, showNotification]);
+
+  useEffect(() => {
+    reloadTransactions();
+  }, [reloadTransactions]);
 
   useEffect(() => {
     if (!accountTypes.length) {
@@ -127,15 +131,12 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           accountId={resolvedAccount.accountId}
           onSuccess={() => {
             hideModal();
-            fetchAccountTransactions(resolvedAccount.accountId).catch((error) => {
-              const message = error instanceof Error ? error.message : "No pudimos actualizar las transacciones.";
-              showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al refrescar", message);
-            });
+            reloadTransactions();
           }}
         />
       </Card>,
     );
-  }, [fetchAccountTransactions, hideModal, resolvedAccount, showModal, showNotification]);
+  }, [hideModal, reloadTransactions, resolvedAccount, showModal]);
 
   if (loadingDetail || !resolvedAccount) {
     return (
@@ -196,6 +197,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           transactions={transactions as AccountTransaction[]}
           loading={loadingTransactions}
           currency={resolvedAccount.currency}
+          onRefresh={reloadTransactions}
         />
       </Card>
     </Box>

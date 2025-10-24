@@ -75,3 +75,14 @@ export interface UserTransactionCreateInput {
   category?: Nullable<ApiCategoryData>;
   description?: Nullable<string>;
 }
+
+export interface UserTransactionUpdateInput {
+  transactionId: Ulid;
+  accountId: Ulid;
+  amount: number;
+  date: Iso8601DateTimeString;
+  typeId: number;
+  categoryId?: Nullable<Ulid>;
+  category?: Nullable<ApiCategoryData>;
+  description?: Nullable<string>;
+}

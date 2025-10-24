@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type ComponentType, type SVGProps, type CSSProperties } from "react";
+import { useState, useRef, useEffect, useMemo, type ComponentType, type SVGProps, type CSSProperties } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import Box from "@/components/shared/ui/content/Box";
@@ -77,6 +77,16 @@ function NavBar({ title, links }: NavBarProps) {
         ...shellGlassStyle,
         backgroundImage: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 35%, transparent 65%) 0%, color-mix(in srgb, var(--color-primary) 82%, transparent 18%) 100%)'
     };
+
+    const isAuthRoute = useMemo(() => {
+        if (!pathname) return false;
+        const publicPrefixes = ["/auth", "/verify-cta", "/verify-email"];
+        return publicPrefixes.some((prefix) => pathname.startsWith(prefix));
+    }, [pathname]);
+
+    if (isAuthRoute) {
+        return null;
+    }
 
     return (
         <>

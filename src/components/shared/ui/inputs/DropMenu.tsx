@@ -76,7 +76,6 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
     const [activeIndex, setActiveIndex] = useState<number>(-1);
     
     const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
-    const [openDirection, setOpenDirection] = useState<'down' | 'up'>('down');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
@@ -114,7 +113,6 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
             width: rect.width,
             maxHeight,
         });
-        setOpenDirection(prefersOpenUp ? "up" : "down");
     }, []);
 
     const performValidation = useCallback(

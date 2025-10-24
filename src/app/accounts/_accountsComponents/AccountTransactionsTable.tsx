@@ -1,24 +1,65 @@
 'use client';
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 
-import { Box, Typography } from "@/components/shared/ui";
+import { Box, Typography, Card, ActionButton } from "@/components/shared/ui";
 import { formatAmount, formatDate } from "@/lib/utils/parser";
 import type { AccountTransaction } from "@/types";
+import { useModal } from "@/context/ModalContext";
+import EditTransactionForm from "./EditTransactionForm";
+import DeleteTransactionForm from "./DeleteTransactionForm";
 
 interface AccountTransactionsTableProps {
   transactions: AccountTransaction[];
   loading: boolean;
   currency: string | null;
+  onRefresh?: () => void;
 }
 
-export default function AccountTransactionsTable({ transactions, loading, currency }: AccountTransactionsTableProps) {
+export default function AccountTransactionsTable({ transactions, loading, currency, onRefresh }: AccountTransactionsTableProps) {
+  const { showModal, hideModal } = useModal();
   const hasTransactions = transactions.length > 0;
   const ordered = useMemo(
     () => [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [transactions],
   );
   const currentYear = new Date().getFullYear();
+
+  const handleEdit = useCallback(
+    (transaction: AccountTransaction) => {
+      showModal(
+        <Card tone="accent" title="Editar transacción">
+          <EditTransactionForm
+            transaction={transaction}
+            accountId={transaction.accountId}
+            onSuccess={() => {
+              hideModal();
+              onRefresh?.();
+            }}
+          />
+        </Card>,
+      );
+    },
+    [hideModal, onRefresh, showModal],
+  );
+
+  const handleDelete = useCallback(
+    (transaction: AccountTransaction) => {
+      showModal(
+        <Card tone="danger" title="Eliminar transacción">
+          <DeleteTransactionForm
+            transaction={transaction}
+            currency={currency}
+            onSuccess={() => {
+              hideModal();
+              onRefresh?.();
+            }}
+          />
+        </Card>,
+      );
+    },
+    [currency, hideModal, onRefresh, showModal],
+  );
 
   if (loading && !hasTransactions) {
     return <Typography variant="body">Cargando movimientos...</Typography>;
@@ -36,11 +77,12 @@ export default function AccountTransactionsTable({ transactions, loading, curren
 
   return (
     <Box className="space-y-3 p-4 overflow-hidden rounded-3xl border border-[color:var(--surface-muted)]">
-      <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center md:justify-center md:bg-[color:var(--surface-glass)] md:px-4 md:py-3 md:text-xs md:font-semibold md:uppercase md:tracking-[0.22em] md:text-[color:var(--text-muted)] md:rounded-2xl">
+      <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:justify-center md:bg-[color:var(--surface-glass)] md:px-4 md:py-3 md:text-xs md:font-semibold md:uppercase md:tracking-[0.22em] md:text-[color:var(--text-muted)] md:rounded-2xl">
         <span>Concepto</span>
         <span>Categoría</span>
         <span>Fecha</span>
         <span>Monto</span>
+        <span className="text-right">Acciones</span>
       </Box>
 
       {ordered.map((transaction) => {
@@ -88,10 +130,25 @@ export default function AccountTransactionsTable({ transactions, loading, curren
                     {formattedDate}
                   </Typography>
                 </Box>
+
+                <Box className="flex w-full items-center gap-2">
+                  <ActionButton
+                    icon="fas fa-pen"
+                    type="accent"
+                    tooltip="Editar transacción"
+                    onClick={() => handleEdit(transaction)}
+                  />
+                  <ActionButton
+                    icon="fas fa-trash"
+                    type="danger"
+                    tooltip="Eliminar transacción"
+                    onClick={() => handleDelete(transaction)}
+                  />
+                </Box>
               </Box>
             </Box>
 
-            <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center md:text-left md:justify-center md:px-4 md:py-3 md:rounded-2xl md:hover:bg-[color:var(--surface-glass-hover)]">
+            <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:text-left md:justify-center md:px-4 md:py-3 md:rounded-2xl md:hover:bg-[color:var(--surface-glass-hover)]">
               <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
                 {description}
               </Typography>
@@ -104,6 +161,20 @@ export default function AccountTransactionsTable({ transactions, loading, curren
               <Typography variant="body" className={`text-base font-semibold ${amountClass}`}>
                 {formatAmount(transaction.amount, currency)}
               </Typography>
+              <Box className="flex items-center justify-end gap-2">
+                <ActionButton
+                  icon="fas fa-pen"
+                  type="accent"
+                  tooltip="Editar transacción"
+                  onClick={() => handleEdit(transaction)}
+                />
+                <ActionButton
+                  icon="fas fa-trash"
+                  type="danger"
+                  tooltip="Eliminar transacción"
+                  onClick={() => handleDelete(transaction)}
+                />
+              </Box>
             </Box>
           </Box>
         );

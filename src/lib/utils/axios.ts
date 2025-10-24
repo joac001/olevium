@@ -1,4 +1,3 @@
-// lib/http.ts
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import axios from "axios";
 
@@ -6,7 +5,6 @@ import { useAuthStore } from "@/lib/stores/auth";
 
 const shouldSendCredentials = process.env.NEXT_PUBLIC_API_WITH_CREDENTIALS === "true";
 
-// Crear una instancia
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: shouldSendCredentials,
@@ -15,6 +13,7 @@ export const http = axios.create({
 // Flag para evitar loops
 let isRefreshing = false;
 let pendingQueue: Array<() => void> = [];
+let redirectingToAuth = false;
 
 http.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
@@ -63,11 +62,24 @@ http.interceptors.response.use(
       queue.forEach((fn) => fn());
       return retry();
     } catch (e) {
-      await useAuthStore.getState().logout(); // limpiar estado
+      try {
+        await useAuthStore.getState().logout(); // limpiar estado en el backend
+      } catch {
+        useAuthStore.getState().clearSession();
+      }
       pendingQueue = [];
+      if (typeof window !== "undefined" && !redirectingToAuth) {
+        redirectingToAuth = true;
+        if (window.location.pathname !== "/auth") {
+          window.location.replace("/auth");
+        }
+      }
       return Promise.reject(e);
     } finally {
       isRefreshing = false;
+      if (typeof window !== "undefined" && window.location.pathname === "/auth") {
+        redirectingToAuth = false;
+      }
     }
   }
 );
