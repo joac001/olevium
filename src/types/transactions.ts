@@ -66,6 +66,12 @@ export interface TransactionCategory {
   isDefault: boolean;
 }
 
+export interface TransactionCategoryCreateInput {
+  description: string;
+  typeId: number;
+  color?: Nullable<string>;
+}
+
 type UserTransactionPayloadBase = {
   accountId: Ulid;
   amount: number;
@@ -81,3 +87,11 @@ export type UserTransactionCreateInput = UserTransactionPayloadBase;
 export type UserTransactionUpdateInput = UserTransactionPayloadBase & {
   transactionId: Ulid;
 };
+
+export interface TransactionCategoryUpdateInput {
+  categoryId: Ulid;
+  userId: Nullable<Ulid>;
+  typeId: number;
+  description: string;
+  color: Nullable<string>;
+}

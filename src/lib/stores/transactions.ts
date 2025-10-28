@@ -10,6 +10,8 @@ import type {
   ApiUserTransaction,
   TransactionCategory,
   TransactionType,
+  TransactionCategoryCreateInput,
+  TransactionCategoryUpdateInput,
   UserTransactionCreateInput,
   UserTransactionUpdateInput,
 } from "@/types";
@@ -58,6 +60,9 @@ interface TransactionsState {
   createTransaction: (payload: UserTransactionCreateInput) => Promise<AccountTransaction>;
   updateTransaction: (transactionId: string, payload: UserTransactionUpdateInput) => Promise<AccountTransaction>;
   deleteTransaction: (transactionId: string) => Promise<void>;
+  createCategory: (payload: TransactionCategoryCreateInput) => Promise<TransactionCategory>;
+  updateCategory: (payload: TransactionCategoryUpdateInput) => Promise<TransactionCategory>;
+  deleteCategory: (categoryId: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -228,6 +233,60 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       if (targetAccountId && targetTransaction) {
         useAccountsStore.getState().applyBalanceDelta(targetAccountId, -targetTransaction.amount);
       }
+    } catch (error) {
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+    }
+  },
+
+  createCategory: async ({ description, typeId, color }) => {
+    try {
+      const body: Record<string, unknown> = {
+        description,
+        type_id: typeId,
+      };
+      if (color !== undefined) {
+        body.color = color;
+      }
+
+      const { data } = await http.post<ApiTransactionCategory>("/categories/", body);
+      const mapped = mapCategory(data);
+      set((prev) => ({
+        categories: [...prev.categories, mapped],
+      }));
+      return mapped;
+    } catch (error) {
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+    }
+  },
+
+  updateCategory: async ({ categoryId, description, typeId, color, userId }) => {
+    try {
+      const body: Record<string, unknown> = {
+        description,
+        type_id: typeId,
+        color,
+        user_id: userId,
+      };
+
+      const { data } = await http.put<ApiTransactionCategory>(`/categories/${categoryId}`, body);
+      const mapped = mapCategory(data);
+      set((prev) => ({
+        categories: prev.categories.map((category) =>
+          category.categoryId === categoryId ? mapped : category,
+        ),
+      }));
+      return mapped;
+    } catch (error) {
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+    }
+  },
+
+  deleteCategory: async (categoryId) => {
+    try {
+      await http.delete(`/categories/${categoryId}`);
+      set((prev) => ({
+        categories: prev.categories.filter((category) => category.categoryId !== categoryId),
+      }));
     } catch (error) {
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
