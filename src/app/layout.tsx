@@ -5,6 +5,7 @@ import { Manrope } from "next/font/google";
 
 import { NavBar, NavLink } from "@/components/layout/";
 import { ClientProviders } from "@/components/providers/ClientProviders";
+import { Typography } from "@/components/shared/ui";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -41,6 +42,9 @@ export default function RootLayout({
         <ClientProviders>
           <NavBar title="Olevium" links={links} />
           {children}
+          <Typography variant="caption" className="block text-center mt-8 mb-4">
+            &copy; {new Date().getFullYear()} Olevium - v1.1.0
+          </Typography>
         </ClientProviders>
       </body>
     </html>
