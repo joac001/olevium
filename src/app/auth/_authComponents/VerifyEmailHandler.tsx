@@ -2,44 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
 
 import { Box, Button, Typography } from "@/components/shared/ui";
 import { useNotification } from "@/context/NotificationContext";
 import { useAuthStore } from "@/lib/stores/auth";
+import { extractAuthErrorMessage } from "./authErrorUtils";
 
 interface VerifyEmailHandlerProps {
   token?: string;
 }
 
 type VerifyStatus = "idle" | "loading" | "success" | "error";
-
-interface ErrorResponse {
-  detail?: string;
-  message?: string;
-  error?: string;
-}
-
-const extractErrorMessage = (error: unknown) => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as ErrorResponse | undefined;
-    if (payload?.detail) {
-      return payload.detail;
-    }
-    if (payload?.message) {
-      return payload.message;
-    }
-    if (payload?.error) {
-      return payload.error;
-    }
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "No pudimos verificar tu correo. Inténtalo nuevamente.";
-};
 
 export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
   const router = useRouter();
@@ -89,7 +62,10 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
           return;
         }
 
-        const friendlyMessage = extractErrorMessage(error);
+        const friendlyMessage = extractAuthErrorMessage(
+          error,
+          "No pudimos verificar tu correo. Inténtalo nuevamente.",
+        );
         setStatus("error");
         setMessage(friendlyMessage);
       }

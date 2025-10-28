@@ -1,6 +1,5 @@
 'use client';
 
-import { AxiosError } from "axios";
 import { create } from "zustand";
 
 import { http } from "@/lib/utils/axios";
@@ -12,6 +11,7 @@ import type {
   ApiUserAccount,
   ApiAccountType,
 } from "@/types";
+import { resolveAxiosError } from "@/lib/utils/errorHandling";
 
 interface AccountsState {
   accounts: Account[];
@@ -49,21 +49,7 @@ const mapAccountType = (payload: ApiAccountType): AccountType => ({
   createdAt: payload.created_at,
 });
 
-const normalizeError = (error: unknown): Error => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as { detail?: string; message?: string; error?: string } | undefined;
-    const detail = payload?.detail ?? payload?.message ?? payload?.error;
-    if (detail) {
-      return new Error(detail);
-    }
-  }
-
-  if (error instanceof Error) {
-    return error;
-  }
-
-  return new Error("No se pudo completar la operación sobre cuentas.");
-};
+const ACCOUNTS_ERROR_FALLBACK = "No se pudo completar la operación sobre cuentas.";
 
 export const useAccountsStore = create<AccountsState>((set, get) => ({
   accounts: [],
@@ -82,7 +68,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       return mapped;
     } catch (error) {
       set({ loading: false });
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -99,7 +85,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       return mapped;
     } catch (error) {
       set({ loadingTypes: false });
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -119,7 +105,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       return account;
     } catch (error) {
       set({ creating: false });
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -137,7 +123,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       }));
       return detail;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -156,7 +142,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       }));
       return updated;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -173,7 +159,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         };
       });
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 

@@ -14,6 +14,8 @@ import AccountTransactionsTable from "./AccountTransactionsTable";
 import EditAccountForm from "./EditAccountForm";
 import DeleteAccountForm from "./DeleteAccountForm";
 import CreateTransactionForm from "./CreateTransactionForm";
+import AccountDetailCardSkeleton from "../_accountsSkeletons/AccountDetailCardSkeleton";
+import AccountTransactionsTableSkeleton from "../_accountsSkeletons/AccountTransactionsTableSkeleton";
 
 interface AccountDetailShellProps {
   accountId: string;
@@ -85,8 +87,6 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
     }
   }, [accountTypes.length, fetchAccountTypes, showNotification]);
 
-
-
   const typeLabel = useMemo(() => {
     const type = accountTypes.find((item) => item.typeId === resolvedAccount?.typeId);
     return type?.name ?? `Tipo #${resolvedAccount?.typeId ?? ""}`;
@@ -138,68 +138,80 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
     );
   }, [hideModal, reloadTransactions, resolvedAccount, showModal]);
 
-  if (loadingDetail || !resolvedAccount) {
+  const showAccountCardSkeleton = loadingDetail && !resolvedAccount;
+  const accountUnavailable = !loadingDetail && !resolvedAccount;
+  const showTransactionsSkeleton = loadingTransactions && !transactions.length;
+
+  if (accountUnavailable) {
     return (
-      <Card tone="neutral" title="Cargando cuenta">
-        <Typography variant="body">Obteniendo información de la cuenta...</Typography>
+      <Card tone="neutral" title="Cuenta no disponible">
+        <Typography variant="body">No pudimos encontrar los datos de esta cuenta.</Typography>
       </Card>
     );
   }
 
   return (
     <Box className="flex w-full max-w-6xl flex-col gap-6">
-      <Card
-        tone="neutral"
-        title={resolvedAccount.name}
-        subtitle={`Saldo actual: ${formatAmount(resolvedAccount.balance, resolvedAccount.currency)}`}
-        actions={[
-          {
-            icon: "fas fa-pen",
-            text: "Editar",
-            type: "primary",
-            onClick: handleOpenEdit,
-          },
-          {
-            icon: "fas fa-trash",
-            text: "Eliminar",
-            type: "danger",
-            onClick: handleOpenDelete,
-          },
-        ]}
-      >
-        <Box className="space-y-3">
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Tipo de cuenta: <span className="font-semibold text-[color:var(--text-primary)]">{typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}</span>
-          </Typography>
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Moneda: <span className="font-semibold text-[color:var(--text-primary)]">{resolvedAccount.currency ?? "Sin moneda"}</span>
-          </Typography>
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Creada el {formatDate(resolvedAccount.createdAt, "dd/mm/aaaa")}
-          </Typography>
-        </Box>
-      </Card>
+      {showAccountCardSkeleton || !resolvedAccount ? (
+        <AccountDetailCardSkeleton />
+      ) : (
+        <Card
+          tone="neutral"
+          title={resolvedAccount.name}
+          subtitle={`Saldo actual: ${formatAmount(resolvedAccount.balance, resolvedAccount.currency)}`}
+          actions={[
+            {
+              icon: "fas fa-pen",
+              text: "Editar",
+              type: "primary",
+              onClick: handleOpenEdit,
+            },
+            {
+              icon: "fas fa-trash",
+              text: "Eliminar",
+              type: "danger",
+              onClick: handleOpenDelete,
+            },
+          ]}
+        >
+          <Box className="space-y-3">
+            <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
+              Tipo de cuenta: <span className="font-semibold text-[color:var(--text-primary)]">{typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}</span>
+            </Typography>
+            <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
+              Moneda: <span className="font-semibold text-[color:var(--text-primary)]">{resolvedAccount.currency ?? "Sin moneda"}</span>
+            </Typography>
+            <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
+              Creada el {formatDate(resolvedAccount.createdAt, "dd/mm/aaaa")}
+            </Typography>
+          </Box>
+        </Card>
+      )}
 
-      <Card
-        tone="neutral"
-        title="Transacciones"
-        subtitle="Movimientos asociados a esta cuenta"
-        actions={[
-          {
-            icon: "fas fa-plus",
-            tooltip: "Agregar transacción",
-            type: "primary",
-            onClick: handleOpenCreateTransaction,
-          },
-        ]}
-      >
-        <AccountTransactionsTable
-          transactions={transactions as AccountTransaction[]}
-          loading={loadingTransactions}
-          currency={resolvedAccount.currency}
-          onRefresh={reloadTransactions}
-        />
-      </Card>
+      {showTransactionsSkeleton ? (
+        <AccountTransactionsTableSkeleton />
+      ) : (
+        <Card
+          tone="neutral"
+          title="Transacciones"
+          subtitle="Movimientos asociados a esta cuenta"
+          actions={[
+            {
+              icon: "fas fa-plus",
+              tooltip: "Agregar transacción",
+              type: "primary",
+              onClick: handleOpenCreateTransaction,
+            },
+          ]}
+        >
+          <AccountTransactionsTable
+            transactions={transactions as AccountTransaction[]}
+            loading={loadingTransactions}
+            currency={resolvedAccount.currency}
+            onRefresh={reloadTransactions}
+          />
+        </Card>
+      )}
     </Box>
   );
 }

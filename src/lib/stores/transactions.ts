@@ -1,6 +1,5 @@
 'use client';
 
-import { AxiosError } from "axios";
 import { create } from "zustand";
 
 import { http } from "@/lib/utils/axios";
@@ -15,6 +14,7 @@ import type {
   UserTransactionUpdateInput,
 } from "@/types";
 import { useAccountsStore } from "@/lib/stores/accounts";
+import { resolveAxiosError } from "@/lib/utils/errorHandling";
 
 const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   transactionId: payload.transaction_id,
@@ -45,21 +45,7 @@ const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
   isDefault: payload.is_default,
 });
 
-const normalizeError = (error: unknown): Error => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as { detail?: string; message?: string; error?: string } | undefined;
-    const detail = payload?.detail ?? payload?.message ?? payload?.error;
-    if (detail) {
-      return new Error(detail);
-    }
-  }
-
-  if (error instanceof Error) {
-    return error;
-  }
-
-  return new Error("No se pudo completar la operación sobre transacciones.");
-};
+const TRANSACTION_ERROR_FALLBACK = "No se pudo completar la operación sobre transacciones.";
 
 interface TransactionsState {
   accountTransactions: Record<string, AccountTransaction[]>;
@@ -93,7 +79,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       return transactions;
     } catch (error) {
       set({ loading: false });
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -107,7 +93,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       set({ transactionTypes: mapped });
       return mapped;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -121,7 +107,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       set({ categories: mapped });
       return mapped;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -151,7 +137,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       useAccountsStore.getState().applyBalanceDelta(accountId, amount);
       return mapped;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -207,7 +193,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       return mapped;
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -243,7 +229,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         useAccountsStore.getState().applyBalanceDelta(targetAccountId, -targetTransaction.amount);
       }
     } catch (error) {
-      throw normalizeError(error);
+      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 

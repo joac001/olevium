@@ -2,39 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
 
 import { Box, FormWrapper, Input, Typography } from "@/components/shared/ui";
 import type { ButtonProps } from "@/components/shared/ui";
 import { useNotification } from "@/context/NotificationContext";
 import { useAuthStore } from "@/lib/stores/auth";
-
-interface ErrorResponse {
-  detail?: string;
-  message?: string;
-  error?: string;
-}
-
-const extractErrorMessage = (error: unknown): string => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as ErrorResponse | undefined;
-    if (payload?.detail) {
-      return payload.detail;
-    }
-    if (payload?.message) {
-      return payload.message;
-    }
-    if (payload?.error) {
-      return payload.error;
-    }
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "No se pudo completar el inicio de sesión. Inténtalo nuevamente.";
-};
+import { extractAuthErrorMessage } from "./authErrorUtils";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -83,7 +56,10 @@ export default function LoginForm() {
 
         router.push("/");
       } catch (error) {
-        const message = extractErrorMessage(error);
+        const message = extractAuthErrorMessage(
+          error,
+          "No se pudo completar el inicio de sesión. Inténtalo nuevamente.",
+        );
         showNotification("fa-solid fa-triangle-exclamation", "danger", "Error de autenticación", message);
         return;
       } finally {

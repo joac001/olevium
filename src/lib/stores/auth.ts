@@ -1,12 +1,13 @@
 'use client';
 
-import { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { create } from "zustand";
 
 import { http } from "@/lib/utils/axios";
 import { useUserStore } from "@/lib/stores/user";
+import { useTransactionsStore } from "@/lib/stores/transactions";
 import { tokenStorage } from "@/lib/utils/tokenStorage";
+import { resolveAxiosError } from "@/lib/utils/errorHandling";
 
 export interface AuthLoginPayload {
   email: string;
@@ -81,21 +82,9 @@ const mapTokenPair = (pair: TokenPairResponse) => ({
   user: pair.user ?? null,
 });
 
-const normalizeAuthError = (error: unknown): Error => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as { detail?: string; message?: string; error?: string } | undefined;
-    const detail = payload?.detail ?? payload?.message ?? payload?.error;
-    if (detail) {
-      return new Error(detail);
-    }
-  }
+const AUTH_ERROR_FALLBACK = "No se pudo completar la acción de autenticación.";
 
-  if (error instanceof Error) {
-    return error;
-  }
-
-  return new Error("No se pudo completar la acción de autenticación.");
-};
+const normalizeAuthError = (error: unknown): Error => resolveAxiosError(error, AUTH_ERROR_FALLBACK);
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
@@ -143,6 +132,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }));
       tokenStorage.save(tokens);
       useUserStore.getState().reset();
+      const transactionsStore = useTransactionsStore.getState();
+      void transactionsStore.fetchTransactionTypes().catch((error) => {
+        console.warn("Failed to prefetch transaction types:", error);
+      });
+      void transactionsStore.fetchCategories().catch((error) => {
+        console.warn("Failed to prefetch transaction categories:", error);
+      });
     } catch (error) {
       set({ loading: false });
       throw normalizeAuthError(error);

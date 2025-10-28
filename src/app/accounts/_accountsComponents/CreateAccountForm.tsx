@@ -7,6 +7,7 @@ import type { DropMenuOption } from "@/components/shared/ui";
 import type { AccountType } from "@/types";
 import { useAccountsStore } from "@/lib/stores/accounts";
 import { useNotification } from "@/context/NotificationContext";
+import { buildAccountTypeOptions, normalizeAccountFormData } from "./accountFormUtils";
 
 interface CreateAccountFormProps {
   accountTypes: AccountType[];
@@ -21,14 +22,7 @@ export default function CreateAccountForm({ accountTypes, loadingTypes, onSucces
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialTypeId = defaultTypeId ?? accountTypes[0]?.typeId ?? null;
 
-  const typeOptions: DropMenuOption[] = useMemo(
-    () =>
-      accountTypes.map((type) => ({
-        value: type.typeId,
-        label: type.name,
-      })),
-    [accountTypes],
-  );
+  const typeOptions: DropMenuOption[] = useMemo(() => buildAccountTypeOptions(accountTypes), [accountTypes]);
 
   const buttons = useMemo(
     () => [
@@ -44,54 +38,19 @@ export default function CreateAccountForm({ accountTypes, loadingTypes, onSucces
 
   const handleSubmit = useCallback(
     async (formData: FormData) => {
-      const nameValue = formData.get("name");
-      const typeValue = formData.get("typeId");
-      const currencyValue = formData.get("currency");
-      const balanceValue = formData.get("balance");
+      const normalized = normalizeAccountFormData({ formData, showNotification });
 
-      if (
-        typeof nameValue !== "string" ||
-        typeof typeValue !== "string" ||
-        typeof currencyValue !== "string" ||
-        typeof balanceValue !== "string"
-      ) {
-        showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Formulario incompleto",
-          "Completa todos los campos para registrar la cuenta.",
-        );
-        return;
-      }
-
-      const trimmedName = nameValue.trim();
-      const trimmedCurrency = currencyValue.trim();
-
-      if (!trimmedName || !trimmedCurrency) {
-        showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Datos inválidos",
-          "El nombre y la moneda son obligatorios.",
-        );
-        return;
-      }
-
-      const typeId = Number(typeValue);
-      const balance = Number(balanceValue);
-
-      if (!Number.isFinite(balance)) {
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Datos inválidos", "El balance debe ser un número válido.");
+      if (!normalized) {
         return;
       }
 
       setIsSubmitting(true);
       try {
         await createAccount({
-          name: trimmedName,
-          typeId,
-          currency: trimmedCurrency,
-          balance,
+          name: normalized.name,
+          typeId: normalized.typeId,
+          currency: normalized.currency,
+          balance: normalized.balance,
         });
 
         showNotification(

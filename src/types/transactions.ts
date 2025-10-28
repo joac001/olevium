@@ -66,7 +66,7 @@ export interface TransactionCategory {
   isDefault: boolean;
 }
 
-export interface UserTransactionCreateInput {
+type UserTransactionPayloadBase = {
   accountId: Ulid;
   amount: number;
   date: Iso8601DateTimeString;
@@ -74,15 +74,10 @@ export interface UserTransactionCreateInput {
   categoryId?: Nullable<Ulid>;
   category?: Nullable<ApiCategoryData>;
   description?: Nullable<string>;
-}
+};
 
-export interface UserTransactionUpdateInput {
+export type UserTransactionCreateInput = UserTransactionPayloadBase;
+
+export type UserTransactionUpdateInput = UserTransactionPayloadBase & {
   transactionId: Ulid;
-  accountId: Ulid;
-  amount: number;
-  date: Iso8601DateTimeString;
-  typeId: number;
-  categoryId?: Nullable<Ulid>;
-  category?: Nullable<ApiCategoryData>;
-  description?: Nullable<string>;
-}
+};
