@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu, Typography } from "@/components/shared/ui";
-import type { DropMenuOption } from "@/components/shared/ui";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import { useNotification } from "@/context/NotificationContext";
-import { useTransactionData } from "@/context/TransactionContext";
-import type { TransactionCategoryCreateInput } from "@/types";
+import { Box, FormWrapper, Input, DropMenu, Typography } from '@/components/shared/ui';
+import type { DropMenuOption } from '@/components/shared/ui';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useNotification } from '@/context/NotificationContext';
+import { useTransactionData } from '@/context/TransactionContext';
+import type { TransactionCategoryCreateInput } from '@/types';
 
 interface CreateCategoryFormProps {
   onSuccess?: () => void;
@@ -15,54 +15,60 @@ interface CreateCategoryFormProps {
 
 export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProps) {
   const { showNotification } = useNotification();
-  const createCategory = useTransactionsStore((state) => state.createCategory);
-  const fetchTransactionTypes = useTransactionsStore((state) => state.fetchTransactionTypes);
+  const createCategory = useTransactionsStore(state => state.createCategory);
+  const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { transactionTypes, transactionTypesLoading } = useTransactionData();
 
   useEffect(() => {
     if (!transactionTypes.length && !transactionTypesLoading) {
-      fetchTransactionTypes().catch((error) => {
-        const message = error instanceof Error ? error.message : "No pudimos cargar los tipos de transacción.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al cargar tipos", message);
+      fetchTransactionTypes().catch(error => {
+        const message =
+          error instanceof Error ? error.message : 'No pudimos cargar los tipos de transacción.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al cargar tipos',
+          message
+        );
       });
     }
   }, [fetchTransactionTypes, showNotification, transactionTypes.length, transactionTypesLoading]);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
-      transactionTypes.map((type) => ({
+      transactionTypes.map(type => ({
         value: type.typeId,
         label: type.name,
       })),
-    [transactionTypes],
+    [transactionTypes]
   );
 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Creando..." : "Crear categoría",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Creando...' : 'Crear categoría',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
     async (formData: FormData) => {
-      const descriptionValue = formData.get("description");
-      const typeValue = formData.get("typeId");
-      const colorValue = formData.get("color");
+      const descriptionValue = formData.get('description');
+      const typeValue = formData.get('typeId');
+      const colorValue = formData.get('color');
 
-      if (typeof descriptionValue !== "string" || typeof typeValue !== "string") {
+      if (typeof descriptionValue !== 'string' || typeof typeValue !== 'string') {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Formulario incompleto",
-          "Descripción y tipo son obligatorios.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Formulario incompleto',
+          'Descripción y tipo son obligatorios.'
         );
         return;
       }
@@ -70,10 +76,10 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       const trimmedDescription = descriptionValue.trim();
       if (!trimmedDescription) {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Datos inválidos",
-          "La descripción no puede estar vacía.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Datos inválidos',
+          'La descripción no puede estar vacía.'
         );
         return;
       }
@@ -81,16 +87,16 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       const typeId = Number(typeValue);
       if (!Number.isFinite(typeId)) {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Tipo inválido",
-          "Selecciona un tipo válido.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Tipo inválido',
+          'Selecciona un tipo válido.'
         );
         return;
       }
 
       const colorRaw =
-        typeof colorValue === "string" && colorValue.trim().length ? colorValue.trim() : null;
+        typeof colorValue === 'string' && colorValue.trim().length ? colorValue.trim() : null;
 
       const payload: TransactionCategoryCreateInput = {
         description: trimmedDescription,
@@ -103,20 +109,20 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       try {
         await createCategory(payload);
         showNotification(
-          "fa-solid fa-circle-check",
-          "success",
-          "Categoría creada",
-          "La nueva categoría está lista para usarse.",
+          'fa-solid fa-circle-check',
+          'success',
+          'Categoría creada',
+          'La nueva categoría está lista para usarse.'
         );
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo crear la categoría.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al crear", message);
+        const message = error instanceof Error ? error.message : 'No se pudo crear la categoría.';
+        showNotification('fa-solid fa-triangle-exclamation', 'danger', 'Error al crear', message);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [createCategory, onSuccess, showNotification],
+    [createCategory, onSuccess, showNotification]
   );
 
   return (
@@ -144,12 +150,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           </Typography>
         )}
 
-        <Input
-          name="color"
-          label="Color (opcional)"
-          placeholder="#AABBCC"
-          icon="fas fa-palette"
-        />
+        <Input name="color" label="Color (opcional)" placeholder="#AABBCC" icon="fas fa-palette" />
       </Box>
     </FormWrapper>
   );

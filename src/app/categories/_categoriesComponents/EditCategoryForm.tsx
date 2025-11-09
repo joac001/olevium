@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from "@/components/shared/ui";
-import type { DropMenuOption } from "@/components/shared/ui";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import { useNotification } from "@/context/NotificationContext";
-import type { TransactionCategory, TransactionType } from "@/types";
+import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import type { DropMenuOption } from '@/components/shared/ui';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useNotification } from '@/context/NotificationContext';
+import type { TransactionCategory, TransactionType } from '@/types';
 
 interface EditCategoryFormProps {
   category: TransactionCategory;
@@ -15,54 +15,59 @@ interface EditCategoryFormProps {
   onSuccess?: () => void;
 }
 
-export default function EditCategoryForm({ category, transactionTypes, loadingTypes, onSuccess }: EditCategoryFormProps) {
+export default function EditCategoryForm({
+  category,
+  transactionTypes,
+  loadingTypes,
+  onSuccess,
+}: EditCategoryFormProps) {
   const { showNotification } = useNotification();
-  const updateCategory = useTransactionsStore((state) => state.updateCategory);
+  const updateCategory = useTransactionsStore(state => state.updateCategory);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
-      transactionTypes.map((type) => ({
+      transactionTypes.map(type => ({
         value: type.typeId,
         label: type.name,
       })),
-    [transactionTypes],
+    [transactionTypes]
   );
 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Guardando..." : "Guardar cambios",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Guardando...' : 'Guardar cambios',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
     async (formData: FormData) => {
       if (!category.userId) {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Acción no permitida",
-          "Esta categoría no se puede editar.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Acción no permitida',
+          'Esta categoría no se puede editar.'
         );
         return;
       }
 
-      const descriptionValue = formData.get("description");
-      const typeValue = formData.get("typeId");
-      const colorValue = formData.get("color");
+      const descriptionValue = formData.get('description');
+      const typeValue = formData.get('typeId');
+      const colorValue = formData.get('color');
 
-      if (typeof descriptionValue !== "string" || typeof typeValue !== "string") {
+      if (typeof descriptionValue !== 'string' || typeof typeValue !== 'string') {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Formulario incompleto",
-          "Descripción y tipo son obligatorios.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Formulario incompleto',
+          'Descripción y tipo son obligatorios.'
         );
         return;
       }
@@ -70,10 +75,10 @@ export default function EditCategoryForm({ category, transactionTypes, loadingTy
       const trimmedDescription = descriptionValue.trim();
       if (!trimmedDescription) {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Datos inválidos",
-          "La descripción no puede estar vacía.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Datos inválidos',
+          'La descripción no puede estar vacía.'
         );
         return;
       }
@@ -81,16 +86,16 @@ export default function EditCategoryForm({ category, transactionTypes, loadingTy
       const typeId = Number(typeValue);
       if (!Number.isFinite(typeId)) {
         showNotification(
-          "fa-solid fa-triangle-exclamation",
-          "danger",
-          "Tipo inválido",
-          "Selecciona un tipo válido.",
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Tipo inválido',
+          'Selecciona un tipo válido.'
         );
         return;
       }
 
       const color =
-        typeof colorValue === "string" && colorValue.trim().length ? colorValue.trim() : null;
+        typeof colorValue === 'string' && colorValue.trim().length ? colorValue.trim() : null;
 
       setIsSubmitting(true);
 
@@ -104,21 +109,27 @@ export default function EditCategoryForm({ category, transactionTypes, loadingTy
         });
 
         showNotification(
-          "fa-solid fa-circle-check",
-          "success",
-          "Categoría actualizada",
-          "Guardamos los cambios de la categoría.",
+          'fa-solid fa-circle-check',
+          'success',
+          'Categoría actualizada',
+          'Guardamos los cambios de la categoría.'
         );
 
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo actualizar la categoría.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al actualizar", message);
+        const message =
+          error instanceof Error ? error.message : 'No se pudo actualizar la categoría.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al actualizar',
+          message
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [category.categoryId, category.userId, showNotification, updateCategory, onSuccess],
+    [category.categoryId, category.userId, showNotification, updateCategory, onSuccess]
   );
 
   return (
@@ -144,7 +155,7 @@ export default function EditCategoryForm({ category, transactionTypes, loadingTy
         <Input
           name="color"
           label="Color (opcional)"
-          defaultValue={category.color ?? ""}
+          defaultValue={category.color ?? ''}
           placeholder="#AABBCC"
           icon="fas fa-palette"
         />

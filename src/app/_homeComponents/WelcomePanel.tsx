@@ -1,29 +1,35 @@
 'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Box, Card, Typography, Button } from "@/components/shared/ui";
-import { formatDate } from "@/lib/utils/parser";
-import { useNotification } from "@/context/NotificationContext";
-import { useAuthStore } from "@/lib/stores/auth";
-import { useUserStore } from "@/lib/stores/user";
+import { Box, Card, Typography, Button } from '@/components/shared/ui';
+import { formatDate } from '@/lib/utils/parser';
+import { useNotification } from '@/context/NotificationContext';
+import { useAuthStore } from '@/lib/stores/auth';
+import { useUserStore } from '@/lib/stores/user';
 
 export default function WelcomePanel() {
   const router = useRouter();
   const { showNotification } = useNotification();
-  const user = useUserStore((state) => state.user);
-  const loading = useUserStore((state) => state.loading);
-  const hasFetched = useUserStore((state) => state.hasFetched);
-  const fetchCurrentUser = useUserStore((state) => state.fetchCurrentUser);
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const logout = useAuthStore((state) => state.logout);
+  const user = useUserStore(state => state.user);
+  const loading = useUserStore(state => state.loading);
+  const hasFetched = useUserStore(state => state.hasFetched);
+  const fetchCurrentUser = useUserStore(state => state.fetchCurrentUser);
+  const accessToken = useAuthStore(state => state.accessToken);
+  const logout = useAuthStore(state => state.logout);
 
   useEffect(() => {
     if (!hasFetched && accessToken) {
-      fetchCurrentUser().catch((error) => {
-        const message = error instanceof Error ? error.message : "No se pudo cargar tu información.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al obtener tus datos", message);
+      fetchCurrentUser().catch(error => {
+        const message =
+          error instanceof Error ? error.message : 'No se pudo cargar tu información.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al obtener tus datos',
+          message
+        );
       });
     }
   }, [accessToken, fetchCurrentUser, hasFetched, showNotification]);
@@ -31,18 +37,34 @@ export default function WelcomePanel() {
   const handleLogout = async () => {
     try {
       await logout();
-      showNotification("fa-solid fa-circle-check", "success", "Sesión finalizada", "Vuelve cuando quieras.");
-      router.replace("/auth");
+      showNotification(
+        'fa-solid fa-circle-check',
+        'success',
+        'Sesión finalizada',
+        'Vuelve cuando quieras.'
+      );
+      router.replace('/auth');
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No pudimos cerrar tu sesión. Intenta nuevamente.";
-      showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al cerrar sesión", message);
+      const message =
+        error instanceof Error ? error.message : 'No pudimos cerrar tu sesión. Intenta nuevamente.';
+      showNotification(
+        'fa-solid fa-triangle-exclamation',
+        'danger',
+        'Error al cerrar sesión',
+        message
+      );
     }
   };
 
   const handleReloadProfile = () => {
-    fetchCurrentUser().catch((error) => {
-      const message = error instanceof Error ? error.message : "No se pudo cargar tu información.";
-      showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al obtener tus datos", message);
+    fetchCurrentUser().catch(error => {
+      const message = error instanceof Error ? error.message : 'No se pudo cargar tu información.';
+      showNotification(
+        'fa-solid fa-triangle-exclamation',
+        'danger',
+        'Error al obtener tus datos',
+        message
+      );
     });
   };
 
@@ -54,13 +76,18 @@ export default function WelcomePanel() {
         ) : user ? (
           <Box className="space-y-3">
             <Typography variant="h2" className="text-lg md:text-xl">
-              ¡Hola, {user.name || "Usuario"}!
+              ¡Hola, {user.name || 'Usuario'}!
             </Typography>
             <Typography variant="body" className="text-[color:var(--text-muted)]">
-              Has iniciado sesión con <span className="font-semibold text-[color:var(--text-primary)]">{user.email}</span>.
+              Has iniciado sesión con{' '}
+              <span className="font-semibold text-[color:var(--text-primary)]">{user.email}</span>.
             </Typography>
             <Typography variant="body" className="text-[color:var(--text-muted)]">
-              Formas parte de Olevium desde el <span className="font-semibold text-[color:var(--text-primary)]">{formatDate(user.created_at ?? "", "dd Mes aaaa") || "Fecha no disponible"}</span>.
+              Formas parte de Olevium desde el{' '}
+              <span className="font-semibold text-[color:var(--text-primary)]">
+                {formatDate(user.created_at ?? '', 'dd Mes aaaa') || 'Fecha no disponible'}
+              </span>
+              .
             </Typography>
           </Box>
         ) : (

@@ -1,13 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from "@/components/shared/ui";
-import type { AccountTransaction } from "@/types";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import { useNotification } from "@/context/NotificationContext";
-import { useTransactionData } from "@/context/TransactionContext";
-import { CUSTOM_CATEGORY_VALUE, normalizeTransactionFormData, useTransactionFormState } from "./transactionFormUtils";
+import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import type { AccountTransaction } from '@/types';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useNotification } from '@/context/NotificationContext';
+import { useTransactionData } from '@/context/TransactionContext';
+import {
+  CUSTOM_CATEGORY_VALUE,
+  normalizeTransactionFormData,
+  useTransactionFormState,
+} from './transactionFormUtils';
 
 interface EditTransactionFormProps {
   accountId: string;
@@ -15,10 +19,15 @@ interface EditTransactionFormProps {
   onSuccess?: () => void;
 }
 
-export default function EditTransactionForm({ accountId, transaction, onSuccess }: EditTransactionFormProps) {
+export default function EditTransactionForm({
+  accountId,
+  transaction,
+  onSuccess,
+}: EditTransactionFormProps) {
   const { showNotification } = useNotification();
-  const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } = useTransactionData();
-  const updateTransaction = useTransactionsStore((state) => state.updateTransaction);
+  const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } =
+    useTransactionData();
+  const updateTransaction = useTransactionsStore(state => state.updateTransaction);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -47,13 +56,13 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Guardando..." : "Guardar cambios",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Guardando...' : 'Guardar cambios',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
@@ -85,11 +94,22 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
           description,
         });
 
-        showNotification("fa-solid fa-circle-check", "success", "Transacción actualizada", "Guardamos los cambios del movimiento.");
+        showNotification(
+          'fa-solid fa-circle-check',
+          'success',
+          'Transacción actualizada',
+          'Guardamos los cambios del movimiento.'
+        );
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo actualizar la transacción.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al actualizar", message);
+        const message =
+          error instanceof Error ? error.message : 'No se pudo actualizar la transacción.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al actualizar',
+          message
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -104,7 +124,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
       transaction.transactionId,
       updateTransaction,
       onSuccess,
-    ],
+    ]
   );
 
   return (
@@ -142,12 +162,12 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
         <DropMenu
           name="categoryId"
           label="Categoría"
-          placeholder={categoriesLoading ? "Cargando categorías..." : "Selecciona una categoría"}
+          placeholder={categoriesLoading ? 'Cargando categorías...' : 'Selecciona una categoría'}
           options={categoryOptions}
           disabled={categoryDisabled}
           value={selectedCategory}
-          onValueChange={(value) => {
-            if (typeof value === "string") {
+          onValueChange={value => {
+            if (typeof value === 'string') {
               handleCategoryChange(value);
             }
           }}
@@ -162,7 +182,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
               required
               icon="fas fa-tag"
               value={customCategoryName}
-              onValueChange={(value) => setCustomCategoryName(String(value))}
+              onValueChange={value => setCustomCategoryName(String(value))}
             />
             <Input
               name="customCategoryDescription"
@@ -171,7 +191,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
               required
               icon="fas fa-align-left"
               value={customCategoryDescription}
-              onValueChange={(value) => setCustomCategoryDescription(String(value))}
+              onValueChange={value => setCustomCategoryDescription(String(value))}
             />
           </Box>
         )}
@@ -179,7 +199,7 @@ export default function EditTransactionForm({ accountId, transaction, onSuccess 
         <Input
           name="description"
           label="Descripción del movimiento"
-          defaultValue={transaction.description ?? ""}
+          defaultValue={transaction.description ?? ''}
           icon="fas fa-pen"
         />
       </Box>

@@ -1,4 +1,4 @@
-import type { CurrencyCode, Iso8601DateTimeString, Nullable, Ulid } from "./common";
+import type { CurrencyCode, Iso8601DateTimeString, Nullable, Ulid } from './common';
 
 export interface ApiUserAccount {
   account_id: Ulid;

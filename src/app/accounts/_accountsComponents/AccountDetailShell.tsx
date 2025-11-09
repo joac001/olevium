@@ -1,21 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Box, Card, Typography } from "@/components/shared/ui";
-import { formatAmount, formatDate } from "@/lib/utils/parser";
-import { useNotification } from "@/context/NotificationContext";
-import { useModal } from "@/context/ModalContext";
-import { useAccountsStore } from "@/lib/stores/accounts";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import type { AccountDetail, AccountTransaction } from "@/types";
-import AccountTransactionsTable from "./AccountTransactionsTable";
-import EditAccountForm from "./EditAccountForm";
-import DeleteAccountForm from "./DeleteAccountForm";
-import CreateTransactionForm from "./CreateTransactionForm";
-import AccountDetailCardSkeleton from "../_accountsSkeletons/AccountDetailCardSkeleton";
-import AccountTransactionsTableSkeleton from "../_accountsSkeletons/AccountTransactionsTableSkeleton";
+import { Box, Card, Typography } from '@/components/shared/ui';
+import { formatAmount, formatDate } from '@/lib/utils/parser';
+import { useNotification } from '@/context/NotificationContext';
+import { useModal } from '@/context/ModalContext';
+import { useAccountsStore } from '@/lib/stores/accounts';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import type { AccountDetail, AccountTransaction } from '@/types';
+import AccountTransactionsTable from './AccountTransactionsTable';
+import EditAccountForm from './EditAccountForm';
+import DeleteAccountForm from './DeleteAccountForm';
+import CreateTransactionForm from './CreateTransactionForm';
+import AccountDetailCardSkeleton from '../_accountsSkeletons/AccountDetailCardSkeleton';
+import AccountTransactionsTableSkeleton from '../_accountsSkeletons/AccountTransactionsTableSkeleton';
 
 interface AccountDetailShellProps {
   accountId: string;
@@ -26,21 +26,24 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const { showNotification } = useNotification();
   const { showModal, hideModal } = useModal();
 
-  const account = useAccountsStore((state) => state.accountDetails[accountId]);
-  const accounts = useAccountsStore((state) => state.accounts);
-  const accountTypes = useAccountsStore((state) => state.accountTypes);
-  const accountTransactionsMap = useTransactionsStore((state) => state.accountTransactions);
+  const account = useAccountsStore(state => state.accountDetails[accountId]);
+  const accounts = useAccountsStore(state => state.accounts);
+  const accountTypes = useAccountsStore(state => state.accountTypes);
+  const accountTransactionsMap = useTransactionsStore(state => state.accountTransactions);
   const transactions = accountTransactionsMap[accountId] ?? [];
 
-  const fetchAccountDetail = useAccountsStore((state) => state.fetchAccountDetail);
-  const fetchAccountTypes = useAccountsStore((state) => state.fetchAccountTypes);
-  const fetchAccountTransactions = useTransactionsStore((state) => state.fetchAccountTransactions);
+  const fetchAccountDetail = useAccountsStore(state => state.fetchAccountDetail);
+  const fetchAccountTypes = useAccountsStore(state => state.fetchAccountTypes);
+  const fetchAccountTransactions = useTransactionsStore(state => state.fetchAccountTransactions);
 
   const [loadingDetail, setLoadingDetail] = useState(!account);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(!accountTypes.length);
 
-  const fallbackAccount = useMemo(() => accounts.find((item) => item.accountId === accountId), [accountId, accounts]);
+  const fallbackAccount = useMemo(
+    () => accounts.find(item => item.accountId === accountId),
+    [accountId, accounts]
+  );
 
   const resolvedAccount: AccountDetail | null = account ?? fallbackAccount ?? null;
 
@@ -48,10 +51,15 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
     if (!account) {
       setLoadingDetail(true);
       fetchAccountDetail(accountId)
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "No pudimos obtener la cuenta.";
-          showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al cargar cuenta", message);
-          router.replace("/accounts");
+        .catch(error => {
+          const message = error instanceof Error ? error.message : 'No pudimos obtener la cuenta.';
+          showNotification(
+            'fa-solid fa-triangle-exclamation',
+            'danger',
+            'Error al cargar cuenta',
+            message
+          );
+          router.replace('/accounts');
         })
         .finally(() => setLoadingDetail(false));
     } else {
@@ -62,9 +70,15 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const reloadTransactions = useCallback(() => {
     setLoadingTransactions(true);
     fetchAccountTransactions(accountId)
-      .catch((error) => {
-        const message = error instanceof Error ? error.message : "No pudimos obtener las transacciones.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al cargar transacciones", message);
+      .catch(error => {
+        const message =
+          error instanceof Error ? error.message : 'No pudimos obtener las transacciones.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al cargar transacciones',
+          message
+        );
       })
       .finally(() => setLoadingTransactions(false));
   }, [accountId, fetchAccountTransactions, showNotification]);
@@ -77,9 +91,15 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
     if (!accountTypes.length) {
       setLoadingTypes(true);
       fetchAccountTypes()
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "No pudimos cargar los tipos de cuenta.";
-          showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al cargar tipos", message);
+        .catch(error => {
+          const message =
+            error instanceof Error ? error.message : 'No pudimos cargar los tipos de cuenta.';
+          showNotification(
+            'fa-solid fa-triangle-exclamation',
+            'danger',
+            'Error al cargar tipos',
+            message
+          );
         })
         .finally(() => setLoadingTypes(false));
     } else {
@@ -88,8 +108,8 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   }, [accountTypes.length, fetchAccountTypes, showNotification]);
 
   const typeLabel = useMemo(() => {
-    const type = accountTypes.find((item) => item.typeId === resolvedAccount?.typeId);
-    return type?.name ?? `Tipo #${resolvedAccount?.typeId ?? ""}`;
+    const type = accountTypes.find(item => item.typeId === resolvedAccount?.typeId);
+    return type?.name ?? `Tipo #${resolvedAccount?.typeId ?? ''}`;
   }, [accountTypes, resolvedAccount?.typeId]);
 
   const handleOpenEdit = useCallback(() => {
@@ -104,7 +124,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
             hideModal();
           }}
         />
-      </Card>,
+      </Card>
     );
   }, [accountTypes, hideModal, loadingTypes, resolvedAccount, showModal]);
 
@@ -119,7 +139,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
             hideModal();
           }}
         />
-      </Card>,
+      </Card>
     );
   }, [hideModal, resolvedAccount, showModal]);
 
@@ -134,7 +154,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
             reloadTransactions();
           }}
         />
-      </Card>,
+      </Card>
     );
   }, [hideModal, reloadTransactions, resolvedAccount, showModal]);
 
@@ -161,28 +181,34 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           subtitle={`Saldo actual: ${formatAmount(resolvedAccount.balance, resolvedAccount.currency)}`}
           actions={[
             {
-              icon: "fas fa-pen",
-              text: "Editar",
-              type: "primary",
+              icon: 'fas fa-pen',
+              text: 'Editar',
+              type: 'primary',
               onClick: handleOpenEdit,
             },
             {
-              icon: "fas fa-trash",
-              text: "Eliminar",
-              type: "danger",
+              icon: 'fas fa-trash',
+              text: 'Eliminar',
+              type: 'danger',
               onClick: handleOpenDelete,
             },
           ]}
         >
           <Box className="space-y-3">
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-              Tipo de cuenta: <span className="font-semibold text-[color:var(--text-primary)]">{typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}</span>
+              Tipo de cuenta:{' '}
+              <span className="font-semibold text-[color:var(--text-primary)]">
+                {typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}
+              </span>
             </Typography>
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-              Moneda: <span className="font-semibold text-[color:var(--text-primary)]">{resolvedAccount.currency ?? "Sin moneda"}</span>
+              Moneda:{' '}
+              <span className="font-semibold text-[color:var(--text-primary)]">
+                {resolvedAccount.currency ?? 'Sin moneda'}
+              </span>
             </Typography>
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-              Creada el {formatDate(resolvedAccount.createdAt, "dd/mm/aaaa")}
+              Creada el {formatDate(resolvedAccount.createdAt, 'dd/mm/aaaa')}
             </Typography>
           </Box>
         </Card>
@@ -197,9 +223,9 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           subtitle="Movimientos asociados a esta cuenta"
           actions={[
             {
-              icon: "fas fa-plus",
-              tooltip: "Agregar transacción",
-              type: "primary",
+              icon: 'fas fa-plus',
+              tooltip: 'Agregar transacción',
+              type: 'primary',
               onClick: handleOpenCreateTransaction,
             },
           ]}

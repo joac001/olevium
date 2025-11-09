@@ -1,22 +1,26 @@
 'use client';
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from "@/components/shared/ui";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import { useNotification } from "@/context/NotificationContext";
-import { useTransactionData } from "@/context/TransactionContext";
-import { normalizeTransactionFormData, useTransactionFormState } from "./transactionFormUtils";
+import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useNotification } from '@/context/NotificationContext';
+import { useTransactionData } from '@/context/TransactionContext';
+import { normalizeTransactionFormData, useTransactionFormState } from './transactionFormUtils';
 
 interface CreateTransactionFormProps {
   accountId: string;
   onSuccess?: () => void;
 }
 
-export default function CreateTransactionForm({ accountId, onSuccess }: CreateTransactionFormProps) {
+export default function CreateTransactionForm({
+  accountId,
+  onSuccess,
+}: CreateTransactionFormProps) {
   const { showNotification } = useNotification();
-  const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } = useTransactionData();
-  const createTransaction = useTransactionsStore((state) => state.createTransaction);
+  const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } =
+    useTransactionData();
+  const createTransaction = useTransactionsStore(state => state.createTransaction);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -45,13 +49,13 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Guardando..." : "Agregar transacción",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Guardando...' : 'Agregar transacción',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
@@ -83,21 +87,35 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
         });
 
         showNotification(
-          "fa-solid fa-circle-check",
-          "success",
-          "Transacción creada",
-          "Registramos el movimiento en la cuenta.",
+          'fa-solid fa-circle-check',
+          'success',
+          'Transacción creada',
+          'Registramos el movimiento en la cuenta.'
         );
 
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo crear la transacción.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al crear transacción", message);
+        const message = error instanceof Error ? error.message : 'No se pudo crear la transacción.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al crear transacción',
+          message
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [accountId, createTransaction, customCategoryDescription, customCategoryName, selectedType, showNotification, onSuccess, selectedCategory],
+    [
+      accountId,
+      createTransaction,
+      customCategoryDescription,
+      customCategoryName,
+      selectedType,
+      showNotification,
+      onSuccess,
+      selectedCategory,
+    ]
   );
 
   return (
@@ -113,13 +131,7 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
           icon="fas fa-money-bill-wave"
         />
 
-        <Input
-          name="date"
-          type="date"
-          label="Fecha"
-          required
-          icon="fas fa-calendar-days"
-        />
+        <Input name="date" type="date" label="Fecha" required icon="fas fa-calendar-days" />
 
         <DropMenu
           name="typeId"
@@ -134,12 +146,12 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
         <DropMenu
           name="categoryId"
           label="Categoría"
-          placeholder={categoriesLoading ? "Cargando categorías..." : "Selecciona una categoría"}
+          placeholder={categoriesLoading ? 'Cargando categorías...' : 'Selecciona una categoría'}
           options={categoryOptions}
           disabled={categoryDisabled}
           value={selectedCategory}
-          onValueChange={(value) => {
-            if (typeof value === "string") {
+          onValueChange={value => {
+            if (typeof value === 'string') {
               handleCategoryChange(value);
             }
           }}
@@ -154,7 +166,7 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
               required
               icon="fas fa-tag"
               value={customCategoryName}
-              onValueChange={(value) => setCustomCategoryName(String(value))}
+              onValueChange={value => setCustomCategoryName(String(value))}
             />
             <Input
               name="customCategoryDescription"
@@ -163,7 +175,7 @@ export default function CreateTransactionForm({ accountId, onSuccess }: CreateTr
               required
               icon="fas fa-align-left"
               value={customCategoryDescription}
-              onValueChange={(value) => setCustomCategoryDescription(String(value))}
+              onValueChange={value => setCustomCategoryDescription(String(value))}
             />
           </Box>
         )}

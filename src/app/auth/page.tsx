@@ -1,5 +1,5 @@
-import { Container, Box, Typography } from "@/components/shared/ui";
-import AuthSwitcher from "./_authComponents/AuthSwitcher";
+import { Container, Box, Typography } from '@/components/shared/ui';
+import AuthSwitcher from './_authComponents/AuthSwitcher';
 
 export default function AuthPage() {
   return (

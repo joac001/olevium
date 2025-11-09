@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Card } from "@/components/shared/ui";
+import { Box, Card } from '@/components/shared/ui';
 
 interface SkeletonProps {
   className?: string;
@@ -9,7 +9,7 @@ interface SkeletonProps {
 const SkeletonLine = ({ className }: SkeletonProps) => (
   <Box
     aria-hidden
-    className={`h-4 w-full animate-pulse rounded-full bg-[color:var(--surface-muted)] ${className ?? ""}`}
+    className={`h-4 w-full animate-pulse rounded-full bg-[color:var(--surface-muted)] ${className ?? ''}`}
   />
 );
 

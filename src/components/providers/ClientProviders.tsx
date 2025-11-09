@@ -1,10 +1,10 @@
 'use client';
 
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
-import { NotificationProvider } from "@/context/NotificationContext";
-import { ModalProvider } from "@/context/ModalContext";
-import { TransactionDataProvider } from "@/context/TransactionContext";
+import { NotificationProvider } from '@/context/NotificationContext';
+import { ModalProvider } from '@/context/ModalContext';
+import { TransactionDataProvider } from '@/context/TransactionContext';
 
 interface ClientProvidersProps {
   children: ReactNode;

@@ -1,9 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import type { TransactionCategory, TransactionType } from "@/types";
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import type { TransactionCategory, TransactionType } from '@/types';
 
 interface TransactionDataContextValue {
   transactionTypes: TransactionType[];
@@ -17,7 +17,7 @@ const TransactionDataContext = createContext<TransactionDataContextValue | undef
 export function useTransactionData() {
   const context = useContext(TransactionDataContext);
   if (!context) {
-    throw new Error("useTransactionData debe usarse dentro de TransactionDataProvider");
+    throw new Error('useTransactionData debe usarse dentro de TransactionDataProvider');
   }
   return context;
 }
@@ -30,10 +30,10 @@ export function TransactionDataProvider({ children }: TransactionDataProviderPro
   const [transactionTypesLoading, setTransactionTypesLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const transactionTypes = useTransactionsStore((state) => state.transactionTypes);
-  const categories = useTransactionsStore((state) => state.categories);
-  const fetchTransactionTypes = useTransactionsStore((state) => state.fetchTransactionTypes);
-  const fetchCategories = useTransactionsStore((state) => state.fetchCategories);
+  const transactionTypes = useTransactionsStore(state => state.transactionTypes);
+  const categories = useTransactionsStore(state => state.categories);
+  const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
+  const fetchCategories = useTransactionsStore(state => state.fetchCategories);
 
   useEffect(() => {
     if (transactionTypes.length) {
@@ -43,9 +43,9 @@ export function TransactionDataProvider({ children }: TransactionDataProviderPro
     let active = true;
     setTransactionTypesLoading(true);
     fetchTransactionTypes()
-      .catch((error) => {
+      .catch(error => {
         if (!active) return;
-        console.error("Transaction types fetch failed", error);
+        console.error('Transaction types fetch failed', error);
       })
       .finally(() => {
         if (!active) return;
@@ -65,9 +65,9 @@ export function TransactionDataProvider({ children }: TransactionDataProviderPro
     let active = true;
     setCategoriesLoading(true);
     fetchCategories()
-      .catch((error) => {
+      .catch(error => {
         if (!active) return;
-        console.error("Categories fetch failed", error);
+        console.error('Categories fetch failed', error);
       })
       .finally(() => {
         if (!active) return;
@@ -79,12 +79,15 @@ export function TransactionDataProvider({ children }: TransactionDataProviderPro
     };
   }, [categories.length, fetchCategories]);
 
-  const value = useMemo<TransactionDataContextValue>(() => ({
-    transactionTypes,
-    transactionTypesLoading,
-    categories,
-    categoriesLoading,
-  }), [transactionTypes, transactionTypesLoading, categories, categoriesLoading]);
+  const value = useMemo<TransactionDataContextValue>(
+    () => ({
+      transactionTypes,
+      transactionTypesLoading,
+      categories,
+      categoriesLoading,
+    }),
+    [transactionTypes, transactionTypesLoading, categories, categoriesLoading]
+  );
 
   return (
     <TransactionDataContext.Provider value={value}>{children}</TransactionDataContext.Provider>

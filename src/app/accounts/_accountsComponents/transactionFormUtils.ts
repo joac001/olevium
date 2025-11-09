@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { DropMenuOption } from "@/components/shared/ui";
-import type { TransactionCategory, TransactionType } from "@/types";
-import { formatDateToISO } from "@/lib/utils/parser";
+import type { DropMenuOption } from '@/components/shared/ui';
+import type { TransactionCategory, TransactionType } from '@/types';
+import { formatDateToISO } from '@/lib/utils/parser';
 
-export const CUSTOM_CATEGORY_VALUE = "__custom__";
+export const CUSTOM_CATEGORY_VALUE = '__custom__';
 
 interface UseTransactionFormStateParams {
   transactionTypes: TransactionType[];
@@ -35,10 +35,10 @@ interface UseTransactionFormStateResult {
 }
 
 const normalizeTypeValue = (raw: number | string | null): number | null => {
-  if (typeof raw === "number") {
+  if (typeof raw === 'number') {
     return Number.isFinite(raw) ? raw : null;
   }
-  if (typeof raw === "string" && raw.length) {
+  if (typeof raw === 'string' && raw.length) {
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -58,9 +58,11 @@ export function useTransactionFormState({
   shouldAutofillCategory = false,
 }: UseTransactionFormStateParams): UseTransactionFormStateResult {
   const [selectedType, setSelectedType] = useState<number | null>(initialTypeId ?? null);
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategoryId ?? CUSTOM_CATEGORY_VALUE);
-  const [customCategoryName, setCustomCategoryName] = useState("");
-  const [customCategoryDescription, setCustomCategoryDescription] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    initialCategoryId ?? CUSTOM_CATEGORY_VALUE
+  );
+  const [customCategoryName, setCustomCategoryName] = useState('');
+  const [customCategoryDescription, setCustomCategoryDescription] = useState('');
   const hasAutofilledCategory = useRef(false);
 
   const fallbackTypeId = useMemo(() => {
@@ -78,10 +80,10 @@ export function useTransactionFormState({
 
   const resolveFirstCategoryForType = useCallback(
     (typeId: number | null) => {
-      const match = categories.find((category) => isCategoryValidForType(category, typeId));
+      const match = categories.find(category => isCategoryValidForType(category, typeId));
       return match?.categoryId ?? null;
     },
-    [categories],
+    [categories]
   );
 
   useEffect(() => {
@@ -90,7 +92,8 @@ export function useTransactionFormState({
     }
 
     const exists = categories.some(
-      (category) => category.categoryId === selectedCategory && isCategoryValidForType(category, selectedType),
+      category =>
+        category.categoryId === selectedCategory && isCategoryValidForType(category, selectedType)
     );
 
     if (!exists) {
@@ -127,7 +130,7 @@ export function useTransactionFormState({
       const fallback = resolveFirstCategoryForType(nextType);
       setSelectedCategory(fallback ?? CUSTOM_CATEGORY_VALUE);
     },
-    [resolveFirstCategoryForType],
+    [resolveFirstCategoryForType]
   );
 
   const handleCategoryChange = useCallback((value: string) => {
@@ -136,18 +139,18 @@ export function useTransactionFormState({
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
-      transactionTypes.map((type) => ({
+      transactionTypes.map(type => ({
         value: type.typeId,
         label: type.name,
       })),
-    [transactionTypes],
+    [transactionTypes]
   );
 
   const categoryOptions: DropMenuOption[] = useMemo(() => {
-    const base: DropMenuOption[] = [{ value: CUSTOM_CATEGORY_VALUE, label: "Personalizada" }];
+    const base: DropMenuOption[] = [{ value: CUSTOM_CATEGORY_VALUE, label: 'Personalizada' }];
     const filtered = categories
-      .filter((category) => isCategoryValidForType(category, selectedType))
-      .map((category) => ({
+      .filter(category => isCategoryValidForType(category, selectedType))
+      .map(category => ({
         value: category.categoryId,
         label: category.description,
       }));
@@ -206,35 +209,44 @@ export const normalizeTransactionFormData = ({
   customCategoryDescription,
   showNotification,
 }: NormalizeTransactionFormArgs): NormalizedTransactionFormData | null => {
-  const amountValue = formData.get("amount");
-  const dateValue = formData.get("date");
-  const typeValue = formData.get("typeId");
-  const categoryValue = formData.get("categoryId");
-  const descriptionValue = formData.get("description");
+  const amountValue = formData.get('amount');
+  const dateValue = formData.get('date');
+  const typeValue = formData.get('typeId');
+  const categoryValue = formData.get('categoryId');
+  const descriptionValue = formData.get('description');
 
-  if (typeof amountValue !== "string" || typeof dateValue !== "string" || typeof typeValue !== "string") {
+  if (
+    typeof amountValue !== 'string' ||
+    typeof dateValue !== 'string' ||
+    typeof typeValue !== 'string'
+  ) {
     showNotification(
-      "fa-solid fa-triangle-exclamation",
-      "danger",
-      "Formulario incompleto",
-      "Monto, fecha y tipo son obligatorios.",
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Formulario incompleto',
+      'Monto, fecha y tipo son obligatorios.'
     );
     return null;
   }
 
   const amount = Number(amountValue);
   if (!Number.isFinite(amount)) {
-    showNotification("fa-solid fa-triangle-exclamation", "danger", "Datos inválidos", "El monto debe ser numérico.");
+    showNotification(
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Datos inválidos',
+      'El monto debe ser numérico.'
+    );
     return null;
   }
 
   const typeId = selectedType ?? normalizeTypeValue(typeValue);
   if (!typeId) {
     showNotification(
-      "fa-solid fa-triangle-exclamation",
-      "danger",
-      "Tipo inválido",
-      "Selecciona un tipo de transacción válido.",
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Tipo inválido',
+      'Selecciona un tipo de transacción válido.'
     );
     return null;
   }
@@ -245,8 +257,9 @@ export const normalizeTransactionFormData = ({
   let categoryId: string | undefined;
   if (!isCustomCategory) {
     const raw =
-      (typeof categoryValue === "string" && categoryValue.length ? categoryValue : selectedCategory) ??
-      CUSTOM_CATEGORY_VALUE;
+      (typeof categoryValue === 'string' && categoryValue.length
+        ? categoryValue
+        : selectedCategory) ?? CUSTOM_CATEGORY_VALUE;
     if (raw !== CUSTOM_CATEGORY_VALUE) {
       categoryId = raw;
     }
@@ -257,22 +270,22 @@ export const normalizeTransactionFormData = ({
     const trimmedDescription = customCategoryDescription.trim();
     if (!trimmedName || !trimmedDescription) {
       showNotification(
-        "fa-solid fa-triangle-exclamation",
-        "danger",
-        "Datos de categoría incompletos",
-        "Debes ingresar el nombre y la descripción de la nueva categoría.",
+        'fa-solid fa-triangle-exclamation',
+        'danger',
+        'Datos de categoría incompletos',
+        'Debes ingresar el nombre y la descripción de la nueva categoría.'
       );
       return null;
     }
   }
 
-  const rawDescription = typeof descriptionValue === "string" ? descriptionValue.trim() : "";
+  const rawDescription = typeof descriptionValue === 'string' ? descriptionValue.trim() : '';
   const normalizedDescription =
     rawDescription.length > 0
       ? rawDescription
       : isCustomCategory
         ? customCategoryDescription.trim()
-        : "";
+        : '';
 
   const isoDate = formatDateToISO(dateValue);
 

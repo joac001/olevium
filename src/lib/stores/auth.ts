@@ -1,13 +1,13 @@
 'use client';
 
-import type { AxiosRequestConfig } from "axios";
-import { create } from "zustand";
+import type { AxiosRequestConfig } from 'axios';
+import { create } from 'zustand';
 
-import { http } from "@/lib/utils/axios";
-import { useUserStore } from "@/lib/stores/user";
-import { useTransactionsStore } from "@/lib/stores/transactions";
-import { tokenStorage } from "@/lib/utils/tokenStorage";
-import { resolveAxiosError } from "@/lib/utils/errorHandling";
+import { http } from '@/lib/utils/axios';
+import { useUserStore } from '@/lib/stores/user';
+import { useTransactionsStore } from '@/lib/stores/transactions';
+import { tokenStorage } from '@/lib/utils/tokenStorage';
+import { resolveAxiosError } from '@/lib/utils/errorHandling';
 
 export interface AuthLoginPayload {
   email: string;
@@ -78,11 +78,11 @@ type AuthState = {
 const mapTokenPair = (pair: TokenPairResponse) => ({
   accessToken: pair.access_token ?? pair.accessToken ?? null,
   refreshToken: pair.refresh_token ?? pair.refreshToken ?? null,
-  tokenType: pair.token_type ?? pair.tokenType ?? "bearer",
+  tokenType: pair.token_type ?? pair.tokenType ?? 'bearer',
   user: pair.user ?? null,
 });
 
-const AUTH_ERROR_FALLBACK = "No se pudo completar la acción de autenticación.";
+const AUTH_ERROR_FALLBACK = 'No se pudo completar la acción de autenticación.';
 
 const normalizeAuthError = (error: unknown): Error => resolveAxiosError(error, AUTH_ERROR_FALLBACK);
 
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: false,
 
   setTokens: ({ accessToken, refreshToken, tokenType }) => {
-    set((prev) => ({
+    set(prev => ({
       accessToken,
       refreshToken,
       tokenType,
@@ -118,10 +118,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email, password) => {
     set({ loading: true });
     try {
-      const { data } = await http.post<TokenPairResponse>("/auth/login", { email, password });
+      const { data } = await http.post<TokenPairResponse>('/auth/login', { email, password });
       const tokens = mapTokenPair(data);
       if (!tokens.accessToken || !tokens.refreshToken) {
-        throw new Error("Respuesta del servidor inválida: faltan tokens de sesión.");
+        throw new Error('Respuesta del servidor inválida: faltan tokens de sesión.');
       }
       set(() => ({
         accessToken: tokens.accessToken,
@@ -133,11 +133,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       tokenStorage.save(tokens);
       useUserStore.getState().reset();
       const transactionsStore = useTransactionsStore.getState();
-      void transactionsStore.fetchTransactionTypes().catch((error) => {
-        console.warn("Failed to prefetch transaction types:", error);
+      void transactionsStore.fetchTransactionTypes().catch(error => {
+        console.warn('Failed to prefetch transaction types:', error);
       });
-      void transactionsStore.fetchCategories().catch((error) => {
-        console.warn("Failed to prefetch transaction categories:", error);
+      void transactionsStore.fetchCategories().catch(error => {
+        console.warn('Failed to prefetch transaction categories:', error);
       });
     } catch (error) {
       set({ loading: false });
@@ -145,18 +145,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signup: async (payload) => {
+  signup: async payload => {
     try {
-      const { data } = await http.post<AuthSignupResponse>("/auth/signup", payload);
+      const { data } = await http.post<AuthSignupResponse>('/auth/signup', payload);
       return data;
     } catch (error) {
       throw normalizeAuthError(error);
     }
   },
 
-  verifyEmail: async (token) => {
+  verifyEmail: async token => {
     try {
-      const { data } = await http.get<VerifyEmailResponse>(`/auth/verify-email/${encodeURIComponent(token)}`);
+      const { data } = await http.get<VerifyEmailResponse>(
+        `/auth/verify-email/${encodeURIComponent(token)}`
+      );
       return data;
     } catch (error) {
       throw normalizeAuthError(error);
@@ -166,10 +168,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshSession: async () => {
     const { accessToken, refreshToken } = get();
 
-    console.log("Refreshing session...");
+    console.log('Refreshing session...');
 
     if (!refreshToken) {
-      throw new Error("No refresh token available");
+      throw new Error('No refresh token available');
     }
 
     const payload: TokenRefreshRequest = {
@@ -182,14 +184,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     };
 
     try {
-      const { data } = await http.post<TokenPairResponse>("/auth/refresh", payload, refreshConfig);
+      const { data } = await http.post<TokenPairResponse>('/auth/refresh', payload, refreshConfig);
 
       const tokens = mapTokenPair(data);
       if (!tokens.accessToken || !tokens.refreshToken) {
-        throw new Error("Respuesta de refresh inválida.");
+        throw new Error('Respuesta de refresh inválida.');
       }
 
-      set((prev) => ({
+      set(prev => ({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         tokenType: tokens.tokenType,
@@ -213,7 +215,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   tryHydrate: async () => {
     const { loading } = get();
     if (loading) return; // Evitar múltiples ejecuciones simultáneas
-    
+
     set({ loading: true });
     try {
       const stored = tokenStorage.read();
@@ -229,7 +231,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      set((prev) => ({
+      set(prev => ({
         accessToken: stored.accessToken,
         refreshToken: stored.refreshToken,
         tokenType: stored.tokenType,
@@ -243,7 +245,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           await get().refreshSession();
         } catch (error) {
           // Si falla el refresh durante hydrate, limpiar todo
-          console.warn("Failed to refresh during hydrate:", error);
+          console.warn('Failed to refresh during hydrate:', error);
           set({
             accessToken: null,
             refreshToken: null,
@@ -274,17 +276,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     const { accessToken } = get();
-    
+
     try {
       if (accessToken) {
-        const config: AxiosRequestConfig & { skipAuthRefresh?: boolean } = { 
-          skipAuthRefresh: true 
+        const config: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+          skipAuthRefresh: true,
         };
-        await http.post("/auth/logout", undefined, config);
+        await http.post('/auth/logout', undefined, config);
       }
     } catch (error) {
       // Log el error pero continúa con la limpieza local
-      console.warn("Error during logout:", error);
+      console.warn('Error during logout:', error);
     } finally {
       // Siempre limpiar la sesión local
       set({

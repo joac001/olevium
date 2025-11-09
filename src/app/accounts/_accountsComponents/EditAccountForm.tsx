@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from "@/components/shared/ui";
-import type { DropMenuOption } from "@/components/shared/ui";
-import type { AccountDetail, AccountType } from "@/types";
-import { useAccountsStore } from "@/lib/stores/accounts";
-import { useNotification } from "@/context/NotificationContext";
-import { buildAccountTypeOptions, normalizeAccountFormData } from "./accountFormUtils";
+import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import type { DropMenuOption } from '@/components/shared/ui';
+import type { AccountDetail, AccountType } from '@/types';
+import { useAccountsStore } from '@/lib/stores/accounts';
+import { useNotification } from '@/context/NotificationContext';
+import { buildAccountTypeOptions, normalizeAccountFormData } from './accountFormUtils';
 
 interface EditAccountFormProps {
   account: AccountDetail;
@@ -16,23 +16,31 @@ interface EditAccountFormProps {
   onSuccess?: () => void;
 }
 
-export default function EditAccountForm({ account, accountTypes, loadingTypes, onSuccess }: EditAccountFormProps) {
+export default function EditAccountForm({
+  account,
+  accountTypes,
+  loadingTypes,
+  onSuccess,
+}: EditAccountFormProps) {
   const { showNotification } = useNotification();
-  const updateAccount = useAccountsStore((state) => state.updateAccount);
+  const updateAccount = useAccountsStore(state => state.updateAccount);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const typeOptions: DropMenuOption[] = useMemo(() => buildAccountTypeOptions(accountTypes), [accountTypes]);
+  const typeOptions: DropMenuOption[] = useMemo(
+    () => buildAccountTypeOptions(accountTypes),
+    [accountTypes]
+  );
 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Guardando..." : "Guardar cambios",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Guardando...' : 'Guardar cambios',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
@@ -53,20 +61,25 @@ export default function EditAccountForm({ account, accountTypes, loadingTypes, o
         });
 
         showNotification(
-          "fa-solid fa-circle-check",
-          "success",
-          "Cuenta actualizada",
-          "Guardamos los cambios en tu cuenta.",
+          'fa-solid fa-circle-check',
+          'success',
+          'Cuenta actualizada',
+          'Guardamos los cambios en tu cuenta.'
         );
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo actualizar la cuenta.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al actualizar", message);
+        const message = error instanceof Error ? error.message : 'No se pudo actualizar la cuenta.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al actualizar',
+          message
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [account.accountId, showNotification, updateAccount, onSuccess],
+    [account.accountId, showNotification, updateAccount, onSuccess]
   );
 
   return (
@@ -83,7 +96,7 @@ export default function EditAccountForm({ account, accountTypes, loadingTypes, o
         <DropMenu
           name="typeId"
           label="Tipo de cuenta"
-          placeholder={loadingTypes ? "Cargando tipos..." : "Selecciona un tipo"}
+          placeholder={loadingTypes ? 'Cargando tipos...' : 'Selecciona un tipo'}
           options={typeOptions}
           required
           disabled={loadingTypes || !typeOptions.length}
@@ -93,7 +106,7 @@ export default function EditAccountForm({ account, accountTypes, loadingTypes, o
         <Input
           name="currency"
           label="Moneda"
-          defaultValue={account.currency ?? ""}
+          defaultValue={account.currency ?? ''}
           required
           icon="fas fa-coins"
         />

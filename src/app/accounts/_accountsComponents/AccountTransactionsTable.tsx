@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback } from 'react';
 
-import { Box, Typography, Card, ActionButton } from "@/components/shared/ui";
-import { formatAmount, formatDate } from "@/lib/utils/parser";
-import type { AccountTransaction } from "@/types";
-import { useModal } from "@/context/ModalContext";
-import EditTransactionForm from "./EditTransactionForm";
-import DeleteTransactionForm from "./DeleteTransactionForm";
+import { Box, Typography, Card, ActionButton } from '@/components/shared/ui';
+import { formatAmount, formatDate } from '@/lib/utils/parser';
+import type { AccountTransaction } from '@/types';
+import { useModal } from '@/context/ModalContext';
+import EditTransactionForm from './EditTransactionForm';
+import DeleteTransactionForm from './DeleteTransactionForm';
 
 interface AccountTransactionsTableProps {
   transactions: AccountTransaction[];
@@ -16,12 +16,17 @@ interface AccountTransactionsTableProps {
   onRefresh?: () => void;
 }
 
-export default function AccountTransactionsTable({ transactions, loading, currency, onRefresh }: AccountTransactionsTableProps) {
+export default function AccountTransactionsTable({
+  transactions,
+  loading,
+  currency,
+  onRefresh,
+}: AccountTransactionsTableProps) {
   const { showModal, hideModal } = useModal();
   const hasTransactions = transactions.length > 0;
   const ordered = useMemo(
     () => [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [transactions],
+    [transactions]
   );
   const currentYear = new Date().getFullYear();
 
@@ -37,10 +42,10 @@ export default function AccountTransactionsTable({ transactions, loading, curren
               onRefresh?.();
             }}
           />
-        </Card>,
+        </Card>
       );
     },
-    [hideModal, onRefresh, showModal],
+    [hideModal, onRefresh, showModal]
   );
 
   const handleDelete = useCallback(
@@ -55,10 +60,10 @@ export default function AccountTransactionsTable({ transactions, loading, curren
               onRefresh?.();
             }}
           />
-        </Card>,
+        </Card>
       );
     },
-    [currency, hideModal, onRefresh, showModal],
+    [currency, hideModal, onRefresh, showModal]
   );
 
   if (loading && !hasTransactions) {
@@ -85,12 +90,17 @@ export default function AccountTransactionsTable({ transactions, loading, curren
         <span className="text-right">Acciones</span>
       </Box>
 
-      {ordered.map((transaction) => {
+      {ordered.map(transaction => {
         const isCurrentYear = new Date(transaction.date).getFullYear() === currentYear;
-        const formattedDate = formatDate(transaction.date, isCurrentYear ? "dd/mm" : "dd/mm/aa");
+        const formattedDate = formatDate(transaction.date, isCurrentYear ? 'dd/mm' : 'dd/mm/aa');
         const isCredit = transaction.typeId === 2;
-        const amountClass = isCredit ? "[color:var(--color-success-light)]" : "[color:var(--color-danger-light)]";
-        const description = transaction.description && transaction.description.trim().length ? transaction.description : "-";
+        const amountClass = isCredit
+          ? '[color:var(--color-success-light)]'
+          : '[color:var(--color-danger-light)]';
+        const description =
+          transaction.description && transaction.description.trim().length
+            ? transaction.description
+            : '-';
 
         return (
           <Box
@@ -100,7 +110,10 @@ export default function AccountTransactionsTable({ transactions, loading, curren
             <Box className="flex flex-col gap-3 md:hidden">
               <Box className="flex items-start justify-between gap-4">
                 <div>
-                  <Typography variant="caption" className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                  <Typography
+                    variant="caption"
+                    className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
+                  >
                     Concepto
                   </Typography>
                   <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
@@ -114,16 +127,22 @@ export default function AccountTransactionsTable({ transactions, loading, curren
 
               <Box className="flex flex-wrap gap-4">
                 <Box>
-                  <Typography variant="caption" className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                  <Typography
+                    variant="caption"
+                    className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
+                  >
                     Categoría
                   </Typography>
                   <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
-                    {transaction.category ?? "Sin categoría"}
+                    {transaction.category ?? 'Sin categoría'}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="caption" className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                  <Typography
+                    variant="caption"
+                    className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
+                  >
                     Fecha
                   </Typography>
                   <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
@@ -153,7 +172,7 @@ export default function AccountTransactionsTable({ transactions, loading, curren
                 {description}
               </Typography>
               <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
-                {transaction.category ?? "Sin categoría"}
+                {transaction.category ?? 'Sin categoría'}
               </Typography>
               <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
                 {formattedDate}

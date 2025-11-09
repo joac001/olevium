@@ -1,8 +1,8 @@
 'use client';
 
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { http } from "@/lib/utils/axios";
+import { http } from '@/lib/utils/axios';
 import type {
   AccountTransaction,
   ApiTransactionCategory,
@@ -14,9 +14,9 @@ import type {
   TransactionCategoryUpdateInput,
   UserTransactionCreateInput,
   UserTransactionUpdateInput,
-} from "@/types";
-import { useAccountsStore } from "@/lib/stores/accounts";
-import { resolveAxiosError } from "@/lib/utils/errorHandling";
+} from '@/types';
+import { useAccountsStore } from '@/lib/stores/accounts';
+import { resolveAxiosError } from '@/lib/utils/errorHandling';
 
 const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   transactionId: payload.transaction_id,
@@ -47,7 +47,7 @@ const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
   isDefault: payload.is_default,
 });
 
-const TRANSACTION_ERROR_FALLBACK = "No se pudo completar la operación sobre transacciones.";
+const TRANSACTION_ERROR_FALLBACK = 'No se pudo completar la operación sobre transacciones.';
 
 interface TransactionsState {
   accountTransactions: Record<string, AccountTransaction[]>;
@@ -58,7 +58,10 @@ interface TransactionsState {
   fetchTransactionTypes: () => Promise<TransactionType[]>;
   fetchCategories: () => Promise<TransactionCategory[]>;
   createTransaction: (payload: UserTransactionCreateInput) => Promise<AccountTransaction>;
-  updateTransaction: (transactionId: string, payload: UserTransactionUpdateInput) => Promise<AccountTransaction>;
+  updateTransaction: (
+    transactionId: string,
+    payload: UserTransactionUpdateInput
+  ) => Promise<AccountTransaction>;
   deleteTransaction: (transactionId: string) => Promise<void>;
   createCategory: (payload: TransactionCategoryCreateInput) => Promise<TransactionCategory>;
   updateCategory: (payload: TransactionCategoryUpdateInput) => Promise<TransactionCategory>;
@@ -72,12 +75,14 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
   categories: [],
   loading: false,
 
-  fetchAccountTransactions: async (accountId) => {
+  fetchAccountTransactions: async accountId => {
     set({ loading: true });
     try {
-      const { data } = await http.get<ApiUserTransaction[]>(`/transactions/by_account/${accountId}`);
+      const { data } = await http.get<ApiUserTransaction[]>(
+        `/transactions/by_account/${accountId}`
+      );
       const transactions = data.map(mapTransaction);
-      set((prev) => ({
+      set(prev => ({
         loading: false,
         accountTransactions: { ...prev.accountTransactions, [accountId]: transactions },
       }));
@@ -116,7 +121,15 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
   },
 
-  createTransaction: async ({ accountId, amount, date, typeId, categoryId, category, description }) => {
+  createTransaction: async ({
+    accountId,
+    amount,
+    date,
+    typeId,
+    categoryId,
+    category,
+    description,
+  }) => {
     try {
       const payload: Record<string, unknown> = {
         account_id: accountId,
@@ -129,10 +142,10 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       if (category !== undefined) payload.category = category;
       if (description !== undefined) payload.description = description;
 
-      const { data } = await http.post<ApiUserTransaction>("/transactions/", payload);
+      const { data } = await http.post<ApiUserTransaction>('/transactions/', payload);
       const mapped = mapTransaction(data);
 
-      set((prev) => ({
+      set(prev => ({
         accountTransactions: {
           ...prev.accountTransactions,
           [accountId]: [mapped, ...(prev.accountTransactions[accountId] ?? [])],
@@ -150,9 +163,9 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     const state = get();
     let previousAccountId: string | null = null;
     let previousTransaction: AccountTransaction | null = null;
-    
+
     for (const [accId, txs] of Object.entries(state.accountTransactions)) {
-      const found = txs.find((tx) => tx.transactionId === transactionId);
+      const found = txs.find(tx => tx.transactionId === transactionId);
       if (found) {
         previousAccountId = accId;
         previousTransaction = found;
@@ -163,7 +176,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     try {
       // Construir body solo con campos definidos
       const body: Record<string, unknown> = {};
-      
+
       if (payload.amount !== undefined) body.amount = payload.amount;
       if (payload.date !== undefined) body.date = payload.date;
       if (payload.categoryId !== undefined) body.category_id = payload.categoryId;
@@ -174,13 +187,13 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       const { data } = await http.put<ApiUserTransaction>(`/transactions/${transactionId}`, body);
       const mapped = mapTransaction(data);
 
-      set((prev) => {
+      set(prev => {
         const accountId = mapped.accountId;
         const current = prev.accountTransactions[accountId] ?? [];
         return {
           accountTransactions: {
             ...prev.accountTransactions,
-            [accountId]: current.map((tx) => (tx.transactionId === transactionId ? mapped : tx)),
+            [accountId]: current.map(tx => (tx.transactionId === transactionId ? mapped : tx)),
           },
         };
       });
@@ -202,12 +215,12 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
   },
 
-  deleteTransaction: async (transactionId) => {
+  deleteTransaction: async transactionId => {
     const state = get();
     let targetAccountId: string | null = null;
     let targetTransaction: AccountTransaction | null = null;
     for (const [accId, txs] of Object.entries(state.accountTransactions)) {
-      const found = txs.find((tx) => tx.transactionId === transactionId);
+      const found = txs.find(tx => tx.transactionId === transactionId);
       if (found) {
         targetAccountId = accId;
         targetTransaction = found;
@@ -217,7 +230,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
     try {
       await http.delete(`/transactions/${transactionId}`);
-      set((prev) => {
+      set(prev => {
         if (!targetAccountId) {
           return prev;
         }
@@ -225,7 +238,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         return {
           accountTransactions: {
             ...prev.accountTransactions,
-            [targetAccountId]: txs.filter((tx) => tx.transactionId !== transactionId),
+            [targetAccountId]: txs.filter(tx => tx.transactionId !== transactionId),
           },
         };
       });
@@ -248,9 +261,9 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         body.color = color;
       }
 
-      const { data } = await http.post<ApiTransactionCategory>("/categories/", body);
+      const { data } = await http.post<ApiTransactionCategory>('/categories/', body);
       const mapped = mapCategory(data);
-      set((prev) => ({
+      set(prev => ({
         categories: [...prev.categories, mapped],
       }));
       return mapped;
@@ -270,9 +283,9 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       const { data } = await http.put<ApiTransactionCategory>(`/categories/${categoryId}`, body);
       const mapped = mapCategory(data);
-      set((prev) => ({
-        categories: prev.categories.map((category) =>
-          category.categoryId === categoryId ? mapped : category,
+      set(prev => ({
+        categories: prev.categories.map(category =>
+          category.categoryId === categoryId ? mapped : category
         ),
       }));
       return mapped;
@@ -281,11 +294,11 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
   },
 
-  deleteCategory: async (categoryId) => {
+  deleteCategory: async categoryId => {
     try {
       await http.delete(`/categories/${categoryId}`);
-      set((prev) => ({
-        categories: prev.categories.filter((category) => category.categoryId !== categoryId),
+      set(prev => ({
+        categories: prev.categories.filter(category => category.categoryId !== categoryId),
       }));
     } catch (error) {
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);

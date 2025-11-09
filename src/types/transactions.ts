@@ -1,4 +1,4 @@
-import type { Iso8601DateTimeString, Nullable, Ulid } from "./common";
+import type { Iso8601DateTimeString, Nullable, Ulid } from './common';
 
 export interface ApiCategoryData {
   description: string;

@@ -1,5 +1,5 @@
-import { Container, Box, Typography } from "@/components/shared/ui";
-import WelcomePanel from "./_homeComponents/WelcomePanel";
+import { Container, Box, Typography } from '@/components/shared/ui';
+import WelcomePanel from './_homeComponents/WelcomePanel';
 
 export default function HomePage() {
   return (
@@ -8,7 +8,8 @@ export default function HomePage() {
         <Box className="space-y-2 text-center">
           <Typography variant="h1">Bienvenido a Olevium</Typography>
           <Typography variant="body" className="text-[color:var(--text-muted)]">
-            Gestiona tus finanzas personales con insights personalizados y herramientas inteligentes.
+            Gestiona tus finanzas personales con insights personalizados y herramientas
+            inteligentes.
           </Typography>
         </Box>
 

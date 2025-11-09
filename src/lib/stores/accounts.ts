@@ -1,8 +1,8 @@
 'use client';
 
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { http } from "@/lib/utils/axios";
+import { http } from '@/lib/utils/axios';
 import type {
   Account,
   AccountDetail,
@@ -10,8 +10,8 @@ import type {
   AccountCreateInput,
   ApiUserAccount,
   ApiAccountType,
-} from "@/types";
-import { resolveAxiosError } from "@/lib/utils/errorHandling";
+} from '@/types';
+import { resolveAxiosError } from '@/lib/utils/errorHandling';
 
 interface AccountsState {
   accounts: Account[];
@@ -24,7 +24,10 @@ interface AccountsState {
   fetchAccountTypes: () => Promise<AccountType[]>;
   fetchAccountDetail: (accountId: string) => Promise<AccountDetail>;
   createAccount: (input: AccountCreateInput) => Promise<Account>;
-  updateAccount: (accountId: string, payload: Partial<AccountCreateInput>) => Promise<AccountDetail>;
+  updateAccount: (
+    accountId: string,
+    payload: Partial<AccountCreateInput>
+  ) => Promise<AccountDetail>;
   deleteAccount: (accountId: string) => Promise<void>;
   applyBalanceDelta: (accountId: string, delta: number) => void;
   reset: () => void;
@@ -49,7 +52,7 @@ const mapAccountType = (payload: ApiAccountType): AccountType => ({
   createdAt: payload.created_at,
 });
 
-const ACCOUNTS_ERROR_FALLBACK = "No se pudo completar la operación sobre cuentas.";
+const ACCOUNTS_ERROR_FALLBACK = 'No se pudo completar la operación sobre cuentas.';
 
 export const useAccountsStore = create<AccountsState>((set, get) => ({
   accounts: [],
@@ -62,7 +65,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   fetchAccounts: async () => {
     set({ loading: true });
     try {
-      const { data } = await http.get<ApiUserAccount[]>("/accounts/");
+      const { data } = await http.get<ApiUserAccount[]>('/accounts/');
       const mapped = data.map(mapAccount);
       set({ accounts: mapped, loading: false });
       return mapped;
@@ -79,7 +82,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
 
     set({ loadingTypes: true });
     try {
-      const { data } = await http.get<ApiAccountType[]>("/accounts/types");
+      const { data } = await http.get<ApiAccountType[]>('/accounts/types');
       const mapped = data.map(mapAccountType);
       set({ accountTypes: mapped, loadingTypes: false });
       return mapped;
@@ -89,7 +92,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     }
   },
 
-  createAccount: async (input) => {
+  createAccount: async input => {
     set({ creating: true });
     try {
       const payload = {
@@ -99,9 +102,9 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         balance: input.balance,
       };
 
-      const { data } = await http.post<ApiUserAccount>("/accounts/", payload);
+      const { data } = await http.post<ApiUserAccount>('/accounts/', payload);
       const account = mapAccount(data);
-      set((prev) => ({ accounts: [account, ...prev.accounts], creating: false }));
+      set(prev => ({ accounts: [account, ...prev.accounts], creating: false }));
       return account;
     } catch (error) {
       set({ creating: false });
@@ -109,7 +112,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     }
   },
 
-  fetchAccountDetail: async (accountId) => {
+  fetchAccountDetail: async accountId => {
     const cached = get().accountDetails[accountId];
     if (cached) {
       return cached;
@@ -118,7 +121,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     try {
       const { data } = await http.get<ApiUserAccount>(`/accounts/${accountId}`);
       const detail = mapAccountDetail(data);
-      set((prev) => ({
+      set(prev => ({
         accountDetails: { ...prev.accountDetails, [accountId]: detail },
       }));
       return detail;
@@ -136,8 +139,8 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         ...(payload.balance !== undefined ? { balance: payload.balance } : {}),
       });
       const updated = mapAccountDetail(data);
-      set((prev) => ({
-        accounts: prev.accounts.map((acc) => (acc.accountId === accountId ? updated : acc)),
+      set(prev => ({
+        accounts: prev.accounts.map(acc => (acc.accountId === accountId ? updated : acc)),
         accountDetails: { ...prev.accountDetails, [accountId]: updated },
       }));
       return updated;
@@ -146,15 +149,15 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     }
   },
 
-  deleteAccount: async (accountId) => {
+  deleteAccount: async accountId => {
     try {
       await http.delete(`/accounts/${accountId}`);
-      set((prev) => {
+      set(prev => {
         const restDetails = { ...prev.accountDetails };
         delete restDetails[accountId];
 
         return {
-          accounts: prev.accounts.filter((acc) => acc.accountId !== accountId),
+          accounts: prev.accounts.filter(acc => acc.accountId !== accountId),
           accountDetails: restDetails,
         };
       });
@@ -164,9 +167,9 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   },
 
   applyBalanceDelta: (accountId, delta) => {
-    set((prev) => {
-      const accounts = prev.accounts.map((acc) =>
-        acc.accountId === accountId ? { ...acc, balance: acc.balance + delta } : acc,
+    set(prev => {
+      const accounts = prev.accounts.map(acc =>
+        acc.accountId === accountId ? { ...acc, balance: acc.balance + delta } : acc
       );
       const detail = prev.accountDetails[accountId];
       const accountDetails = detail

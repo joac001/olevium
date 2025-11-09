@@ -15,11 +15,7 @@ const setCookie = (name: string, value: string, options: CookieOptions = {}) => 
   }
 
   const { maxAge = ONE_DAY_SECONDS } = options;
-  const segments = [
-    `${name}=${encodeURIComponent(value)}`,
-    'Path=/',
-    'SameSite=Lax',
-  ];
+  const segments = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'SameSite=Lax'];
 
   if (maxAge >= 0) {
     segments.push(`Max-Age=${maxAge}`);

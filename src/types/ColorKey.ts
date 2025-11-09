@@ -1,10 +1,10 @@
 export type ColorKey =
-    | "primary"
-    | "secondary"
-    | "success"
-    | "accent"
-    | "warning"
-    | "error"
-    | "danger"
-    | "info"
-    | "neutral";
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'accent'
+  | 'warning'
+  | 'error'
+  | 'danger'
+  | 'info'
+  | 'neutral';

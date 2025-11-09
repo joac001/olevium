@@ -1,8 +1,8 @@
 'use client';
 
-import { Box } from "@/components/shared/ui";
-import AccountDetailCardSkeleton from "./AccountDetailCardSkeleton";
-import AccountTransactionsTableSkeleton from "./AccountTransactionsTableSkeleton";
+import { Box } from '@/components/shared/ui';
+import AccountDetailCardSkeleton from './AccountDetailCardSkeleton';
+import AccountTransactionsTableSkeleton from './AccountTransactionsTableSkeleton';
 
 export default function AccountDetailSkeleton() {
   return (

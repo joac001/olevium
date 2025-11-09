@@ -1,9 +1,9 @@
-import type { AxiosError, AxiosRequestConfig } from "axios";
-import axios from "axios";
+import type { AxiosError, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
-import { useAuthStore } from "@/lib/stores/auth";
+import { useAuthStore } from '@/lib/stores/auth';
 
-const shouldSendCredentials = process.env.NEXT_PUBLIC_API_WITH_CREDENTIALS === "true";
+const shouldSendCredentials = process.env.NEXT_PUBLIC_API_WITH_CREDENTIALS === 'true';
 
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -15,7 +15,7 @@ let isRefreshing = false;
 let pendingQueue: Array<() => void> = [];
 let redirectingToAuth = false;
 
-http.interceptors.request.use((config) => {
+http.interceptors.request.use(config => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers = config.headers ?? {};
@@ -30,7 +30,7 @@ type RetriableConfig = AxiosRequestConfig & {
 };
 
 http.interceptors.response.use(
-  (res) => res,
+  res => res,
   async (error: AxiosError) => {
     const { response } = error;
     const config = (error.config ?? {}) as RetriableConfig;
@@ -59,7 +59,7 @@ http.interceptors.response.use(
       // Ejecutar la cola
       const queue = [...pendingQueue];
       pendingQueue = [];
-      queue.forEach((fn) => fn());
+      queue.forEach(fn => fn());
       return retry();
     } catch (e) {
       try {
@@ -68,16 +68,16 @@ http.interceptors.response.use(
         useAuthStore.getState().clearSession();
       }
       pendingQueue = [];
-      if (typeof window !== "undefined" && !redirectingToAuth) {
+      if (typeof window !== 'undefined' && !redirectingToAuth) {
         redirectingToAuth = true;
-        if (window.location.pathname !== "/auth") {
-          window.location.replace("/auth");
+        if (window.location.pathname !== '/auth') {
+          window.location.replace('/auth');
         }
       }
       return Promise.reject(e);
     } finally {
       isRefreshing = false;
-      if (typeof window !== "undefined" && window.location.pathname === "/auth") {
+      if (typeof window !== 'undefined' && window.location.pathname === '/auth') {
         redirectingToAuth = false;
       }
     }

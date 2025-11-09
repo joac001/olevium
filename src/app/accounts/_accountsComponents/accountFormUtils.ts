@@ -1,5 +1,5 @@
-import type { DropMenuOption } from "@/components/shared/ui";
-import type { AccountType } from "@/types";
+import type { DropMenuOption } from '@/components/shared/ui';
+import type { AccountType } from '@/types';
 
 interface NormalizeAccountFormArgs {
   formData: FormData;
@@ -14,7 +14,7 @@ export interface NormalizedAccountFormData {
 }
 
 export const buildAccountTypeOptions = (accountTypes: AccountType[]): DropMenuOption[] =>
-  accountTypes.map((type) => ({
+  accountTypes.map(type => ({
     value: type.typeId,
     label: type.name,
   }));
@@ -23,22 +23,22 @@ export const normalizeAccountFormData = ({
   formData,
   showNotification,
 }: NormalizeAccountFormArgs): NormalizedAccountFormData | null => {
-  const nameValue = formData.get("name");
-  const typeValue = formData.get("typeId");
-  const currencyValue = formData.get("currency");
-  const balanceValue = formData.get("balance");
+  const nameValue = formData.get('name');
+  const typeValue = formData.get('typeId');
+  const currencyValue = formData.get('currency');
+  const balanceValue = formData.get('balance');
 
   if (
-    typeof nameValue !== "string" ||
-    typeof typeValue !== "string" ||
-    typeof currencyValue !== "string" ||
-    typeof balanceValue !== "string"
+    typeof nameValue !== 'string' ||
+    typeof typeValue !== 'string' ||
+    typeof currencyValue !== 'string' ||
+    typeof balanceValue !== 'string'
   ) {
     showNotification(
-      "fa-solid fa-triangle-exclamation",
-      "danger",
-      "Formulario incompleto",
-      "Completa todos los campos para continuar.",
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Formulario incompleto',
+      'Completa todos los campos para continuar.'
     );
     return null;
   }
@@ -48,10 +48,10 @@ export const normalizeAccountFormData = ({
 
   if (!trimmedName || !trimmedCurrency) {
     showNotification(
-      "fa-solid fa-triangle-exclamation",
-      "danger",
-      "Datos inválidos",
-      "El nombre y la moneda son obligatorios.",
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Datos inválidos',
+      'El nombre y la moneda son obligatorios.'
     );
     return null;
   }
@@ -61,10 +61,10 @@ export const normalizeAccountFormData = ({
 
   if (!Number.isFinite(balance)) {
     showNotification(
-      "fa-solid fa-triangle-exclamation",
-      "danger",
-      "Datos inválidos",
-      "El balance debe ser un número válido.",
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Datos inválidos',
+      'El balance debe ser un número válido.'
     );
     return null;
   }

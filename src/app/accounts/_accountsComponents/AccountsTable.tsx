@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo } from "react";
-import Link from "next/link";
+import { useMemo } from 'react';
+import Link from 'next/link';
 
-import { Box, Typography } from "@/components/shared/ui";
-import { formatAmount } from "@/lib/utils/parser";
-import type { Account, AccountType } from "@/types";
+import { Box, Typography } from '@/components/shared/ui';
+import { formatAmount } from '@/lib/utils/parser';
+import type { Account, AccountType } from '@/types';
 
 interface AccountsTableProps {
   accounts: Account[];
@@ -15,12 +15,18 @@ interface AccountsTableProps {
   disableAdd?: boolean;
 }
 
-export default function AccountsTable({ accounts, accountTypes, loading, onAddAccount, disableAdd }: AccountsTableProps) {
+export default function AccountsTable({
+  accounts,
+  accountTypes,
+  loading,
+  onAddAccount,
+  disableAdd,
+}: AccountsTableProps) {
   const hasAccounts = accounts.length > 0;
 
   const accountsByType = useMemo(() => {
     const byType = new Map<number, Account[]>();
-    accounts.forEach((account) => {
+    accounts.forEach(account => {
       const current = byType.get(account.typeId) ?? [];
       current.push(account);
       byType.set(account.typeId, current);
@@ -34,26 +40,32 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
 
   return (
     <Box className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-      {accountTypes.map((type) => {
+      {accountTypes.map(type => {
         const list = accountsByType.get(type.typeId) ?? [];
         const totalsByCurrency = list.reduce<Record<string, number>>((acc, account) => {
-          const currency = account.currency ?? "Sin moneda";
+          const currency = account.currency ?? 'Sin moneda';
           acc[currency] = (acc[currency] ?? 0) + account.balance;
           return acc;
         }, {});
 
         const totalsLabel = Object.entries(totalsByCurrency)
-          .map(([currency, amount]) => `${currency}: ${formatAmount(amount, currency === "Sin moneda" ? null : currency)}`)
-          .join(" · ");
+          .map(
+            ([currency, amount]) =>
+              `${currency}: ${formatAmount(amount, currency === 'Sin moneda' ? null : currency)}`
+          )
+          .join(' · ');
 
         return (
-          <Box key={type.typeId} className="rounded-3xl border border-[color:var(--surface-muted)] p-4 md:p-5">
+          <Box
+            key={type.typeId}
+            className="rounded-3xl border border-[color:var(--surface-muted)] p-4 md:p-5"
+          >
             <Box className="flex flex-col gap-2">
               <Typography variant="h2" className="text-lg md:text-xl">
                 {type.name.charAt(0).toUpperCase() + type.name.slice(1)}
               </Typography>
               <Typography variant="caption" className="text-sm text-[color:var(--text-muted)]">
-                {totalsLabel || "Sin cuentas registradas"}
+                {totalsLabel || 'Sin cuentas registradas'}
               </Typography>
             </Box>
 
@@ -67,7 +79,7 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
                 <span className="leading-none">+</span>
               </button>
 
-              {list.map((account) => (
+              {list.map(account => (
                 <Link
                   key={account.accountId}
                   href={`/accounts/${account.accountId}`}
@@ -77,13 +89,16 @@ export default function AccountsTable({ accounts, accountTypes, loading, onAddAc
                     <Typography variant="h2" className="text-base md:text-lg">
                       {account.name}
                     </Typography>
-                    <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
+                    <Typography
+                      variant="caption"
+                      className="text-xs text-[color:var(--text-muted)]"
+                    >
                       {account.currency}
                     </Typography>
                   </Box>
                   <Typography
                     variant="body"
-                    className={`text-base font-semibold ${account.balance >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                    className={`text-base font-semibold ${account.balance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
                   >
                     {formatAmount(account.balance, account.currency)}
                   </Typography>

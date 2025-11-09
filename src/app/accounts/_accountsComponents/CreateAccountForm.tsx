@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from "@/components/shared/ui";
-import type { DropMenuOption } from "@/components/shared/ui";
-import type { AccountType } from "@/types";
-import { useAccountsStore } from "@/lib/stores/accounts";
-import { useNotification } from "@/context/NotificationContext";
-import { buildAccountTypeOptions, normalizeAccountFormData } from "./accountFormUtils";
+import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import type { DropMenuOption } from '@/components/shared/ui';
+import type { AccountType } from '@/types';
+import { useAccountsStore } from '@/lib/stores/accounts';
+import { useNotification } from '@/context/NotificationContext';
+import { buildAccountTypeOptions, normalizeAccountFormData } from './accountFormUtils';
 
 interface CreateAccountFormProps {
   accountTypes: AccountType[];
@@ -16,24 +16,32 @@ interface CreateAccountFormProps {
   defaultTypeId?: number;
 }
 
-export default function CreateAccountForm({ accountTypes, loadingTypes, onSuccess, defaultTypeId }: CreateAccountFormProps) {
+export default function CreateAccountForm({
+  accountTypes,
+  loadingTypes,
+  onSuccess,
+  defaultTypeId,
+}: CreateAccountFormProps) {
   const { showNotification } = useNotification();
-  const createAccount = useAccountsStore((state) => state.createAccount);
+  const createAccount = useAccountsStore(state => state.createAccount);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialTypeId = defaultTypeId ?? accountTypes[0]?.typeId ?? null;
 
-  const typeOptions: DropMenuOption[] = useMemo(() => buildAccountTypeOptions(accountTypes), [accountTypes]);
+  const typeOptions: DropMenuOption[] = useMemo(
+    () => buildAccountTypeOptions(accountTypes),
+    [accountTypes]
+  );
 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? "Creando..." : "Registrar cuenta",
-        htmlType: "submit" as const,
-        type: "primary" as const,
+        text: isSubmitting ? 'Creando...' : 'Registrar cuenta',
+        htmlType: 'submit' as const,
+        type: 'primary' as const,
         disabled: isSubmitting,
       },
     ],
-    [isSubmitting],
+    [isSubmitting]
   );
 
   const handleSubmit = useCallback(
@@ -54,21 +62,26 @@ export default function CreateAccountForm({ accountTypes, loadingTypes, onSucces
         });
 
         showNotification(
-          "fa-solid fa-circle-check",
-          "success",
-          "Cuenta creada",
-          "Tu cuenta quedó registrada y ya forma parte del panel.",
+          'fa-solid fa-circle-check',
+          'success',
+          'Cuenta creada',
+          'Tu cuenta quedó registrada y ya forma parte del panel.'
         );
 
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "No se pudo crear la cuenta.";
-        showNotification("fa-solid fa-triangle-exclamation", "danger", "Error al crear cuenta", message);
+        const message = error instanceof Error ? error.message : 'No se pudo crear la cuenta.';
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error al crear cuenta',
+          message
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [createAccount, onSuccess, showNotification],
+    [createAccount, onSuccess, showNotification]
   );
 
   return (
@@ -85,20 +98,14 @@ export default function CreateAccountForm({ accountTypes, loadingTypes, onSucces
         <DropMenu
           name="typeId"
           label="Tipo de cuenta"
-          placeholder={loadingTypes ? "Cargando tipos..." : "Selecciona un tipo"}
+          placeholder={loadingTypes ? 'Cargando tipos...' : 'Selecciona un tipo'}
           options={typeOptions}
           required
           disabled={loadingTypes || !typeOptions.length}
           defaultValue={initialTypeId}
         />
 
-        <Input
-          name="currency"
-          label="Moneda"
-          placeholder="Ej. ARS"
-          required
-          icon="fas fa-coins"
-        />
+        <Input name="currency" label="Moneda" placeholder="Ej. ARS" required icon="fas fa-coins" />
 
         <Input
           name="balance"

@@ -1,9 +1,9 @@
 'use client';
 
-import { AxiosError } from "axios";
-import { create } from "zustand";
+import { AxiosError } from 'axios';
+import { create } from 'zustand';
 
-import { http } from "@/lib/utils/axios";
+import { http } from '@/lib/utils/axios';
 
 export interface UserProfile {
   user_id: number;
@@ -23,7 +23,9 @@ interface UserState {
 
 const normalizeUserError = (error: unknown): Error => {
   if (error instanceof AxiosError) {
-    const payload = error.response?.data as { detail?: string; message?: string; error?: string } | undefined;
+    const payload = error.response?.data as
+      | { detail?: string; message?: string; error?: string }
+      | undefined;
     const detail = payload?.detail ?? payload?.message ?? payload?.error;
     if (detail) {
       return new Error(detail);
@@ -34,7 +36,7 @@ const normalizeUserError = (error: unknown): Error => {
     return error;
   }
 
-  return new Error("No se pudo obtener la información del usuario.");
+  return new Error('No se pudo obtener la información del usuario.');
 };
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -50,7 +52,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ loading: true });
 
     try {
-      const { data } = await http.get<UserProfile>("/users/me");
+      const { data } = await http.get<UserProfile>('/users/me');
       set({
         user: data,
         loading: false,
@@ -66,7 +68,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
   },
 
-  setUser: (user) => set({ user, hasFetched: !!user }),
+  setUser: user => set({ user, hasFetched: !!user }),
 
   reset: () => set({ user: null, hasFetched: false, loading: false }),
 }));

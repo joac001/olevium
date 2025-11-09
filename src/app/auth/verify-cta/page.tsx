@@ -1,6 +1,6 @@
-import Link from "next/link";
+import Link from 'next/link';
 
-import { Container, Box, Card, Typography } from "@/components/shared/ui";
+import { Container, Box, Card, Typography } from '@/components/shared/ui';
 
 export default function VerifyCtaPage() {
   return (
@@ -19,7 +19,10 @@ export default function VerifyCtaPage() {
             <Typography variant="body" className="text-lg md:text-xl">
               Verifica tu email con el enlace que acabamos de enviar a tu bandeja de entrada.
             </Typography>
-            <i className="fas fa-envelope text-4xl text-[color:var(--text-muted)] md:text-5xl" aria-hidden />
+            <i
+              className="fas fa-envelope text-4xl text-[color:var(--text-muted)] md:text-5xl"
+              aria-hidden
+            />
           </Box>
         </Card>
       </Box>

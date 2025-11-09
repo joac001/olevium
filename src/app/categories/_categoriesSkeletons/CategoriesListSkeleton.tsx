@@ -1,13 +1,19 @@
 'use client';
 
-import { Box, Card } from "@/components/shared/ui";
+import { Box, Card } from '@/components/shared/ui';
 
-const SkeletonLine = ({ className = "" }: { className?: string }) => (
-  <Box aria-hidden className={`h-4 w-full animate-pulse rounded-full bg-[color:var(--surface-muted)] ${className}`} />
+const SkeletonLine = ({ className = '' }: { className?: string }) => (
+  <Box
+    aria-hidden
+    className={`h-4 w-full animate-pulse rounded-full bg-[color:var(--surface-muted)] ${className}`}
+  />
 );
 
 const SkeletonBadge = () => (
-  <Box aria-hidden className="h-8 w-20 animate-pulse rounded-full bg-[color:var(--surface-muted)]" />
+  <Box
+    aria-hidden
+    className="h-8 w-20 animate-pulse rounded-full bg-[color:var(--surface-muted)]"
+  />
 );
 
 const SkeletonCard = () => (

@@ -1,5 +1,5 @@
-import { Container } from "@/components/shared/ui";
-import AccountsShell from "./_accountsComponents/AccountsShell";
+import { Container } from '@/components/shared/ui';
+import AccountsShell from './_accountsComponents/AccountsShell';
 
 export default function AccountsPage() {
   return (

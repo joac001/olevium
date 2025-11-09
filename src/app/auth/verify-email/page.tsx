@@ -1,5 +1,5 @@
-import { Container, Box, Card, Typography } from "@/components/shared/ui";
-import VerifyEmailHandler from "../_authComponents/VerifyEmailHandler";
+import { Container, Box, Card, Typography } from '@/components/shared/ui';
+import VerifyEmailHandler from '../_authComponents/VerifyEmailHandler';
 
 type VerifyEmailPageProps = {
   searchParams?: {
@@ -9,7 +9,7 @@ type VerifyEmailPageProps = {
 
 export default function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
   const tokenParam = searchParams?.token;
-  const token = typeof tokenParam === "string" ? tokenParam : undefined;
+  const token = typeof tokenParam === 'string' ? tokenParam : undefined;
 
   return (
     <Container className="py-16">

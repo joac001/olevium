@@ -1,35 +1,31 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
-import { Manrope } from "next/font/google";
+import { Manrope } from 'next/font/google';
 
-import { NavBar, NavLink } from "@/components/layout/";
-import { ClientProviders } from "@/components/providers/ClientProviders";
-import { Typography } from "@/components/shared/ui";
+import { NavBar, NavLink } from '@/components/layout/';
+import { ClientProviders } from '@/components/providers/ClientProviders';
+import { Typography } from '@/components/shared/ui';
 
-const manrope = Manrope({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Olevium",
-  description: "Asistente financiero inteligente",
+  title: 'Olevium',
+  description: 'Asistente financiero inteligente',
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 };
 
 const links: NavLink[] = [
-  { icon: "fas fa-home", label: "Inicio", href: "/" } as NavLink,
-  { icon: "fas fa-wallet", label: "Cuentas", href: "/accounts" } as NavLink,
-  { icon: "fas fa-tags", label: "Categorías", href: "/categories" } as NavLink,
+  { icon: 'fas fa-home', label: 'Inicio', href: '/' } as NavLink,
+  { icon: 'fas fa-wallet', label: 'Cuentas', href: '/accounts' } as NavLink,
+  { icon: 'fas fa-tags', label: 'Categorías', href: '/categories' } as NavLink,
 ];
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>
