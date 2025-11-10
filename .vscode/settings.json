@@ -4,6 +4,13 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+  "tailwindCSS.lint.cssConflict": "ignore",
+  "tailwindCSS.lint.invalidApply": "ignore",
+  "tailwindCSS.lint.invalidConfigPath": "ignore",
+  "tailwindCSS.lint.invalidTailwindDirective": "ignore",
+  "tailwindCSS.lint.invalidVariant": "ignore",
+  "tailwindCSS.lint.recommendedVariantOrder": "ignore",
+  "tailwindCSS.suggestions": false,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
