@@ -10,6 +10,7 @@
   "tailwindCSS.lint.invalidTailwindDirective": "ignore",
   "tailwindCSS.lint.invalidVariant": "ignore",
   "tailwindCSS.lint.recommendedVariantOrder": "ignore",
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
   "tailwindCSS.suggestions": false,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",

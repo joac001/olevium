@@ -169,7 +169,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { refreshToken } = get();
 
     if (!refreshToken) {
-      // Limpiar la sesión silenciosamente si no hay refresh token
+      // Limpiar la sesion silenciosamente si no hay refresh token
       set({
         accessToken: null,
         refreshToken: null,
@@ -180,44 +180,85 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error('Session expired - no refresh token');
     }
 
-    // Usar solo refresh_token según la documentación del backend
     const payload: TokenRefreshRequest = {
       refresh_token: refreshToken,
     };
 
-    const refreshConfig: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+    const storedTokens = tokenStorage.read();
+    const bearerToken =
+      get().accessToken ??
+      storedTokens.accessToken ??
+      storedTokens.refreshToken ??
+      refreshToken;
+
+    const baseRefreshConfig: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
       skipAuthRefresh: true,
+      headers: bearerToken
+        ? {
+            Authorization: `Bearer ${bearerToken}`
+          }
+        : undefined,
     };
 
-    try {
-      const { data } = await http.post<TokenPairResponse>('/auth/refresh', payload, refreshConfig);
+    const fallbackRefreshConfig: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+      skipAuthRefresh: true,
+      headers: {
+        Authorization: `Bearer ${refreshToken}`
+      },
+    };
 
-      const tokens = mapTokenPair(data);
-      if (!tokens.accessToken || !tokens.refreshToken) {
-        throw new Error('Respuesta de refresh inválida.');
-      }
-
+    const applyTokens = (tokens: ReturnType<typeof mapTokenPair>) => {
       set(prev => ({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         tokenType: tokens.tokenType,
         user: tokens.user ?? prev.user ?? null,
-        loading: false, // Asegurar que loading se resetee
+        loading: false,
       }));
       tokenStorage.save(tokens);
+    };
+
+    try {
+      const { data } = await http.post<TokenPairResponse>(
+        '/auth/refresh',
+        payload,
+        baseRefreshConfig
+      );
+
+      const tokens = mapTokenPair(data);
+      if (!tokens.accessToken || !tokens.refreshToken) {
+        throw new Error('Respuesta de refresh invalida.');
+      }
+
+      applyTokens(tokens);
+      return;
     } catch (error) {
-      // Limpiar tokens inválidos pero no hacer logout automático aquí
-      set({
-        accessToken: null,
-        refreshToken: null,
-        tokenType: null,
-        loading: false,
-      });
-      tokenStorage.clear();
-      throw normalizeAuthError(error);
+      try {
+        const { data } = await http.post<TokenPairResponse>(
+          '/auth/refresh',
+          payload,
+          fallbackRefreshConfig
+        );
+
+        const tokens = mapTokenPair(data);
+        if (!tokens.accessToken || !tokens.refreshToken) {
+          throw new Error('Respuesta de refresh invalida.');
+        }
+
+        applyTokens(tokens);
+        return;
+      } catch (finalError) {
+        set({
+          accessToken: null,
+          refreshToken: null,
+          tokenType: null,
+          loading: false,
+        });
+        tokenStorage.clear();
+        throw normalizeAuthError(finalError);
+      }
     }
   },
-
   tryHydrate: async () => {
     const { loading } = get();
     if (loading) return; // Evitar múltiples ejecuciones simultáneas

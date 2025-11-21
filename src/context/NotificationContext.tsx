@@ -1,15 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
 import { StructuredError, ErrorProcessor, OperationContext } from '@/lib/utils/errorSystem';
 import NotificationWrapper from '@/components/shared/ui/wrappers/NotificationWrapper';
 
 interface NotificationContextType {
-  // Métodos existentes para compatibilidad
+  // Metodos existentes para compatibilidad
   showNotification: (icon: string, color: string, title: string, description: string) => void;
   hideNotification: () => void;
 
-  // Nuevos métodos mejorados
+  // Metodos mejorados
   showError: (
     error: unknown,
     context?: OperationContext,
@@ -56,44 +56,59 @@ interface NotificationProviderProps {
 }
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+  const DEFAULT_DURATION = 3000;
+  const ERROR_DURATION = 4200;
+
   // Estado para notificaciones simples (compatibilidad)
   const [isOpen, setIsOpen] = useState(false);
   const [notificationProps, setNotificationProps] = useState<NotificationProps>(
     {} as NotificationProps
   );
-  const [duration, setDuration] = useState<number>(3000);
+  const [duration, setDuration] = useState<number>(DEFAULT_DURATION);
 
   // Estado para errores estructurados
   const [activeErrors, setActiveErrors] = useState<StructuredError[]>([]);
   const [retryActions, setRetryActions] = useState<Record<string, () => Promise<void>>>({});
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Método original para compatibilidad
+  // Metodo original para compatibilidad
   const showNotification = useCallback(
     (icon: string, color: string, title: string, description: string) => {
       setNotificationProps({ icon, color, title, description });
-      setDuration(3000);
+      setDuration(DEFAULT_DURATION);
       setIsOpen(true);
     },
-    []
+    [DEFAULT_DURATION]
   );
 
   const hideNotification = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  // Nuevos métodos mejorados
+  const scheduleErrorDismiss = useCallback(
+    (errorId: string) => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+
+      errorTimeoutRef.current = setTimeout(() => {
+        setActiveErrors(prev => prev.filter(error => error.id !== errorId));
+        setRetryActions(prev => {
+          const { [errorId]: _ignored, ...rest } = prev;
+          return rest;
+        });
+        setIsOpen(false);
+      }, ERROR_DURATION);
+    },
+    [ERROR_DURATION]
+  );
+
+  // Metodos mejorados
   const showError = useCallback(
     (error: unknown, context?: OperationContext, retryAction?: () => Promise<void>): string => {
       const structuredError = ErrorProcessor.process(error, context);
 
-      // Configurar acción de retry si se proporciona
       if (retryAction) {
-        setRetryActions(prev => ({
-          ...prev,
-          [structuredError.id]: retryAction,
-        }));
-
-        // Agregar acción de retry al error
         structuredError.actions = [
           {
             label: 'Reintentar',
@@ -104,46 +119,36 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         ];
       }
 
-      setActiveErrors(prev => {
-        // Evitar duplicados del mismo tipo de error en poco tiempo
-        const isDuplicate = prev.some(
-          existingError =>
-            existingError.type === structuredError.type &&
-            existingError.message === structuredError.message &&
-            Date.now() - existingError.timestamp.getTime() < 5000 // 5 segundos
-        );
+      setActiveErrors([structuredError]);
+      setRetryActions(retryAction ? { [structuredError.id]: retryAction } : {});
 
-        if (isDuplicate) {
-          return prev;
-        }
-
-        return [...prev, structuredError];
-      });
+      setDuration(ERROR_DURATION);
+      setIsOpen(true);
+      scheduleErrorDismiss(structuredError.id);
 
       return structuredError.id;
     },
-    []
+    [ERROR_DURATION, scheduleErrorDismiss]
   );
 
   const showSuccess = useCallback(
     (message: string, context?: OperationContext) => {
-      const title = 'Éxito';
+      const title = 'Exito';
       let enhancedMessage = message;
 
-      // Personalizar mensaje según contexto
       if (context?.operation && context?.resource) {
         const operations: Record<string, (resource: string) => string> = {
           create: (resource: string) => `${resource} creado exitosamente`,
           update: (resource: string) => `${resource} actualizado exitosamente`,
           delete: (resource: string) => `${resource} eliminado exitosamente`,
-          login: () => 'Sesión iniciada exitosamente',
-          logout: () => 'Sesión cerrada exitosamente',
+          login: () => 'Sesion iniciada exitosamente',
+          logout: () => 'Sesion cerrada exitosamente',
         };
 
         const operationMessage = operations[context.operation];
         if (operationMessage) {
           enhancedMessage = operationMessage(
-            context.userFriendlyOperation || context.resource || ''
+            context.userFriendlyOperation ?? context.resource ?? ''
           );
         }
       }
@@ -161,7 +166,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   );
 
   const showInfo = useCallback(
-    (message: string, title: string = 'Información') => {
+    (message: string, title: string = 'Informacion') => {
       showNotification('fa-solid fa-info-circle', 'info', title, message);
     },
     [showNotification]
@@ -170,7 +175,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const dismissError = useCallback((errorId: string) => {
     setActiveErrors(prev => prev.filter(error => error.id !== errorId));
     setRetryActions(prev => {
-      const { [errorId]: _, ...rest } = prev;
+      const { [errorId]: _ignored, ...rest } = prev;
       return rest;
     });
   }, []);

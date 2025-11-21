@@ -41,6 +41,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(!accountTypes.length);
   const [accountNotFound, setAccountNotFound] = useState(false);
+  const [accountDeleted, setAccountDeleted] = useState(false);
 
   const fallbackAccount = useMemo(
     () => accounts.find(item => item.accountId === accountId),
@@ -48,11 +49,19 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   );
 
   const resolvedAccount: AccountDetail | null = account ?? fallbackAccount ?? null;
+  useEffect(() => {
+    setAccountDeleted(false);
+  }, [accountId]);
 
   useEffect(() => {
     // No intentar recargar si la cuenta fue eliminada del store y no existe en fallback
     // También verificar que tengamos datos iniciales o que estemos en carga inicial
-    const shouldFetch = !account && !fallbackAccount && !accountNotFound && !loadingDetail;
+    const shouldFetch =
+      !accountDeleted && !account && !fallbackAccount && !accountNotFound && !loadingDetail;
+
+    if (accountDeleted) {
+      return;
+    }
 
     if (shouldFetch) {
       setLoadingDetail(true);
@@ -83,6 +92,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   ]);
 
   const reloadTransactions = useCallback(() => {
+    if (accountDeleted) return;
     setLoadingTransactions(true);
     fetchAccountTransactions(accountId)
       .catch(error => {
@@ -90,7 +100,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
         showError(error, context);
       })
       .finally(() => setLoadingTransactions(false));
-  }, [accountId, fetchAccountTransactions, showNotification, showError]);
+  }, [accountDeleted, accountId, fetchAccountTransactions, showNotification, showError]);
 
   useEffect(() => {
     reloadTransactions();
@@ -143,6 +153,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           accountId={resolvedAccount.accountId}
           accountName={resolvedAccount.name}
           onSuccess={() => {
+            setAccountDeleted(true);
             hideModal();
           }}
         />
