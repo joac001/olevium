@@ -9,6 +9,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import { useAccountsStore } from '@/lib/stores/accounts';
 import { useTransactionsStore } from '@/lib/stores/transactions';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { AccountDetail, AccountTransaction } from '@/types';
 import AccountTransactionsTable from './AccountTransactionsTable';
 import EditAccountForm from './EditAccountForm';
@@ -23,7 +24,7 @@ interface AccountDetailShellProps {
 
 export default function AccountDetailShell({ accountId }: AccountDetailShellProps) {
   const router = useRouter();
-  const { showNotification } = useNotification();
+  const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
 
   const account = useAccountsStore(state => state.accountDetails[accountId]);
@@ -39,6 +40,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const [loadingDetail, setLoadingDetail] = useState(!account);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(!accountTypes.length);
+  const [accountNotFound, setAccountNotFound] = useState(false);
 
   const fallbackAccount = useMemo(
     () => accounts.find(item => item.accountId === accountId),
@@ -48,40 +50,47 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
   const resolvedAccount: AccountDetail | null = account ?? fallbackAccount ?? null;
 
   useEffect(() => {
-    if (!account) {
+    // No intentar recargar si la cuenta fue eliminada del store y no existe en fallback
+    // También verificar que tengamos datos iniciales o que estemos en carga inicial
+    const shouldFetch = !account && !fallbackAccount && !accountNotFound && !loadingDetail;
+
+    if (shouldFetch) {
       setLoadingDetail(true);
       fetchAccountDetail(accountId)
         .catch(error => {
-          const message = error instanceof Error ? error.message : 'No pudimos obtener la cuenta.';
-          showNotification(
-            'fa-solid fa-triangle-exclamation',
-            'danger',
-            'Error al cargar cuenta',
-            message
-          );
-          router.replace('/accounts');
+          setAccountNotFound(true);
+          // Solo mostrar error y navegar si no estamos en proceso de eliminación
+          if (!fallbackAccount) {
+            const context = createOperationContext('fetch', 'cuenta', 'la cuenta');
+            showError(error, context);
+            router.replace('/accounts');
+          }
         })
         .finally(() => setLoadingDetail(false));
-    } else {
+    } else if (account || fallbackAccount) {
       setLoadingDetail(false);
     }
-  }, [account, accountId, fetchAccountDetail, router, showNotification]);
+  }, [
+    account,
+    accountId,
+    accountNotFound,
+    fallbackAccount,
+    fetchAccountDetail,
+    loadingDetail,
+    router,
+    showNotification,
+    showError,
+  ]);
 
   const reloadTransactions = useCallback(() => {
     setLoadingTransactions(true);
     fetchAccountTransactions(accountId)
       .catch(error => {
-        const message =
-          error instanceof Error ? error.message : 'No pudimos obtener las transacciones.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al cargar transacciones',
-          message
-        );
+        const context = createOperationContext('fetch', 'transacciones', 'las transacciones');
+        showError(error, context);
       })
       .finally(() => setLoadingTransactions(false));
-  }, [accountId, fetchAccountTransactions, showNotification]);
+  }, [accountId, fetchAccountTransactions, showNotification, showError]);
 
   useEffect(() => {
     reloadTransactions();
@@ -92,20 +101,18 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
       setLoadingTypes(true);
       fetchAccountTypes()
         .catch(error => {
-          const message =
-            error instanceof Error ? error.message : 'No pudimos cargar los tipos de cuenta.';
-          showNotification(
-            'fa-solid fa-triangle-exclamation',
-            'danger',
-            'Error al cargar tipos',
-            message
+          const context = createOperationContext(
+            'fetch',
+            'tipos de cuentas',
+            'los tipos de cuentas'
           );
+          showError(error, context);
         })
         .finally(() => setLoadingTypes(false));
     } else {
       setLoadingTypes(false);
     }
-  }, [accountTypes.length, fetchAccountTypes, showNotification]);
+  }, [accountTypes.length, fetchAccountTypes, showNotification, showError]);
 
   const typeLabel = useMemo(() => {
     const type = accountTypes.find(item => item.typeId === resolvedAccount?.typeId);
@@ -216,7 +223,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
 
       {showTransactionsSkeleton ? (
         <AccountTransactionsTableSkeleton />
-      ) : (
+      ) : resolvedAccount ? (
         <Card
           tone="neutral"
           title="Transacciones"
@@ -237,7 +244,7 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
             onRefresh={reloadTransactions}
           />
         </Card>
-      )}
+      ) : null}
     </Box>
   );
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, Button, Typography } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuthStore } from '@/lib/stores/auth';
-import { extractAuthErrorMessage } from './authErrorUtils';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
 interface VerifyEmailHandlerProps {
   token?: string;
@@ -16,7 +16,7 @@ type VerifyStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
   const router = useRouter();
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const verifyEmail = useAuthStore(state => state.verifyEmail);
   const [status, setStatus] = useState<VerifyStatus>(token ? 'loading' : 'error');
   const [message, setMessage] = useState<string>(() =>
@@ -48,11 +48,10 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
             'Tu correo fue verificado correctamente. Te redirigiremos al inicio de sesión.'
         );
 
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Email verificado',
-          'Puedes iniciar sesión con tus credenciales.'
+        const context = createOperationContext('verify-email', 'email', 'el email');
+        showSuccess(
+          'Email verificado exitosamente. Puedes iniciar sesión con tus credenciales.',
+          context
         );
 
         redirectTimeout = setTimeout(() => {
@@ -63,12 +62,11 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
           return;
         }
 
-        const friendlyMessage = extractAuthErrorMessage(
-          error,
-          'No pudimos verificar tu correo. Inténtalo nuevamente.'
-        );
+        const context = createOperationContext('verify-email', 'email', 'el email');
+        showError(error, context);
+
         setStatus('error');
-        setMessage(friendlyMessage);
+        setMessage('No pudimos verificar tu correo. Inténtalo nuevamente.');
       }
     };
 
@@ -80,7 +78,7 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
         clearTimeout(redirectTimeout);
       }
     };
-  }, [router, showNotification, token, verifyEmail]);
+  }, [router, showNotification, token, verifyEmail, showError, showSuccess]);
 
   const iconClass = useMemo(() => {
     switch (status) {

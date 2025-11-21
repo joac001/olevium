@@ -6,6 +6,7 @@ import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { TransactionCategory, TransactionType } from '@/types';
 
 interface EditCategoryFormProps {
@@ -21,7 +22,7 @@ export default function EditCategoryForm({
   loadingTypes,
   onSuccess,
 }: EditCategoryFormProps) {
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const updateCategory = useTransactionsStore(state => state.updateCategory);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -108,28 +109,26 @@ export default function EditCategoryForm({
           userId: category.userId,
         });
 
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Categoría actualizada',
-          'Guardamos los cambios de la categoría.'
-        );
+        const context = createOperationContext('update', 'categoría', 'la categoría');
+        showSuccess('Categoría actualizada exitosamente. Cambios guardados.', context);
 
         onSuccess?.();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'No se pudo actualizar la categoría.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al actualizar',
-          message
-        );
+        const context = createOperationContext('update', 'categoría', 'la categoría');
+        showError(error, context);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [category.categoryId, category.userId, showNotification, updateCategory, onSuccess]
+    [
+      category.categoryId,
+      category.userId,
+      showNotification,
+      updateCategory,
+      onSuccess,
+      showError,
+      showSuccess,
+    ]
   );
 
   return (

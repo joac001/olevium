@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, FormWrapper, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { useAccountsStore } from '@/lib/stores/accounts';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
 interface DeleteAccountFormProps {
   accountId: string;
@@ -18,7 +19,7 @@ export default function DeleteAccountForm({
   accountName,
   onSuccess,
 }: DeleteAccountFormProps) {
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const deleteAccount = useAccountsStore(state => state.deleteAccount);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -51,28 +52,37 @@ export default function DeleteAccountForm({
 
       setIsSubmitting(true);
       try {
-        await deleteAccount(accountId);
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Cuenta eliminada',
-          'La cuenta se eliminó correctamente.'
-        );
+        // Primero cerrar modal para evitar que el componente padre intente actualizar
         onSuccess?.();
+
+        // Eliminar cuenta
+        await deleteAccount(accountId);
+
+        // Navegar inmediatamente
         router.replace('/accounts');
+
+        // Mostrar éxito después de navegar
+        setTimeout(() => {
+          const context = createOperationContext('delete', 'cuenta', 'la cuenta');
+          showSuccess('Cuenta eliminada exitosamente.', context);
+        }, 200);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo eliminar la cuenta.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al eliminar',
-          message
-        );
+        const context = createOperationContext('delete', 'cuenta', 'la cuenta');
+        showError(error);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [accountId, accountName, deleteAccount, onSuccess, router, showNotification]
+    [
+      accountId,
+      accountName,
+      deleteAccount,
+      onSuccess,
+      router,
+      showNotification,
+      showError,
+      showSuccess,
+    ]
   );
 
   return (

@@ -1,13 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import type { AccountType } from '@/types';
 import { useAccountsStore } from '@/lib/stores/accounts';
 import { useNotification } from '@/context/NotificationContext';
-import { buildAccountTypeOptions, normalizeAccountFormData } from './accountFormUtils';
+import {
+  buildAccountTypeOptions,
+  buildCurrencyOptions,
+  normalizeAccountFormData,
+} from './accountFormUtils';
 
 interface CreateAccountFormProps {
   accountTypes: AccountType[];
@@ -24,6 +28,10 @@ export default function CreateAccountForm({
 }: CreateAccountFormProps) {
   const { showNotification } = useNotification();
   const createAccount = useAccountsStore(state => state.createAccount);
+  const getCurrencies = useAccountsStore(state => state.getCurrencies);
+  const currencies = useAccountsStore(state => state.currencies);
+  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialTypeId = defaultTypeId ?? accountTypes[0]?.typeId ?? null;
 
@@ -31,6 +39,15 @@ export default function CreateAccountForm({
     () => buildAccountTypeOptions(accountTypes),
     [accountTypes]
   );
+
+  const currencyOptions: DropMenuOption[] = useMemo(
+    () => buildCurrencyOptions(currencies),
+    [currencies]
+  );
+
+  useEffect(() => {
+    getCurrencies();
+  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -57,7 +74,7 @@ export default function CreateAccountForm({
         await createAccount({
           name: normalized.name,
           typeId: normalized.typeId,
-          currency: normalized.currency,
+          currencyId: normalized.currencyId,
           balance: normalized.balance,
         });
 
@@ -70,7 +87,39 @@ export default function CreateAccountForm({
 
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo crear la cuenta.';
+        console.error('Error creating account:', error);
+
+        let message = 'No se pudo crear la cuenta.';
+
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: Record<string, unknown> } };
+          const responseData = axiosError.response?.data;
+
+          if (responseData?.detail) {
+            if (typeof responseData.detail === 'string') {
+              message = responseData.detail;
+            } else if (Array.isArray(responseData.detail)) {
+              // Manejar errores de validación de FastAPI
+              message = responseData.detail
+                .map((item: Record<string, unknown> | string) => {
+                  if (typeof item === 'string') return item;
+                  if (typeof item === 'object' && item.msg) return String(item.msg);
+                  if (typeof item === 'object' && item.message) return String(item.message);
+                  return 'Error de validación';
+                })
+                .join(', ');
+            } else {
+              message = 'Error de validación en los datos proporcionados.';
+            }
+          } else if (responseData?.message && typeof responseData.message === 'string') {
+            message = responseData.message;
+          } else if (responseData?.error && typeof responseData.error === 'string') {
+            message = responseData.error;
+          }
+        } else if (error instanceof Error) {
+          message = error.message;
+        }
+
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -105,7 +154,14 @@ export default function CreateAccountForm({
           defaultValue={initialTypeId}
         />
 
-        <Input name="currency" label="Moneda" placeholder="Ej. ARS" required icon="fas fa-coins" />
+        <DropMenu
+          name="currencyId"
+          label="Moneda"
+          placeholder={loadingCurrencies ? 'Cargando monedas...' : 'Selecciona una moneda'}
+          options={currencyOptions}
+          required
+          disabled={loadingCurrencies || !currencyOptions.length}
+        />
 
         <Input
           name="balance"

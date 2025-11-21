@@ -8,10 +8,11 @@ import { formatDate } from '@/lib/utils/parser';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuthStore } from '@/lib/stores/auth';
 import { useUserStore } from '@/lib/stores/user';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
 export default function WelcomePanel() {
   const router = useRouter();
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const user = useUserStore(state => state.user);
   const loading = useUserStore(state => state.loading);
   const hasFetched = useUserStore(state => state.hasFetched);
@@ -22,49 +23,28 @@ export default function WelcomePanel() {
   useEffect(() => {
     if (!hasFetched && accessToken) {
       fetchCurrentUser().catch(error => {
-        const message =
-          error instanceof Error ? error.message : 'No se pudo cargar tu información.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al obtener tus datos',
-          message
-        );
+        const context = createOperationContext('fetch', 'perfil', 'el perfil');
+        showError(error, context);
       });
     }
-  }, [accessToken, fetchCurrentUser, hasFetched, showNotification]);
+  }, [accessToken, fetchCurrentUser, hasFetched, showNotification, showError]);
 
   const handleLogout = async () => {
     try {
       await logout();
-      showNotification(
-        'fa-solid fa-circle-check',
-        'success',
-        'Sesión finalizada',
-        'Vuelve cuando quieras.'
-      );
+      const context = createOperationContext('logout', 'sesión', 'la sesión');
+      showSuccess('Sesión finalizada exitosamente. ¡Vuelve cuando quieras!', context);
       router.replace('/auth');
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'No pudimos cerrar tu sesión. Intenta nuevamente.';
-      showNotification(
-        'fa-solid fa-triangle-exclamation',
-        'danger',
-        'Error al cerrar sesión',
-        message
-      );
+      const context = createOperationContext('logout', 'sesión', 'la sesión');
+      showError(error, context);
     }
   };
 
   const handleReloadProfile = () => {
     fetchCurrentUser().catch(error => {
-      const message = error instanceof Error ? error.message : 'No se pudo cargar tu información.';
-      showNotification(
-        'fa-solid fa-triangle-exclamation',
-        'danger',
-        'Error al obtener tus datos',
-        message
-      );
+      const context = createOperationContext('fetch', 'perfil', 'el perfil');
+      showError(error, context);
     });
   };
 

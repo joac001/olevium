@@ -5,6 +5,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { Box, FormWrapper, Typography } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { TransactionCategory } from '@/types';
 
 interface DeleteCategoryFormProps {
@@ -14,7 +15,7 @@ interface DeleteCategoryFormProps {
 
 export default function DeleteCategoryForm({ category, onSuccess }: DeleteCategoryFormProps) {
   const deleteCategory = useTransactionsStore(state => state.deleteCategory);
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buttons = useMemo(
@@ -46,27 +47,27 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
       setIsSubmitting(true);
       try {
         await deleteCategory(category.categoryId);
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Categoría eliminada',
-          'Quitamos la categoría personalizada.'
-        );
+
+        const context = createOperationContext('delete', 'categoría', 'la categoría');
+        showSuccess('Categoría eliminada exitosamente.', context);
+
         onSuccess?.();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'No se pudo eliminar la categoría.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al eliminar',
-          message
-        );
+        const context = createOperationContext('delete', 'categoría', 'la categoría');
+        showError(error, context);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [category.categoryId, category.userId, deleteCategory, onSuccess, showNotification]
+    [
+      category.categoryId,
+      category.userId,
+      deleteCategory,
+      onSuccess,
+      showNotification,
+      showError,
+      showSuccess,
+    ]
   );
 
   return (

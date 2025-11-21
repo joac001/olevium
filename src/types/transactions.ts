@@ -15,7 +15,8 @@ export interface ApiUserTransaction {
   type_id: number;
   date: Iso8601DateTimeString;
   category_id: Nullable<Ulid>;
-  category?: Nullable<string>;
+  category?: Nullable<ApiTransactionCategorySummary>;
+  transaction_type?: Nullable<ApiTransactionTypeSummary>;
   type_name?: Nullable<string>;
   description?: Nullable<string>;
   created_at: Iso8601DateTimeString;
@@ -35,6 +36,19 @@ export interface ApiTransactionCategory {
   color: Nullable<string>;
   created_at: Iso8601DateTimeString;
   is_default: boolean;
+  transaction_type?: Nullable<ApiTransactionTypeSummary>;
+}
+
+export interface ApiTransactionTypeSummary {
+  type_id: number;
+  name: string;
+}
+
+export interface ApiTransactionCategorySummary {
+  category_id: Ulid;
+  description: string;
+  color?: Nullable<string>;
+  transaction_type?: Nullable<ApiTransactionTypeSummary>;
 }
 
 export interface AccountTransaction {
@@ -45,7 +59,8 @@ export interface AccountTransaction {
   date: Iso8601DateTimeString;
   createdAt: Iso8601DateTimeString;
   categoryId: Nullable<Ulid>;
-  category: Nullable<string>;
+  category: Nullable<TransactionCategorySummary>;
+  transactionType: Nullable<TransactionTypeSummary>;
   typeName: Nullable<string>;
   description: Nullable<string>;
 }
@@ -56,6 +71,11 @@ export interface TransactionType {
   createdAt: Iso8601DateTimeString;
 }
 
+export interface TransactionTypeSummary {
+  typeId: number;
+  name: string;
+}
+
 export interface TransactionCategory {
   categoryId: Ulid;
   userId: Nullable<Ulid>;
@@ -64,6 +84,14 @@ export interface TransactionCategory {
   color: Nullable<string>;
   createdAt: Iso8601DateTimeString;
   isDefault: boolean;
+  transactionType: Nullable<TransactionTypeSummary>;
+}
+
+export interface TransactionCategorySummary {
+  categoryId: Ulid;
+  description: string;
+  color: Nullable<string>;
+  transactionType: Nullable<TransactionTypeSummary>;
 }
 
 export interface TransactionCategoryCreateInput {

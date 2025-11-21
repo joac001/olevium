@@ -8,13 +8,14 @@ import { useUserStore } from '@/lib/stores/user';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import { useTransactionData } from '@/context/TransactionContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import CategoriesListSkeleton from '../_categoriesSkeletons/CategoriesListSkeleton';
 import EditCategoryForm from './EditCategoryForm';
 import DeleteCategoryForm from './DeleteCategoryForm';
 import CreateCategoryForm from './CreateCategoryForm';
 
 export default function CategoriesShell() {
-  const { showNotification } = useNotification();
+  const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
 
   const categories = useTransactionsStore(state => state.categories);
@@ -34,32 +35,20 @@ export default function CategoriesShell() {
   useEffect(() => {
     if (!categories.length) {
       fetchCategories().catch(error => {
-        const message =
-          error instanceof Error ? error.message : 'No pudimos obtener las categorías.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al cargar categorías',
-          message
-        );
+        const context = createOperationContext('fetch', 'categorías', 'las categorías');
+        showError(error, context);
       });
     }
-  }, [categories.length, fetchCategories, showNotification]);
+  }, [categories.length, fetchCategories, showNotification, showError]);
 
   useEffect(() => {
     if (!hasFetchedUser) {
       fetchCurrentUser().catch(error => {
-        const message =
-          error instanceof Error ? error.message : 'No pudimos obtener la información de usuario.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al cargar usuario',
-          message
-        );
+        const context = createOperationContext('fetch', 'usuario', 'la información del usuario');
+        showError(error, context);
       });
     }
-  }, [fetchCurrentUser, hasFetchedUser, showNotification]);
+  }, [fetchCurrentUser, hasFetchedUser, showNotification, showError]);
 
   const userId = user ? String(user.user_id) : null;
 

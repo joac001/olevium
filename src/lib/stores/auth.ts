@@ -166,16 +166,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   refreshSession: async () => {
-    const { accessToken, refreshToken } = get();
-
-    console.log('Refreshing session...');
+    const { refreshToken } = get();
 
     if (!refreshToken) {
-      throw new Error('No refresh token available');
+      // Limpiar la sesión silenciosamente si no hay refresh token
+      set({
+        accessToken: null,
+        refreshToken: null,
+        tokenType: null,
+        loading: false,
+      });
+      tokenStorage.clear();
+      throw new Error('Session expired - no refresh token');
     }
 
+    // Usar solo refresh_token según la documentación del backend
     const payload: TokenRefreshRequest = {
-      ...(accessToken ? { access_token: accessToken } : {}),
       refresh_token: refreshToken,
     };
 
@@ -244,8 +250,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
           await get().refreshSession();
         } catch (error) {
-          // Si falla el refresh durante hydrate, limpiar todo
-          console.warn('Failed to refresh during hydrate:', error);
+          // Si falla el refresh durante hydrate, limpiar todo silenciosamente
+          console.warn('Failed to refresh during hydrate - clearing session:', error);
           set({
             accessToken: null,
             refreshToken: null,
@@ -255,7 +261,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
           tokenStorage.clear();
           useUserStore.getState().reset();
-          throw error;
+          // No re-throw el error para evitar notificaciones innecesarias durante la hidratación
+          return;
         }
       }
     } catch (error) {

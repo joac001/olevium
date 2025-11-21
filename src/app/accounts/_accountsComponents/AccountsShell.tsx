@@ -7,11 +7,12 @@ import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import { useAccountsStore } from '@/lib/stores/accounts';
 import { formatAmount } from '@/lib/utils/parser';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import AccountsTable from './AccountsTable';
 import CreateAccountForm from './CreateAccountForm';
 
 export default function AccountsShell() {
-  const { showNotification } = useNotification();
+  const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
   const accounts = useAccountsStore(state => state.accounts);
   const accountTypes = useAccountsStore(state => state.accountTypes);
@@ -22,26 +23,15 @@ export default function AccountsShell() {
 
   useEffect(() => {
     fetchAccounts().catch(error => {
-      const message = error instanceof Error ? error.message : 'No pudimos obtener tus cuentas.';
-      showNotification(
-        'fa-solid fa-triangle-exclamation',
-        'danger',
-        'Error al cargar cuentas',
-        message
-      );
+      const context = createOperationContext('fetch', 'cuentas', 'las cuentas');
+      showError(error, context);
     });
 
     fetchAccountTypes().catch(error => {
-      const message =
-        error instanceof Error ? error.message : 'No pudimos cargar los tipos de cuentas.';
-      showNotification(
-        'fa-solid fa-triangle-exclamation',
-        'danger',
-        'Error al cargar tipos',
-        message
-      );
+      const context = createOperationContext('fetch', 'tipos de cuentas', 'los tipos de cuentas');
+      showError(error, context);
     });
-  }, [fetchAccounts, fetchAccountTypes, showNotification]);
+  }, [fetchAccounts, fetchAccountTypes, showNotification, showError]);
 
   const balancesByCurrency = useMemo(() => {
     return accounts.reduce<Record<string, number>>((accumulator, account) => {

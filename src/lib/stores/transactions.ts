@@ -6,17 +6,37 @@ import { http } from '@/lib/utils/axios';
 import type {
   AccountTransaction,
   ApiTransactionCategory,
+  ApiTransactionCategorySummary,
   ApiTransactionType,
+  ApiTransactionTypeSummary,
   ApiUserTransaction,
   TransactionCategory,
-  TransactionType,
   TransactionCategoryCreateInput,
+  TransactionCategorySummary,
   TransactionCategoryUpdateInput,
+  TransactionType,
+  TransactionTypeSummary,
   UserTransactionCreateInput,
   UserTransactionUpdateInput,
 } from '@/types';
 import { useAccountsStore } from '@/lib/stores/accounts';
 import { resolveAxiosError } from '@/lib/utils/errorHandling';
+
+const mapTransactionTypeSummary = (payload: ApiTransactionTypeSummary): TransactionTypeSummary => ({
+  typeId: payload.type_id,
+  name: payload.name,
+});
+
+const mapTransactionCategorySummary = (
+  payload: ApiTransactionCategorySummary
+): TransactionCategorySummary => ({
+  categoryId: payload.category_id,
+  description: payload.description,
+  color: payload.color ?? null,
+  transactionType: payload.transaction_type
+    ? mapTransactionTypeSummary(payload.transaction_type)
+    : null,
+});
 
 const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   transactionId: payload.transaction_id,
@@ -26,7 +46,10 @@ const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   date: payload.date,
   createdAt: payload.created_at,
   categoryId: payload.category_id ?? null,
-  category: payload.category ?? null,
+  category: payload.category ? mapTransactionCategorySummary(payload.category) : null,
+  transactionType: payload.transaction_type
+    ? mapTransactionTypeSummary(payload.transaction_type)
+    : null,
   typeName: payload.type_name ?? null,
   description: payload.description ?? null,
 });
@@ -45,6 +68,9 @@ const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
   color: payload.color ?? null,
   createdAt: payload.created_at,
   isDefault: payload.is_default,
+  transactionType: payload.transaction_type
+    ? mapTransactionTypeSummary(payload.transaction_type)
+    : null,
 });
 
 const TRANSACTION_ERROR_FALLBACK = 'No se pudo completar la operación sobre transacciones.';
@@ -152,7 +178,9 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         },
       }));
 
-      useAccountsStore.getState().applyBalanceDelta(accountId, amount);
+      // type_id: 1 = salida (resta), 2 = entrada (suma)
+      const delta = typeId === 1 ? -amount : amount;
+      useAccountsStore.getState().applyBalanceDelta(accountId, delta);
       return mapped;
     } catch (error) {
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
@@ -201,10 +229,23 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       if (previousTransaction) {
         const accountsStore = useAccountsStore.getState();
         if (previousAccountId && previousAccountId !== mapped.accountId) {
-          accountsStore.applyBalanceDelta(previousAccountId, -previousTransaction.amount);
-          accountsStore.applyBalanceDelta(mapped.accountId, mapped.amount);
+          // Revertir el delta original en la cuenta anterior
+          const oldDelta =
+            previousTransaction.typeId === 1
+              ? -previousTransaction.amount
+              : previousTransaction.amount;
+          accountsStore.applyBalanceDelta(previousAccountId, -oldDelta);
+          // Aplicar el nuevo delta en la cuenta nueva
+          const newDelta = mapped.typeId === 1 ? -mapped.amount : mapped.amount;
+          accountsStore.applyBalanceDelta(mapped.accountId, newDelta);
         } else {
-          const delta = mapped.amount - previousTransaction.amount;
+          // Mismo accountId: revertir delta anterior y aplicar nuevo delta
+          const oldDelta =
+            previousTransaction.typeId === 1
+              ? -previousTransaction.amount
+              : previousTransaction.amount;
+          const newDelta = mapped.typeId === 1 ? -mapped.amount : mapped.amount;
+          const delta = newDelta - oldDelta;
           accountsStore.applyBalanceDelta(mapped.accountId, delta);
         }
       }
@@ -244,7 +285,10 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       });
 
       if (targetAccountId && targetTransaction) {
-        useAccountsStore.getState().applyBalanceDelta(targetAccountId, -targetTransaction.amount);
+        // Revertir el delta: si fue salida (resta), ahora sumamos; si fue entrada (suma), ahora restamos
+        const originalDelta =
+          targetTransaction.typeId === 1 ? -targetTransaction.amount : targetTransaction.amount;
+        useAccountsStore.getState().applyBalanceDelta(targetAccountId, -originalDelta);
       }
     } catch (error) {
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);

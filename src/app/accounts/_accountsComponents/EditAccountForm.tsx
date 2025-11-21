@@ -1,13 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import type { AccountDetail, AccountType } from '@/types';
+import type { AccountDetail, AccountType, Currency } from '@/types';
 import { useAccountsStore } from '@/lib/stores/accounts';
 import { useNotification } from '@/context/NotificationContext';
-import { buildAccountTypeOptions, normalizeAccountFormData } from './accountFormUtils';
+import {
+  buildAccountTypeOptions,
+  buildCurrencyOptions,
+  normalizeAccountFormData,
+} from './accountFormUtils';
 
 interface EditAccountFormProps {
   account: AccountDetail;
@@ -24,12 +28,25 @@ export default function EditAccountForm({
 }: EditAccountFormProps) {
   const { showNotification } = useNotification();
   const updateAccount = useAccountsStore(state => state.updateAccount);
+  const getCurrencies = useAccountsStore(state => state.getCurrencies);
+  const currencies = useAccountsStore(state => state.currencies);
+  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () => buildAccountTypeOptions(accountTypes),
     [accountTypes]
   );
+
+  const currencyOptions: DropMenuOption[] = useMemo(
+    () => buildCurrencyOptions(currencies),
+    [currencies]
+  );
+
+  useEffect(() => {
+    getCurrencies();
+  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -56,7 +73,7 @@ export default function EditAccountForm({
         await updateAccount(account.accountId, {
           name: normalized.name,
           typeId: normalized.typeId,
-          currency: normalized.currency,
+          currencyId: normalized.currencyId,
           balance: normalized.balance,
         });
 
@@ -68,7 +85,39 @@ export default function EditAccountForm({
         );
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo actualizar la cuenta.';
+        console.error('Error updating account:', error);
+
+        let message = 'No se pudo actualizar la cuenta.';
+
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: Record<string, unknown> } };
+          const responseData = axiosError.response?.data;
+
+          if (responseData?.detail) {
+            if (typeof responseData.detail === 'string') {
+              message = responseData.detail;
+            } else if (Array.isArray(responseData.detail)) {
+              // Manejar errores de validación de FastAPI
+              message = responseData.detail
+                .map((item: Record<string, unknown> | string) => {
+                  if (typeof item === 'string') return item;
+                  if (typeof item === 'object' && item.msg) return String(item.msg);
+                  if (typeof item === 'object' && item.message) return String(item.message);
+                  return 'Error de validación';
+                })
+                .join(', ');
+            } else {
+              message = 'Error de validación en los datos proporcionados.';
+            }
+          } else if (responseData?.message && typeof responseData.message === 'string') {
+            message = responseData.message;
+          } else if (responseData?.error && typeof responseData.error === 'string') {
+            message = responseData.error;
+          }
+        } else if (error instanceof Error) {
+          message = error.message;
+        }
+
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -103,12 +152,14 @@ export default function EditAccountForm({
           defaultValue={account.typeId}
         />
 
-        <Input
-          name="currency"
+        <DropMenu
+          name="currencyId"
           label="Moneda"
-          defaultValue={account.currency ?? ''}
+          placeholder={loadingCurrencies ? 'Cargando monedas...' : 'Selecciona una moneda'}
+          options={currencyOptions}
           required
-          icon="fas fa-coins"
+          disabled={loadingCurrencies || !currencyOptions.length}
+          defaultValue={account.currencyId}
         />
 
         <Input

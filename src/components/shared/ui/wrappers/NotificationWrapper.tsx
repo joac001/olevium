@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useEffect, useState } from 'react';
+import { StructuredError } from '@/lib/utils/errorSystem';
 
 import OverlayBase from '@/components/shared/ui/wrappers/OverlayBase';
 
@@ -17,6 +18,10 @@ interface NotificationWrapperProps {
     title?: string;
     description?: string;
   };
+  // Nuevas props para el sistema mejorado
+  structuredErrors?: StructuredError[];
+  onDismissError?: (errorId: string) => void;
+  retryActions?: Record<string, () => Promise<void>>;
 }
 
 const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
@@ -24,6 +29,9 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
   duration,
   onClose,
   props,
+  structuredErrors = [],
+  onDismissError,
+  retryActions = {},
 }) => {
   const [visible, setVisible] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -52,6 +60,49 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
   const { color = 'info', icon = 'info-circle', title = '', description = '' } = props || {};
 
   const variant = normalize(color);
+
+  // Si hay errores estructurados, renderiza el sistema mejorado
+  if (structuredErrors.length > 0) {
+    return (
+      <OverlayBase shouldRender={visible}>
+        <div
+          role="alert"
+          aria-live="polite"
+          data-ntf="danger"
+          className={[
+            'fixed top-5 left-1/2 -translate-x-1/2 z-notification',
+            'max-w-md w-fit rounded-xl px-3 py-2 md:px-4 md:py-3',
+            'shadow-[0_10px_25px_-5px_rgba(0,0,0,.12),_0_8px_10px_-6px_rgba(0,0,0,.12)]',
+            'bg-[color:var(--ntf-bg)] text-[color:var(--ntf-fg)]',
+            'transition-all duration-500 ease-in-out',
+            isFadingOut ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0',
+          ].join(' ')}
+        >
+          {structuredErrors.map(error => (
+            <div key={error.id} className="mb-3 last:mb-0">
+              <div className="flex items-start gap-3">
+                <i className="warning-triangle mt-0.5 text-lg md:text-xl" />
+                <div className="flex-1 text-pretty">
+                  <h3 className="text-base font-semibold md:text-lg">{error.title}</h3>
+                  <p className="text-sm font-normal opacity-90 md:text-base">{error.message}</p>
+                  {retryActions[error.id] && (
+                    <div className="mt-2">
+                      <button
+                        onClick={() => retryActions[error.id]()}
+                        className="px-3 py-1 text-xs bg-[color:var(--ntf-fg)] text-[color:var(--ntf-bg)] rounded hover:opacity-90 transition-opacity"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </OverlayBase>
+    );
+  }
 
   return (
     <OverlayBase shouldRender={visible}>

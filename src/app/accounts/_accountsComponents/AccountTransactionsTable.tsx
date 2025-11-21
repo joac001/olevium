@@ -134,7 +134,7 @@ export default function AccountTransactionsTable({
                     Categoría
                   </Typography>
                   <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
-                    {transaction.category ?? 'Sin categoría'}
+                    {transaction.category?.description ?? 'Sin categoría'}
                   </Typography>
                 </Box>
 
@@ -172,7 +172,7 @@ export default function AccountTransactionsTable({
                 {description}
               </Typography>
               <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
-                {transaction.category ?? 'Sin categoría'}
+                {transaction.category?.description ?? 'Sin categoría'}
               </Typography>
               <Typography variant="caption" className="text-xs text-[color:var(--text-muted)]">
                 {formattedDate}

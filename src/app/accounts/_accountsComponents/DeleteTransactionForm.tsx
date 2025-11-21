@@ -6,6 +6,7 @@ import { Box, FormWrapper, Typography } from '@/components/shared/ui';
 import type { AccountTransaction } from '@/types';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
 
 interface DeleteTransactionFormProps {
@@ -20,7 +21,7 @@ export default function DeleteTransactionForm({
   onSuccess,
 }: DeleteTransactionFormProps) {
   const deleteTransaction = useTransactionsStore(state => state.deleteTransaction);
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buttons = useMemo(
@@ -41,27 +42,27 @@ export default function DeleteTransactionForm({
       setIsSubmitting(true);
       try {
         await deleteTransaction(transaction.transactionId);
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Transacción eliminada',
-          'Quitamos el movimiento de la cuenta.'
+        const context = createOperationContext('delete', 'transacción', 'la transacción');
+        showSuccess(
+          'Transacción eliminada exitosamente. Movimiento quitado de la cuenta.',
+          context
         );
         onSuccess?.();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'No se pudo eliminar la transacción.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al eliminar',
-          message
-        );
+        const context = createOperationContext('delete', 'transacción', 'la transacción');
+        showError(error, context);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [deleteTransaction, showNotification, transaction.transactionId, onSuccess]
+    [
+      deleteTransaction,
+      showNotification,
+      transaction.transactionId,
+      onSuccess,
+      showError,
+      showSuccess,
+    ]
   );
 
   const amountLabel = useMemo(

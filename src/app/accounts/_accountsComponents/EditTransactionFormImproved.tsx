@@ -3,25 +3,38 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import type { AccountTransaction } from '@/types';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { useTransactionData } from '@/context/TransactionContext';
+import { useErrorHandler } from '@/lib/hooks/useErrorHandler';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import { normalizeTransactionFormData, useTransactionFormState } from './transactionFormUtils';
+import {
+  CUSTOM_CATEGORY_VALUE,
+  normalizeTransactionFormData,
+  useTransactionFormState,
+} from './transactionFormUtils';
 
-interface CreateTransactionFormProps {
+interface EditTransactionFormImprovedProps {
   accountId: string;
+  transaction: AccountTransaction;
   onSuccess?: () => void;
 }
 
-export default function CreateTransactionForm({
+export default function EditTransactionFormImproved({
   accountId,
+  transaction,
   onSuccess,
-}: CreateTransactionFormProps) {
-  const { showNotification, showError, showSuccess } = useNotification();
+}: EditTransactionFormImprovedProps) {
+  const { showNotification } = useNotification();
   const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } =
     useTransactionData();
-  const createTransaction = useTransactionsStore(state => state.createTransaction);
+  const updateTransaction = useTransactionsStore(state => state.updateTransaction);
+
+  const { handleUpdate } = useErrorHandler({
+    showSuccessOnCompletion: true,
+    successMessage: 'Guardamos los cambios del movimiento.',
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -43,14 +56,14 @@ export default function CreateTransactionForm({
     categories,
     transactionTypesLoading,
     categoriesLoading,
-    initialTypeId: transactionTypes[0]?.typeId ?? null,
-    shouldAutofillCategory: true,
+    initialTypeId: transaction.typeId ?? null,
+    initialCategoryId: transaction.categoryId ?? CUSTOM_CATEGORY_VALUE,
   });
 
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? 'Guardando...' : 'Agregar transacción',
+        text: isSubmitting ? 'Guardando...' : 'Guardar cambios',
         htmlType: 'submit' as const,
         type: 'primary' as const,
         disabled: isSubmitting,
@@ -75,9 +88,13 @@ export default function CreateTransactionForm({
       }
 
       setIsSubmitting(true);
-      try {
+
+      const context = createOperationContext('update', 'transacción', 'la transacción');
+
+      const result = await handleUpdate(async () => {
         const { amount, date, typeId, categoryId, category, description } = normalized;
-        await createTransaction({
+        return updateTransaction(transaction.transactionId, {
+          transactionId: transaction.transactionId,
           accountId,
           amount,
           date,
@@ -86,32 +103,25 @@ export default function CreateTransactionForm({
           category,
           description,
         });
+      }, 'transacción');
 
-        const context = createOperationContext('create', 'transacción', 'la transacción');
-        showSuccess(
-          'Transacción creada exitosamente. Movimiento registrado en la cuenta.',
-          context
-        );
+      setIsSubmitting(false);
 
+      if (result) {
         onSuccess?.();
-      } catch (error) {
-        const context = createOperationContext('create', 'transacción', 'la transacción');
-        showError(error, context);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
       accountId,
-      createTransaction,
       customCategoryDescription,
       customCategoryName,
+      selectedCategory,
       selectedType,
       showNotification,
+      transaction.transactionId,
+      updateTransaction,
       onSuccess,
-      selectedCategory,
-      showError,
-      showSuccess,
+      handleUpdate,
     ]
   );
 
@@ -123,19 +133,26 @@ export default function CreateTransactionForm({
           type="number"
           step="0.01"
           label="Monto"
-          placeholder="0"
+          defaultValue={transaction.amount}
           required
           icon="fas fa-money-bill-wave"
         />
 
-        <Input name="date" type="date" label="Fecha" required icon="fas fa-calendar-days" />
+        <Input
+          name="date"
+          type="date"
+          label="Fecha"
+          defaultValue={transaction.date.slice(0, 10)}
+          required
+          icon="fas fa-calendar-days"
+        />
 
         <DropMenu
           name="typeId"
           label="Tipo de transacción"
           options={typeOptions}
           required
-          disabled={typeDisabled}
+          disabled={true}
           onValueChange={handleTypeChange}
           value={selectedType ?? undefined}
         />
@@ -180,7 +197,7 @@ export default function CreateTransactionForm({
         <Input
           name="description"
           label="Descripción del movimiento"
-          placeholder="Detalle del movimiento"
+          defaultValue={transaction.description ?? ''}
           icon="fas fa-pen"
         />
       </Box>

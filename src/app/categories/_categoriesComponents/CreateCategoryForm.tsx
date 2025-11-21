@@ -7,6 +7,7 @@ import type { DropMenuOption } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { useTransactionData } from '@/context/TransactionContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { TransactionCategoryCreateInput } from '@/types';
 
 interface CreateCategoryFormProps {
@@ -14,7 +15,7 @@ interface CreateCategoryFormProps {
 }
 
 export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProps) {
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const createCategory = useTransactionsStore(state => state.createCategory);
   const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,17 +25,21 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   useEffect(() => {
     if (!transactionTypes.length && !transactionTypesLoading) {
       fetchTransactionTypes().catch(error => {
-        const message =
-          error instanceof Error ? error.message : 'No pudimos cargar los tipos de transacción.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al cargar tipos',
-          message
+        const context = createOperationContext(
+          'fetch',
+          'tipos de transacción',
+          'los tipos de transacción'
         );
+        showError(error, context);
       });
     }
-  }, [fetchTransactionTypes, showNotification, transactionTypes.length, transactionTypesLoading]);
+  }, [
+    fetchTransactionTypes,
+    showNotification,
+    transactionTypes.length,
+    transactionTypesLoading,
+    showError,
+  ]);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
@@ -108,21 +113,19 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
 
       try {
         await createCategory(payload);
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Categoría creada',
-          'La nueva categoría está lista para usarse.'
-        );
+
+        const context = createOperationContext('create', 'categoría', 'la categoría');
+        showSuccess('Categoría creada exitosamente. Está lista para usarse.', context);
+
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo crear la categoría.';
-        showNotification('fa-solid fa-triangle-exclamation', 'danger', 'Error al crear', message);
+        const context = createOperationContext('create', 'categoría', 'la categoría');
+        showError(error, context);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [createCategory, onSuccess, showNotification]
+    [createCategory, onSuccess, showNotification, showError, showSuccess]
   );
 
   return (

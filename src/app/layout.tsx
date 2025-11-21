@@ -37,9 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${manrope.className} antialiased`}>
         <ClientProviders>
           <NavBar title="Olevium" links={links} />
-          {children}
+          <main>{children}</main>
           <Typography variant="caption" className="block text-center mt-8 mb-4">
-            &copy; {new Date().getFullYear()} Olevium - v1.1.0
+            &copy; {new Date().getFullYear()} Olevium - v1.1.1 : Bug fixing release
           </Typography>
         </ClientProviders>
       </body>

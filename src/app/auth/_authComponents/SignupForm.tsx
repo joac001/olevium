@@ -7,11 +7,11 @@ import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuthStore } from '@/lib/stores/auth';
-import { extractAuthErrorMessage } from './authErrorUtils';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
 export default function SignupForm() {
   const router = useRouter();
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const signup = useAuthStore(state => state.signup);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,31 +56,19 @@ export default function SignupForm() {
           password: passwordValue,
         });
 
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Cuenta creada',
-          'Te redirigimos para continuar.'
-        );
+        const context = createOperationContext('create', 'cuenta', 'la cuenta');
+        showSuccess('Cuenta creada exitosamente. Te redirigimos para continuar.', context);
 
         router.push('/auth/verify-cta');
       } catch (error) {
-        const message = extractAuthErrorMessage(
-          error,
-          'No se pudo completar el registro. Inténtalo nuevamente.'
-        );
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error en el registro',
-          message
-        );
+        const context = createOperationContext('create', 'cuenta', 'la cuenta');
+        showError(error, context);
         return;
       } finally {
         setIsSubmitting(false);
       }
     },
-    [router, showNotification, signup]
+    [router, showNotification, signup, showError, showSuccess]
   );
 
   return (

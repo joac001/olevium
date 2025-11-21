@@ -7,6 +7,7 @@ import type { AccountTransaction } from '@/types';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { useTransactionData } from '@/context/TransactionContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 import {
   CUSTOM_CATEGORY_VALUE,
   normalizeTransactionFormData,
@@ -24,7 +25,7 @@ export default function EditTransactionForm({
   transaction,
   onSuccess,
 }: EditTransactionFormProps) {
-  const { showNotification } = useNotification();
+  const { showNotification, showError, showSuccess } = useNotification();
   const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } =
     useTransactionData();
   const updateTransaction = useTransactionsStore(state => state.updateTransaction);
@@ -94,22 +95,15 @@ export default function EditTransactionForm({
           description,
         });
 
-        showNotification(
-          'fa-solid fa-circle-check',
-          'success',
-          'Transacción actualizada',
-          'Guardamos los cambios del movimiento.'
-        );
+        const context = createOperationContext('update', 'transacción', 'la transacción');
+        showSuccess('Transacción actualizada exitosamente. Cambios guardados.', context);
+
         onSuccess?.();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'No se pudo actualizar la transacción.';
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Error al actualizar',
-          message
-        );
+        console.error('Error updating transaction:', error);
+
+        const context = createOperationContext('update', 'transacción', 'la transacción');
+        showError(error, context);
       } finally {
         setIsSubmitting(false);
       }
@@ -124,6 +118,8 @@ export default function EditTransactionForm({
       transaction.transactionId,
       updateTransaction,
       onSuccess,
+      showError,
+      showSuccess,
     ]
   );
 
@@ -154,7 +150,7 @@ export default function EditTransactionForm({
           label="Tipo de transacción"
           options={typeOptions}
           required
-          disabled={typeDisabled}
+          disabled={true}
           onValueChange={handleTypeChange}
           value={selectedType ?? undefined}
         />

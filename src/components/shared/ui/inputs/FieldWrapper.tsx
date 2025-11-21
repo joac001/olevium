@@ -50,7 +50,7 @@ export default function FieldWrapper({
         <Box className={clsx('flex items-center gap-1 pb-1', disabled ? 'opacity-55' : undefined)}>
           <label
             htmlFor={labelId}
-            className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] md:text-base"
+            className="text-sm font-semibold tracking-[0.18em] text-[color:var(--text-muted)] md:text-base"
           >
             {label}
           </label>

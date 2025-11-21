@@ -1,5 +1,5 @@
 import type { DropMenuOption } from '@/components/shared/ui';
-import type { AccountType } from '@/types';
+import type { AccountType, Currency } from '@/types';
 
 interface NormalizeAccountFormArgs {
   formData: FormData;
@@ -9,7 +9,7 @@ interface NormalizeAccountFormArgs {
 export interface NormalizedAccountFormData {
   name: string;
   typeId: number;
-  currency: string;
+  currencyId: number;
   balance: number;
 }
 
@@ -19,13 +19,19 @@ export const buildAccountTypeOptions = (accountTypes: AccountType[]): DropMenuOp
     label: type.name,
   }));
 
+export const buildCurrencyOptions = (currencies: Currency[]): DropMenuOption[] =>
+  currencies.map(currency => ({
+    value: currency.currencyId,
+    label: `${currency.label} - ${currency.name}`,
+  }));
+
 export const normalizeAccountFormData = ({
   formData,
   showNotification,
 }: NormalizeAccountFormArgs): NormalizedAccountFormData | null => {
   const nameValue = formData.get('name');
   const typeValue = formData.get('typeId');
-  const currencyValue = formData.get('currency');
+  const currencyValue = formData.get('currencyId');
   const balanceValue = formData.get('balance');
 
   if (
@@ -44,19 +50,19 @@ export const normalizeAccountFormData = ({
   }
 
   const trimmedName = nameValue.trim();
-  const trimmedCurrency = currencyValue.trim();
 
-  if (!trimmedName || !trimmedCurrency) {
+  if (!trimmedName) {
     showNotification(
       'fa-solid fa-triangle-exclamation',
       'danger',
       'Datos inválidos',
-      'El nombre y la moneda son obligatorios.'
+      'El nombre de la cuenta es obligatorio.'
     );
     return null;
   }
 
   const typeId = Number(typeValue);
+  const currencyId = Number(currencyValue);
   const balance = Number(balanceValue);
 
   if (!Number.isFinite(balance)) {
@@ -69,10 +75,20 @@ export const normalizeAccountFormData = ({
     return null;
   }
 
+  if (!Number.isFinite(currencyId) || currencyId <= 0) {
+    showNotification(
+      'fa-solid fa-triangle-exclamation',
+      'danger',
+      'Datos inválidos',
+      'Debes seleccionar una moneda válida.'
+    );
+    return null;
+  }
+
   return {
     name: trimmedName,
     typeId,
-    currency: trimmedCurrency,
+    currencyId,
     balance,
   };
 };

@@ -241,6 +241,7 @@ export const normalizeTransactionFormData = ({
   }
 
   const typeId = selectedType ?? normalizeTypeValue(typeValue);
+
   if (!typeId) {
     showNotification(
       'fa-solid fa-triangle-exclamation',

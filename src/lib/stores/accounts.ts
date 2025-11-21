@@ -10,24 +10,27 @@ import type {
   AccountCreateInput,
   ApiUserAccount,
   ApiAccountType,
+  ApiCurrency,
+  Currency,
 } from '@/types';
 import { resolveAxiosError } from '@/lib/utils/errorHandling';
 
 interface AccountsState {
   accounts: Account[];
   accountTypes: AccountType[];
+  currencies: Currency[];
   accountDetails: Record<string, AccountDetail>;
   loading: boolean;
   loadingTypes: boolean;
+  loadingCurrencies: boolean;
   creating: boolean;
   fetchAccounts: () => Promise<Account[]>;
   fetchAccountTypes: () => Promise<AccountType[]>;
+  fetchCurrencies: () => Promise<Currency[]>;
+  getCurrencies: () => Promise<Currency[]>;
   fetchAccountDetail: (accountId: string) => Promise<AccountDetail>;
   createAccount: (input: AccountCreateInput) => Promise<Account>;
-  updateAccount: (
-    accountId: string,
-    payload: Partial<AccountCreateInput>
-  ) => Promise<AccountDetail>;
+  updateAccount: (accountId: string, payload: Partial<AccountCreateInput>) => Promise<AccountDetail>;
   deleteAccount: (accountId: string) => Promise<void>;
   applyBalanceDelta: (accountId: string, delta: number) => void;
   reset: () => void;
@@ -37,7 +40,8 @@ const mapAccount = (payload: ApiUserAccount): Account => ({
   accountId: payload.account_id,
   name: payload.name,
   typeId: payload.type_id,
-  currency: payload.currency,
+  currencyId: payload.currency_id,
+  currency: payload.currency?.label ?? null,
   balance: payload.balance,
   createdAt: payload.created_at,
   deleted: payload.deleted,
@@ -52,14 +56,23 @@ const mapAccountType = (payload: ApiAccountType): AccountType => ({
   createdAt: payload.created_at,
 });
 
+const mapCurrency = (payload: ApiCurrency): Currency => ({
+  currencyId: payload.currency_id,
+  label: payload.label,
+  name: payload.name,
+});
+
 const ACCOUNTS_ERROR_FALLBACK = 'No se pudo completar la operación sobre cuentas.';
+const CURRENCIES_ERROR_FALLBACK = 'No pudimos cargar las monedas disponibles.';
 
 export const useAccountsStore = create<AccountsState>((set, get) => ({
   accounts: [],
   accountTypes: [],
+  currencies: [],
   accountDetails: {},
   loading: false,
   loadingTypes: false,
+  loadingCurrencies: false,
   creating: false,
 
   fetchAccounts: async () => {
@@ -92,13 +105,34 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     }
   },
 
+  fetchCurrencies: async () => {
+    set({ loadingCurrencies: true });
+    try {
+      const { data } = await http.get<ApiCurrency[]>('/currencies/');
+      const mapped = data.map(mapCurrency);
+      set({ currencies: mapped, loadingCurrencies: false });
+      return mapped;
+    } catch (error) {
+      set({ loadingCurrencies: false });
+      throw resolveAxiosError(error, CURRENCIES_ERROR_FALLBACK);
+    }
+  },
+
+  getCurrencies: async () => {
+    const cached = get().currencies;
+    if (cached.length) {
+      return cached;
+    }
+    return get().fetchCurrencies();
+  },
+
   createAccount: async input => {
     set({ creating: true });
     try {
       const payload = {
         name: input.name,
         type_id: input.typeId,
-        currency: input.currency,
+        currency_id: input.currencyId,
         balance: input.balance,
       };
 
@@ -135,7 +169,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       const { data } = await http.put<ApiUserAccount>(`/accounts/${accountId}`, {
         ...(payload.name ? { name: payload.name } : {}),
         ...(payload.typeId !== undefined ? { type_id: payload.typeId } : {}),
-        ...(payload.currency ? { currency: payload.currency } : {}),
+        ...(payload.currencyId !== undefined ? { currency_id: payload.currencyId } : {}),
         ...(payload.balance !== undefined ? { balance: payload.balance } : {}),
       });
       const updated = mapAccountDetail(data);
@@ -187,9 +221,11 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     set({
       accounts: [],
       accountTypes: [],
+      currencies: [],
       accountDetails: {},
       loading: false,
       loadingTypes: false,
+      loadingCurrencies: false,
       creating: false,
     }),
 }));

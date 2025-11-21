@@ -1,3 +1,4 @@
+import type { ApiCurrency } from './currency';
 import type { CurrencyCode, Iso8601DateTimeString, Nullable, Ulid } from './common';
 
 export interface ApiUserAccount {
@@ -5,7 +6,8 @@ export interface ApiUserAccount {
   user_id: Ulid;
   name: string;
   type_id: number;
-  currency: Nullable<CurrencyCode>;
+  currency_id: number;
+  currency: Nullable<ApiCurrency>;
   balance: number;
   created_at: Iso8601DateTimeString;
   deleted: boolean;
@@ -22,6 +24,7 @@ export interface Account {
   accountId: Ulid;
   name: string;
   typeId: number;
+  currencyId: number;
   currency: Nullable<CurrencyCode>;
   balance: number;
   createdAt: Iso8601DateTimeString;
@@ -40,6 +43,6 @@ export interface AccountType {
 export interface AccountCreateInput {
   name: string;
   typeId: number;
-  currency: CurrencyCode;
+  currencyId: number;
   balance: number;
 }

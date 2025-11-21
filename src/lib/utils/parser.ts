@@ -83,11 +83,35 @@ export const formatAmount = (value: number, currency: string | null | undefined)
 };
 
 export const formatDateToISO = (date: string): string => {
-  const parsed = Date.parse(date);
-  if (Number.isNaN(parsed)) {
-    return new Date().toISOString();
+  // Handle dd/mm/yyyy format (from display input)
+  const ddmmyyyyMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(date);
+  if (ddmmyyyyMatch) {
+    const [, day, month, year] = ddmmyyyyMatch;
+    const isoDate = new Date(`${year}-${month}-${day}T00:00:00Z`);
+    if (!Number.isNaN(isoDate.getTime())) {
+      return isoDate.toISOString();
+    }
   }
-  const iso = new Date(parsed);
-  iso.setUTCHours(0, 0, 0, 0);
-  return iso.toISOString();
+
+  // Handle yyyy-mm-dd format (from native date input)
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (isoMatch) {
+    const isoDate = new Date(`${date}T00:00:00Z`);
+    if (!Number.isNaN(isoDate.getTime())) {
+      return isoDate.toISOString();
+    }
+  }
+
+  // Fallback for other formats - try direct parsing
+  const parsed = Date.parse(date);
+  if (!Number.isNaN(parsed)) {
+    const isoDate = new Date(parsed);
+    isoDate.setUTCHours(0, 0, 0, 0);
+    return isoDate.toISOString();
+  }
+
+  // If all parsing fails, return today's date ISO
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return today.toISOString();
 };

@@ -3,11 +3,9 @@ import axios from 'axios';
 
 import { useAuthStore } from '@/lib/stores/auth';
 
-const shouldSendCredentials = process.env.NEXT_PUBLIC_API_WITH_CREDENTIALS === 'true';
-
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: shouldSendCredentials,
+  withCredentials: true,
 });
 
 // Flag para evitar loops
@@ -53,6 +51,26 @@ http.interceptors.response.use(
     }
 
     isRefreshing = true;
+
+    // Verificar si hay refresh token antes de intentar el refresh
+    const { refreshToken } = useAuthStore.getState();
+    if (!refreshToken) {
+      // Si no hay refresh token, proceder directamente con limpieza y redirección
+      useAuthStore.getState().clearSession();
+      pendingQueue = [];
+      isRefreshing = false;
+
+      if (typeof window !== 'undefined' && !redirectingToAuth) {
+        redirectingToAuth = true;
+        if (window.location.pathname !== '/auth') {
+          window.location.replace('/auth');
+        }
+      }
+
+      // Rechazar el request original sin mensaje de error específico
+      return Promise.reject(error);
+    }
+
     try {
       await useAuthStore.getState().refreshSession();
 
@@ -62,9 +80,15 @@ http.interceptors.response.use(
       queue.forEach(fn => fn());
       return retry();
     } catch (e) {
-      try {
-        await useAuthStore.getState().logout(); // limpiar estado en el backend
-      } catch {
+      // Solo intentar logout si hay tokens para limpiar en el backend
+      const { accessToken } = useAuthStore.getState();
+      if (accessToken) {
+        try {
+          await useAuthStore.getState().logout(); // limpiar estado en el backend
+        } catch {
+          useAuthStore.getState().clearSession();
+        }
+      } else {
         useAuthStore.getState().clearSession();
       }
       pendingQueue = [];
