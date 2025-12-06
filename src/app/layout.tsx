@@ -23,6 +23,9 @@ const links: NavLink[] = [
   { icon: 'fas fa-home', label: 'Inicio', href: '/' } as NavLink,
   { icon: 'fas fa-wallet', label: 'Cuentas', href: '/accounts' } as NavLink,
   { icon: 'fas fa-tags', label: 'Categorías', href: '/categories' } as NavLink,
+  { icon: 'fas fa-table', label: 'Transacciones', href: '/transactions' } as NavLink,
+  { icon: 'fas fa-rotate', label: 'Recurrentes', href: '/recurring-transactions' } as NavLink,
+  { icon: 'fas fa-user', label: 'Perfil', href: '/profile' } as NavLink,
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

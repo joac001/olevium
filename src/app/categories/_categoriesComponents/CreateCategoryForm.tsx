@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, DropMenu, Typography, Button } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
@@ -18,28 +18,45 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   const { showNotification, showError, showSuccess } = useNotification();
   const createCategory = useTransactionsStore(state => state.createCategory);
   const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
+  const [typesError, setTypesError] = useState<string | null>(null);
+  const [isRequestingTypes, setIsRequestingTypes] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { transactionTypes, transactionTypesLoading } = useTransactionData();
 
-  useEffect(() => {
-    if (!transactionTypes.length && !transactionTypesLoading) {
-      fetchTransactionTypes().catch(error => {
-        const context = createOperationContext(
-          'fetch',
-          'tipos de transacción',
-          'los tipos de transacción'
-        );
-        showError(error, context);
-      });
+  const ensureTransactionTypes = useCallback(async () => {
+    if (transactionTypesLoading || isRequestingTypes) return;
+    if (transactionTypes.length) {
+      setTypesError(null);
+      return;
+    }
+
+    setIsRequestingTypes(true);
+    try {
+      await fetchTransactionTypes();
+      setTypesError(null);
+    } catch (error) {
+      const context = createOperationContext(
+        'fetch',
+        'tipos de transaccion',
+        'los tipos de transaccion'
+      );
+      showError(error, context);
+      setTypesError('No pudimos cargar los tipos de transaccion. Reintenta nuevamente.');
+    } finally {
+      setIsRequestingTypes(false);
     }
   }, [
     fetchTransactionTypes,
-    showNotification,
+    isRequestingTypes,
+    showError,
     transactionTypes.length,
     transactionTypesLoading,
-    showError,
   ]);
+
+  useEffect(() => {
+    void ensureTransactionTypes();
+  }, [ensureTransactionTypes]);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
@@ -53,7 +70,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   const buttons = useMemo(
     () => [
       {
-        text: isSubmitting ? 'Creando...' : 'Crear categoría',
+        text: isSubmitting ? 'Creando...' : 'Crear categoria',
         htmlType: 'submit' as const,
         type: 'primary' as const,
         disabled: isSubmitting,
@@ -73,7 +90,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           'fa-solid fa-triangle-exclamation',
           'danger',
           'Formulario incompleto',
-          'Descripción y tipo son obligatorios.'
+          'Descripcion y tipo son obligatorios.'
         );
         return;
       }
@@ -83,8 +100,8 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
-          'Datos inválidos',
-          'La descripción no puede estar vacía.'
+          'Datos invalidos',
+          'La descripcion no puede estar vacia.'
         );
         return;
       }
@@ -94,8 +111,8 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
-          'Tipo inválido',
-          'Selecciona un tipo válido.'
+          'Tipo invalido',
+          'Selecciona un tipo valido.'
         );
         return;
       }
@@ -114,12 +131,12 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       try {
         await createCategory(payload);
 
-        const context = createOperationContext('create', 'categoría', 'la categoría');
-        showSuccess('Categoría creada exitosamente. Está lista para usarse.', context);
+        const context = createOperationContext('create', 'categoria', 'la categoria');
+        showSuccess('Categoria creada exitosamente. Esta lista para usarse.', context);
 
         onSuccess?.();
       } catch (error) {
-        const context = createOperationContext('create', 'categoría', 'la categoría');
+        const context = createOperationContext('create', 'categoria', 'la categoria');
         showError(error, context);
       } finally {
         setIsSubmitting(false);
@@ -128,13 +145,16 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
     [createCategory, onSuccess, showNotification, showError, showSuccess]
   );
 
+  const isLoadingTypes = transactionTypesLoading || isRequestingTypes;
+  const hasOptions = typeOptions.length > 0;
+
   return (
     <FormWrapper onSubmit={handleSubmit} buttons={buttons} className="flex flex-col gap-5">
       <Box className="space-y-4">
         <Input
           name="description"
-          label="Descripción"
-          placeholder="Nombre de la categoría"
+          label="Descripcion"
+          placeholder="Nombre de la categoria"
           required
           icon="fas fa-tag"
         />
@@ -144,13 +164,36 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           label="Tipo"
           options={typeOptions}
           required
-          disabled={transactionTypesLoading || !typeOptions.length}
+          disabled={isLoadingTypes}
+          placeholder={
+            isLoadingTypes
+              ? 'Cargando tipos...'
+              : hasOptions
+                ? 'Selecciona una opcion'
+                : 'Presiona "Reintentar" para cargar tipos'
+          }
         />
 
-        {!transactionTypesLoading && !typeOptions.length && (
+        {isLoadingTypes && (
           <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
-            No hay tipos de transacción disponibles. Crea uno antes de registrar una categoría.
+            Cargando tipos de transaccion...
           </Typography>
+        )}
+
+        {!isLoadingTypes && !hasOptions && (
+          <Box className="flex flex-col gap-2">
+            <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
+              {typesError ??
+                'No hay tipos de transaccion disponibles. Reintenta cargar antes de registrar una categoria.'}
+            </Typography>
+            <Button
+              type="secondary"
+              text="Reintentar"
+              onClick={ensureTransactionTypes}
+              disabled={isLoadingTypes}
+              className="w-fit px-3 py-1 text-xs"
+            />
+          </Box>
         )}
 
         <Input name="color" label="Color (opcional)" placeholder="#AABBCC" icon="fas fa-palette" />

@@ -78,8 +78,9 @@ const TRANSACTION_ERROR_FALLBACK = 'No se pudo completar la operación sobre tra
 interface TransactionsState {
   accountTransactions: Record<string, AccountTransaction[]>;
   transactionTypes: TransactionType[];
+  transactionTypesLoading: boolean;
   categories: TransactionCategory[];
-  loading: boolean;
+  categoriesLoading: boolean;
   fetchAccountTransactions: (accountId: string) => Promise<AccountTransaction[]>;
   fetchTransactionTypes: () => Promise<TransactionType[]>;
   fetchCategories: () => Promise<TransactionCategory[]>;
@@ -98,51 +99,56 @@ interface TransactionsState {
 export const useTransactionsStore = create<TransactionsState>((set, get) => ({
   accountTransactions: {},
   transactionTypes: [],
+  transactionTypesLoading: false,
   categories: [],
-  loading: false,
+  categoriesLoading: false,
 
   fetchAccountTransactions: async accountId => {
-    set({ loading: true });
+    // No usamos el flag global para no bloquear otros fetches; el estado de carga de tipos/categor��as se maneja aparte.
     try {
       const { data } = await http.get<ApiUserTransaction[]>(
         `/transactions/by_account/${accountId}`
       );
       const transactions = data.map(mapTransaction);
       set(prev => ({
-        loading: false,
         accountTransactions: { ...prev.accountTransactions, [accountId]: transactions },
       }));
       return transactions;
     } catch (error) {
-      set({ loading: false });
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
   fetchTransactionTypes: async () => {
-    const cached = get().transactionTypes;
-    if (cached.length) return cached;
+    const { transactionTypes, transactionTypesLoading } = get();
+    if (transactionTypes.length) return transactionTypes;
+    if (transactionTypesLoading) return transactionTypes;
 
+    set({ transactionTypesLoading: true });
     try {
       const { data } = await http.get<ApiTransactionType[]>(`/transactions/types`);
       const mapped = data.map(mapTransactionType);
-      set({ transactionTypes: mapped });
+      set({ transactionTypes: mapped, transactionTypesLoading: false });
       return mapped;
     } catch (error) {
+      set({ transactionTypesLoading: false });
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
   fetchCategories: async () => {
-    const cached = get().categories;
-    if (cached.length) return cached;
+    const { categories, categoriesLoading } = get();
+    if (categories.length) return categories;
+    if (categoriesLoading) return categories;
 
+    set({ categoriesLoading: true });
     try {
       const { data } = await http.get<ApiTransactionCategory[]>(`/categories/`);
       const mapped = data.map(mapCategory);
-      set({ categories: mapped });
+      set({ categories: mapped, categoriesLoading: false });
       return mapped;
     } catch (error) {
+      set({ categoriesLoading: false });
       throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
@@ -353,7 +359,8 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     set({
       accountTransactions: {},
       transactionTypes: [],
+      transactionTypesLoading: false,
       categories: [],
-      loading: false,
+      categoriesLoading: false,
     }),
 }));

@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useAuthStore } from '@/lib/stores/auth';
 import type { TransactionCategory, TransactionType } from '@/types';
 
 interface TransactionDataContextValue {
@@ -27,57 +28,54 @@ interface TransactionDataProviderProps {
 }
 
 export function TransactionDataProvider({ children }: TransactionDataProviderProps) {
-  const [transactionTypesLoading, setTransactionTypesLoading] = useState(false);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
-
   const transactionTypes = useTransactionsStore(state => state.transactionTypes);
+  const transactionTypesLoading = useTransactionsStore(state => state.transactionTypesLoading);
+
   const categories = useTransactionsStore(state => state.categories);
+  const categoriesLoading = useTransactionsStore(state => state.categoriesLoading);
+
   const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
   const fetchCategories = useTransactionsStore(state => state.fetchCategories);
+  const authLoading = useAuthStore(state => state.loading);
+  const accessToken = useAuthStore(state => state.accessToken);
+  const refreshToken = useAuthStore(state => state.refreshToken);
 
   useEffect(() => {
-    if (transactionTypes.length) {
+    if (transactionTypes.length || transactionTypesLoading) {
       return;
     }
 
-    let active = true;
-    setTransactionTypesLoading(true);
-    fetchTransactionTypes()
-      .catch(error => {
-        if (!active) return;
-        console.error('Transaction types fetch failed', error);
-      })
-      .finally(() => {
-        if (!active) return;
-        setTransactionTypesLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [fetchTransactionTypes, transactionTypes.length]);
-
-  useEffect(() => {
-    if (categories.length) {
+    // Evitar llamadas 401 durante hidrataci��n o antes de tener tokens disponibles
+    if (authLoading || (!accessToken && !refreshToken)) {
       return;
     }
 
-    let active = true;
-    setCategoriesLoading(true);
-    fetchCategories()
-      .catch(error => {
-        if (!active) return;
-        console.error('Categories fetch failed', error);
-      })
-      .finally(() => {
-        if (!active) return;
-        setCategoriesLoading(false);
-      });
+    fetchTransactionTypes().catch(error => {
+      console.error('Transaction types fetch failed', error);
+    });
+  }, [
+    accessToken,
+    authLoading,
+    fetchTransactionTypes,
+    refreshToken,
+    transactionTypes.length,
+    transactionTypesLoading,
+  ]);
 
-    return () => {
-      active = false;
-    };
-  }, [categories.length, fetchCategories]);
+  useEffect(() => {
+    if (categories.length || categoriesLoading) {
+      return;
+    }
+
+    // Evitar llamadas 401 durante hidrataci��n o antes de tener tokens disponibles
+    if (authLoading || (!accessToken && !refreshToken)) {
+      return;
+    }
+
+    fetchCategories().catch(error => {
+      console.error('Categories fetch failed', error);
+    });
+  }, [categories.length, categoriesLoading, fetchCategories, authLoading, accessToken, refreshToken]);
 
   const value = useMemo<TransactionDataContextValue>(
     () => ({
