@@ -2,9 +2,16 @@
 
 import { ActionButton, Banner, Box, Typography, Skeleton } from '@/components/shared/ui';
 import { useProfilePage } from './ProfileProvider';
+import { useModal } from '@/context/ModalContext';
+import WhatsAppTokenModal from './WhatsAppTokenModal';
 
 export default function ProfileHeader() {
   const { usingMockData, handleRefresh, isLoading } = useProfilePage();
+  const { showModal } = useModal();
+
+  const handleOpenWhatsApp = () => {
+    showModal(<WhatsAppTokenModal />);
+  };
 
   if (isLoading) {
     return (
@@ -30,6 +37,12 @@ export default function ProfileHeader() {
           type="accent"
           text="Actualizar"
           onClick={handleRefresh}
+        />
+        <ActionButton
+          icon="fab fa-whatsapp"
+          type="success"
+          text="WhatsApp"
+          onClick={handleOpenWhatsApp}
         />
       </Box>
       {usingMockData && (

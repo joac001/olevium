@@ -68,7 +68,7 @@ export default function ProfileForm() {
           label="Email"
           type="email"
           value={email}
-          onValueChange={(value) => setEmail(String(value ?? ''))}
+          disabled
         />
       </FormWrapper>
     </Box>

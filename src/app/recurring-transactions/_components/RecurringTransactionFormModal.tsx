@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   Box,
+  Card,
   FormWrapper,
   Input,
   DropMenu,
@@ -171,10 +172,7 @@ export default function RecurringTransactionFormModal({
   };
 
   return (
-    <Box className="w-full max-w-xl space-y-4 p-2 md:p-4">
-      <Typography variant="h2">
-        {mode === 'create' ? 'Crear transacción recurrente' : 'Editar transacción recurrente'}
-      </Typography>
+    <Card tone="accent" title={mode === 'create' ? 'Crear transacción recurrente' : 'Editar transacción recurrente'}>
       <FormWrapper
         onSubmit={handleSubmit}
         buttons={buttons}
@@ -237,6 +235,6 @@ export default function RecurringTransactionFormModal({
           </Box>
         )}
       </FormWrapper>
-    </Box>
+    </Card>
   );
 }

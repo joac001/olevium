@@ -50,3 +50,42 @@ export const useChangePasswordMutation = () => {
     mutationFn: putPassword,
   });
 };
+
+// Chat Token mutations
+type ChatTokenResponse = {
+  chat_token: string;
+};
+
+async function createChatToken(): Promise<ChatTokenResponse> {
+  const response = await apiRequest('/api/auth/chat_token/create', {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo crear el token de chat (status ${response.status})`);
+  }
+  return (await response.json()) as ChatTokenResponse;
+}
+
+async function regenerateChatToken(): Promise<ChatTokenResponse> {
+  const response = await apiRequest('/api/auth/chat_token/revoke', {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo regenerar el token de chat (status ${response.status})`);
+  }
+  return (await response.json()) as ChatTokenResponse;
+}
+
+export const useCreateChatTokenMutation = () => {
+  return useMutation({
+    mutationFn: createChatToken,
+  });
+};
+
+export const useRegenerateChatTokenMutation = () => {
+  return useMutation({
+    mutationFn: regenerateChatToken,
+  });
+};
