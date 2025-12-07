@@ -2,13 +2,14 @@ import { Container, Box, Card, Typography } from '@/components/shared/ui';
 import VerifyEmailHandler from '../_authComponents/VerifyEmailHandler';
 
 type VerifyEmailPageProps = {
-  searchParams?: {
+  searchParams: Promise<{
     token?: string;
-  };
+  }>;
 };
 
-export default function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const tokenParam = searchParams?.token;
+export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
+  const params = await searchParams;
+  const tokenParam = params?.token;
   const token = typeof tokenParam === 'string' ? tokenParam : undefined;
 
   return (
