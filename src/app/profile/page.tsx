@@ -7,7 +7,7 @@ import ChangePasswordForm from './_components/ChangePasswordForm';
 export default function ProfilePage() {
   return (
     <ProfileProvider>
-      <Container className="gap-6">
+      <Container className="gap-6 items-center py-10">
         <ProfileHeader />
         <ProfileForm />
         <ChangePasswordForm />

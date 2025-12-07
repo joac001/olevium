@@ -4,3 +4,4 @@ export * from './inputs';
 export * from './text';
 export * from './wrappers';
 export * from './header';
+export * from './feedback';

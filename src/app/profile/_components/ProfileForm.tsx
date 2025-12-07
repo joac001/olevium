@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, Typography, Skeleton } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
 import { useUpdateProfileMutation } from '@/features/user/mutations';
 import { useProfilePage } from './ProfileProvider';
@@ -42,7 +42,14 @@ export default function ProfileForm() {
   ];
 
   if (isLoading) {
-    return <Typography variant="body">Cargando perfil...</Typography>;
+    return (
+      <Box className="w-full max-w-lg space-y-3">
+        <Skeleton width="45%" height="20px" />
+        <Skeleton height="46px" rounded="14px" />
+        <Skeleton height="46px" rounded="14px" />
+        <Skeleton height="42px" rounded="12px" />
+      </Box>
+    );
   }
 
   return (

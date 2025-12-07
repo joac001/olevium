@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, Typography, Skeleton } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
 import { useChangePasswordMutation } from '@/features/user/mutations';
 import { useNotification } from '@/context/NotificationContext';
+import { useProfilePage } from './ProfileProvider';
 
 export default function ChangePasswordForm() {
+  const { isLoading } = useProfilePage();
   const { showNotification } = useNotification();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -42,6 +44,18 @@ export default function ChangePasswordForm() {
       disabled: changePasswordMutation.isPending,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <Box className="w-full max-w-lg space-y-3">
+        <Skeleton width="55%" height="22px" />
+        <Skeleton height="46px" rounded="14px" />
+        <Skeleton height="46px" rounded="14px" />
+        <Skeleton height="46px" rounded="14px" />
+        <Skeleton height="42px" rounded="12px" />
+      </Box>
+    );
+  }
 
   return (
     <Box className="w-full max-w-lg">

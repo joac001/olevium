@@ -234,7 +234,10 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
         const el = listRef.current?.querySelector<HTMLElement>(
           `[data-index="${idx >= 0 ? idx : 0}"]`
         );
-        el?.scrollIntoView({ block: 'nearest' });
+        // Evitamos scroll de la página al abrir el menú.
+        if (el && listRef.current) {
+          listRef.current.scrollTop = el.offsetTop - listRef.current.clientHeight / 2;
+        }
       });
     }
   }, [isOpen, options, selectedValue]);

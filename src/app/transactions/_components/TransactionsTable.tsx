@@ -34,11 +34,28 @@ export default function TransactionsTable() {
           </thead>
           <tbody className="divide-y divide-white/5 text-[color:var(--text-secondary)]">
             {isLoading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center">
-                  Cargando movimientos...
-                </td>
-              </tr>
+              Array.from({ length: 4 }).map((_, idx) => (
+                <tr key={`sk-row-${idx}`}>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-24 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-40 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-28 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-36 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-20 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="skeleton block h-4 w-24 rounded-md" />
+                  </td>
+                </tr>
+              ))
             ) : filteredTransactions.length ? (
               filteredTransactions.map((tx) => {
                 const account = accountDictionary[String(tx.account_id)];

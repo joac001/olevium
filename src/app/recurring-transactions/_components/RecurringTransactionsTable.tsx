@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Box, Typography, ActionButton } from '@/components/shared/ui';
+import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
 import { useRecurringTransactionsPage } from './RecurringTransactionsProvider';
 import { formatCurrency, formatDate } from '@/lib/format';
 
@@ -27,11 +27,25 @@ export default function RecurringTransactionsTable() {
           </thead>
           <tbody className="divide-y divide-white/5 text-[color:var(--text-secondary)]">
             {isLoading ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center">
-                  Cargando transacciones recurrentes...
-                </td>
-              </tr>
+              Array.from({ length: 4 }).map((_, idx) => (
+                <tr key={`sk-rec-${idx}`}>
+                  <td className="px-4 py-4">
+                    <Skeleton width="60%" height="14px" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton width="40%" height="14px" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton width="50%" height="14px" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton width="70%" height="14px" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton width="30%" height="14px" />
+                  </td>
+                </tr>
+              ))
             ) : recurringTransactions.length ? (
               recurringTransactions.map((transaction) => (
                 <tr key={transaction.recurring_transaction_id} className="transition hover:bg-white/5">

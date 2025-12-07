@@ -1,10 +1,20 @@
 'use client';
 
-import { ActionButton, Banner, Box, Typography } from '@/components/shared/ui';
+import { ActionButton, Banner, Box, Typography, Skeleton } from '@/components/shared/ui';
 import { useProfilePage } from './ProfileProvider';
 
 export default function ProfileHeader() {
-  const { usingMockData, handleRefresh } = useProfilePage();
+  const { usingMockData, handleRefresh, isLoading } = useProfilePage();
+
+  if (isLoading) {
+    return (
+      <Box className="flex flex-col gap-3">
+        <Skeleton width="40%" height="32px" />
+        <Skeleton width="65%" height="18px" />
+        <Skeleton width="140px" height="44px" />
+      </Box>
+    );
+  }
 
   return (
     <Box className="flex flex-col gap-3">
