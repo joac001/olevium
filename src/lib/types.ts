@@ -2,7 +2,7 @@ import type {
   ApiUserAccount,
   ApiAccountType,
   ApiCurrency,
-  Transaction as RootTransaction,
+  ApiUserTransaction,
 } from '@/types';
 import type { RecurringTransaction as RootRecurringTransaction } from '@/types/recurring';
 
@@ -20,7 +20,10 @@ export type Category = {
   is_default?: boolean;
 };
 
-export type Transaction = RootTransaction;
+export type Transaction = ApiUserTransaction & {
+  account?: unknown;
+  transaction_type?: unknown;
+};
 export type RecurringTransaction = RootRecurringTransaction;
 
 export type CreateAccountPayload = {

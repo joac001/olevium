@@ -101,10 +101,13 @@ function filterTransactions(
 
     const categoryRecord = categoryDictionary[String(tx.category_id ?? '')];
     const categoryName =
-      tx.category ??
-      (categoryRecord
-        ? [categoryRecord.icon, categoryRecord.description].filter(Boolean).join(' ').trim()
-        : '');
+      typeof tx.category === 'string'
+        ? tx.category
+        : tx.category && typeof tx.category === 'object' && 'description' in tx.category
+          ? String((tx.category as any).description ?? '')
+          : categoryRecord
+            ? [categoryRecord.icon, categoryRecord.description].filter(Boolean).join(' ').trim()
+            : '';
 
     if (categoryFilter !== 'all' && categoryName.toLowerCase() !== categoryFilter.toLowerCase()) {
       return false;
@@ -277,8 +280,12 @@ export default function TransactionsProvider({ children }: { children: ReactNode
     async (transaction: Transaction) => {
       const account = accountDictionary[transaction.account_id];
       const label = transaction.description ?? transaction.date;
+      const currencyLabel =
+        typeof account?.currency === 'string'
+          ? account.currency
+          : (account?.currency as any)?.label ?? 'ARS';
       const confirmed = window.confirm(
-        `¿Eliminar la transacción "${label}" de ${account ? formatAccountName(account.name, account.currency) : 'la cuenta seleccionada'}?`
+        `¿Eliminar la transacción "${label}" de ${account ? formatAccountName(account.name, currencyLabel) : 'la cuenta seleccionada'}?`
       );
       if (!confirmed) return;
 

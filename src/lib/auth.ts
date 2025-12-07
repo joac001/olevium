@@ -11,8 +11,10 @@ export async function login(
 ): Promise<{ success: boolean; message?: string }> {
   try {
     await useAuthStore.getState().login(email, password);
-    const profile: StoredProfile = { email, name: useAuthStore.getState().user?.name };
-    useAuthStore.getState().setProfile?.(profile as any);
+    const profile: StoredProfile = {
+      email,
+      name: useAuthStore.getState().user?.name ?? undefined,
+    };
     return { success: true };
   } catch (error: any) {
     return { success: false, message: error?.message ?? 'No se pudo iniciar sesión' };

@@ -338,8 +338,6 @@ export default function TransactionFormModal({
               required
               options={categoryOptions}
               value={formValues.categoryId}
-              searchable
-              searchPlaceholder="Buscar categoría"
               onValueChange={(value) =>
                 handleFieldChange((prev) => ({ ...prev, categoryId: value != null ? String(value) : '' }))
               }
