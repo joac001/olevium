@@ -15,7 +15,15 @@ function buildUrl(path: string): string {
   const normalizedPath =
     hasApiBase && startsWithApi ? trimmedPath.replace(/^\/api/, '') : trimmedPath;
   const needsSlash = !normalizedPath.startsWith('/');
-  return `${API_BASE}${needsSlash ? '/' : ''}${normalizedPath}`;
+  let url = `${API_BASE}${needsSlash ? '/' : ''}${normalizedPath}`;
+  
+  // Asegurar que las rutas de API terminen con / (sin afectar query params)
+  const [basePath, queryString] = url.split('?');
+  if (!basePath.endsWith('/')) {
+    url = queryString ? `${basePath}/?${queryString}` : `${basePath}/`;
+  }
+  
+  return url;
 }
 
 export async function apiRequest(path: string, init: ApiRequestInit = {}): Promise<Response> {
