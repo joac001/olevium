@@ -14,6 +14,9 @@ import { useRouter, usePathname } from 'next/navigation';
 import Box from '@/components/shared/ui/content/Box';
 import Typography from '@/components/shared/ui/text/Typography';
 import { withAuth } from '@/lib/hoc/withAuth';
+import { useAuthStore } from '@/lib/stores/auth';
+import { useNotification } from '@/context/NotificationContext';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
 /** Acepta ícono como clases (FA) o como componente React (Lucide u otros) */
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -37,11 +40,26 @@ function NavBar({ title, links }: NavBarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const logout = useAuthStore(state => state.logout);
+  const { showSuccess, showError } = useNotification();
+
   const handleOpen = () => setIsOpen(v => !v);
 
   const handleOpenPage = (href: string) => {
     router.push(href);
     setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      const context = createOperationContext('logout', 'sesión', 'la sesión');
+      showSuccess('Sesión finalizada exitosamente. ¡Vuelve cuando quieras!', context);
+      router.replace('/auth');
+    } catch (error) {
+      const context = createOperationContext('logout', 'sesión', 'la sesión');
+      showError(error, context);
+    }
   };
 
   useEffect(() => {
@@ -140,6 +158,15 @@ function NavBar({ title, links }: NavBarProps) {
 
             <Typography variant="h1">{title}</Typography>
           </Box>
+
+          {/* Botón cerrar sesión */}
+          <button
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 group hover:bg-[color:var(--surface-muted)]"
+          >
+            <i className="fas fa-sign-out-alt text-[color:var(--text-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-300" />
+          </button>
         </Box>
       </div>
 
