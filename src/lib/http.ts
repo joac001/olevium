@@ -11,15 +11,7 @@ function buildUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
   const trimmedPath = path.trim();
   const needsSlash = !trimmedPath.startsWith('/');
-  let url = `${API_BASE}${needsSlash ? '/' : ''}${trimmedPath}`;
-  
-  // Asegurar que las rutas de API terminen con / (sin afectar query params)
-  const [basePath, queryString] = url.split('?');
-  if (!basePath.endsWith('/')) {
-    url = queryString ? `${basePath}/?${queryString}` : `${basePath}/`;
-  }
-  
-  return url;
+  return `${API_BASE}${needsSlash ? '/' : ''}${trimmedPath}`;
 }
 
 export async function apiRequest(path: string, init: ApiRequestInit = {}): Promise<Response> {
