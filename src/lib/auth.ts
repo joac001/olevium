@@ -1,23 +1,10 @@
 import { useAuthStore } from '@/lib/stores/auth';
+import { apiRequest, parseErrorMessage } from '@/lib/http';
 
 export type StoredProfile = {
   name?: string;
   email?: string;
 };
-
-// Configuración de URL de API
-const RAW_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-const API_BASE = RAW_BASE.replace(/\/+$/, ''); // sin slash final
-
-function buildApiUrl(path: string): string {
-  const trimmedPath = path.trim();
-  const hasApiBase = API_BASE.endsWith('/api');
-  const startsWithApi = trimmedPath.startsWith('/api');
-  const normalizedPath =
-    hasApiBase && startsWithApi ? trimmedPath.replace(/^\/api/, '') : trimmedPath;
-  const needsSlash = !normalizedPath.startsWith('/');
-  return `${API_BASE}${needsSlash ? '/' : ''}${normalizedPath}`;
-}
 
 export async function login(
   email: string,
@@ -41,12 +28,15 @@ export async function signup(payload: {
   password: string;
 }): Promise<{ success: boolean; message?: string }> {
   try {
-    // Reuse login flow after signup
-    await fetch(buildApiUrl('/api/auth/signup'), {
+    const response = await apiRequest('/auth/signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
+      skipAuth: true,
     });
+    if (!response.ok) {
+      const detail = await parseErrorMessage(response);
+      throw new Error(detail ?? 'No se pudo crear la cuenta');
+    }
     await useAuthStore.getState().login(payload.email, payload.password);
     return { success: true };
   } catch (error: any) {
@@ -59,30 +49,30 @@ export function logout() {
 }
 
 export async function forgotPassword(email: string): Promise<{ message: string }> {
-  const response = await fetch(buildApiUrl('/api/auth/forgot-password'), {
+  const response = await apiRequest('/auth/forgot-password', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ email }),
+    skipAuth: true,
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data?.detail ?? 'No se pudo procesar la solicitud');
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? 'No se pudo procesar la solicitud');
   }
 
   return response.json();
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-  const response = await fetch(buildApiUrl('/api/auth/reset-password'), {
+  const response = await apiRequest('/auth/reset-password', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ token, new_password: newPassword }),
+    skipAuth: true,
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data?.detail ?? 'No se pudo restablecer la contraseña');
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? 'No se pudo restablecer la contraseña');
   }
 
   return response.json();

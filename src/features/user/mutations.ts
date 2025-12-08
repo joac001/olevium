@@ -13,7 +13,7 @@ type ChangePasswordPayload = {
 };
 
 async function putProfile(payload: UpdateProfilePayload): Promise<StoredProfile> {
-  const response = await apiRequest('/api/users/', {
+  const response = await apiRequest('/users/', {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -25,7 +25,7 @@ async function putProfile(payload: UpdateProfilePayload): Promise<StoredProfile>
 }
 
 async function putPassword(payload: ChangePasswordPayload): Promise<void> {
-  const response = await apiRequest('/api/users/password', {
+  const response = await apiRequest('/users/password', {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -57,7 +57,7 @@ type ChatTokenResponse = {
 };
 
 async function createChatToken(): Promise<ChatTokenResponse> {
-  const response = await apiRequest('/api/auth/chat_token/create', {
+  const response = await apiRequest('/auth/chat_token/create', {
     method: 'POST',
   });
   if (!response.ok) {
@@ -68,7 +68,7 @@ async function createChatToken(): Promise<ChatTokenResponse> {
 }
 
 async function regenerateChatToken(): Promise<ChatTokenResponse> {
-  const response = await apiRequest('/api/auth/chat_token/revoke', {
+  const response = await apiRequest('/auth/chat_token/revoke', {
     method: 'POST',
   });
   if (!response.ok) {

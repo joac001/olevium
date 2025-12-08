@@ -3,7 +3,7 @@ import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type { RecurringTransaction, CreateRecurringTransactionPayload, UpdateRecurringTransactionPayload } from '@/lib/types';
 
 async function postRecurringTransaction(payload: CreateRecurringTransactionPayload): Promise<RecurringTransaction> {
-  const response = await apiRequest('/api/recurring-transactions', {
+  const response = await apiRequest('/recurring-transactions', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -18,7 +18,7 @@ async function putRecurringTransaction(
   recurringTransactionId: string,
   payload: UpdateRecurringTransactionPayload
 ): Promise<RecurringTransaction> {
-  const response = await apiRequest(`/api/recurring-transactions/${recurringTransactionId}`, {
+  const response = await apiRequest(`/recurring-transactions/${recurringTransactionId}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
@@ -30,7 +30,7 @@ async function putRecurringTransaction(
 }
 
 async function deleteRecurringTransaction(recurringTransactionId: string): Promise<void> {
-  const response = await apiRequest(`/api/recurring-transactions/${recurringTransactionId}`, {
+  const response = await apiRequest(`/recurring-transactions/${recurringTransactionId}`, {
     method: 'DELETE',
   });
   if (!response.ok && response.status !== 204) {

@@ -58,7 +58,7 @@ const normalizeTransaction = (raw: any): Transaction => ({
 });
 
 export async function getAccounts(): Promise<ApiCollectionResult<Account[]>> {
-  const response = await apiRequest('/api/accounts');
+  const response = await apiRequest('/accounts');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -67,7 +67,7 @@ export async function getAccounts(): Promise<ApiCollectionResult<Account[]>> {
 }
 
 export async function getAccountTypes(): Promise<ApiCollectionResult<AccountType[]>> {
-  const response = await apiRequest('/api/accounts/types');
+  const response = await apiRequest('/accounts/types');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -81,7 +81,7 @@ export async function getAccountTypes(): Promise<ApiCollectionResult<AccountType
 }
 
 export async function getTransactions(): Promise<ApiCollectionResult<Transaction[]>> {
-  const response = await apiRequest('/api/transactions');
+  const response = await apiRequest('/transactions');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -94,7 +94,7 @@ export async function getTransactionsByDateRange(
   endDate: string
 ): Promise<ApiCollectionResult<Transaction[]>> {
   const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
-  const response = await apiRequest(`/api/transactions/by_date_range?${params.toString()}`);
+  const response = await apiRequest(`/transactions/by_date_range?${params.toString()}`);
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -103,7 +103,7 @@ export async function getTransactionsByDateRange(
 }
 
 export async function getCategories(): Promise<ApiCollectionResult<Category[]>> {
-  const response = await apiRequest('/api/categories');
+  const response = await apiRequest('/categories');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -112,7 +112,7 @@ export async function getCategories(): Promise<ApiCollectionResult<Category[]>> 
 }
 
 export async function postAccount(payload: CreateAccountPayload): Promise<Account> {
-  const response = await apiRequest('/api/accounts', {
+  const response = await apiRequest('/accounts', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -125,7 +125,7 @@ export async function postAccount(payload: CreateAccountPayload): Promise<Accoun
 }
 
 export async function putAccount(accountId: string, payload: UpdateAccountPayload): Promise<Account> {
-  const response = await apiRequest(`/api/accounts/${accountId}`, {
+  const response = await apiRequest(`/accounts/${accountId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -138,7 +138,7 @@ export async function putAccount(accountId: string, payload: UpdateAccountPayloa
 }
 
 export async function deleteAccount(accountId: string): Promise<void> {
-  const response = await apiRequest(`/api/accounts/${accountId}`, { method: 'DELETE' });
+  const response = await apiRequest(`/accounts/${accountId}`, { method: 'DELETE' });
   if (!response.ok && response.status !== 204) {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo eliminar la cuenta (status ${response.status})`);
@@ -146,7 +146,7 @@ export async function deleteAccount(accountId: string): Promise<void> {
 }
 
 export async function postCategory(payload: CreateCategoryPayload): Promise<Category> {
-  const response = await apiRequest('/api/categories', {
+  const response = await apiRequest('/categories', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -159,7 +159,7 @@ export async function postCategory(payload: CreateCategoryPayload): Promise<Cate
 }
 
 export async function putCategory(categoryId: string, payload: UpdateCategoryPayload): Promise<Category> {
-  const response = await apiRequest(`/api/categories/${categoryId}`, {
+  const response = await apiRequest(`/categories/${categoryId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -172,7 +172,7 @@ export async function putCategory(categoryId: string, payload: UpdateCategoryPay
 }
 
 export async function deleteCategory(categoryId: string): Promise<void> {
-  const response = await apiRequest(`/api/categories/${categoryId}`, { method: 'DELETE' });
+  const response = await apiRequest(`/categories/${categoryId}`, { method: 'DELETE' });
   if (!response.ok && response.status !== 204) {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo eliminar la categoría (status ${response.status})`);
@@ -180,7 +180,7 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 }
 
 export async function postTransaction(payload: CreateTransactionPayload): Promise<Transaction> {
-  const response = await apiRequest('/api/transactions', {
+  const response = await apiRequest('/transactions', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -193,7 +193,7 @@ export async function postTransaction(payload: CreateTransactionPayload): Promis
 }
 
 export async function putTransaction(transactionId: string, payload: UpdateTransactionPayload): Promise<Transaction> {
-  const response = await apiRequest(`/api/transactions/${transactionId}`, {
+  const response = await apiRequest(`/transactions/${transactionId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -206,7 +206,7 @@ export async function putTransaction(transactionId: string, payload: UpdateTrans
 }
 
 export async function deleteTransaction(transactionId: string): Promise<void> {
-  const response = await apiRequest(`/api/transactions/${transactionId}`, { method: 'DELETE' });
+  const response = await apiRequest(`/transactions/${transactionId}`, { method: 'DELETE' });
   if (!response.ok && response.status !== 204) {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo eliminar la transacción (status ${response.status})`);
@@ -214,7 +214,7 @@ export async function deleteTransaction(transactionId: string): Promise<void> {
 }
 
 export async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
-  const response = await apiRequest('/api/recurring-transactions');
+  const response = await apiRequest('/recurring-transactions');
   if (!response.ok) {
     return { data: [], isMock: true };
   }

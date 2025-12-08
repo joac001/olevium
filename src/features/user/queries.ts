@@ -5,7 +5,7 @@ import type { StoredProfile } from '@/lib/auth';
 
 async function getProfile(): Promise<ApiCollectionResult<StoredProfile>> {
   try {
-    const response = await apiRequest('/api/users/me');
+    const response = await apiRequest('/users/me');
     if (!response.ok) {
       throw new Error(`status ${response.status}`);
     }

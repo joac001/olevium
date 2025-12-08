@@ -10,12 +10,8 @@ type ApiRequestInit = RequestInit & {
 function buildUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
   const trimmedPath = path.trim();
-  const hasApiBase = API_BASE.endsWith('/api');
-  const startsWithApi = trimmedPath.startsWith('/api');
-  const normalizedPath =
-    hasApiBase && startsWithApi ? trimmedPath.replace(/^\/api/, '') : trimmedPath;
-  const needsSlash = !normalizedPath.startsWith('/');
-  let url = `${API_BASE}${needsSlash ? '/' : ''}${normalizedPath}`;
+  const needsSlash = !trimmedPath.startsWith('/');
+  let url = `${API_BASE}${needsSlash ? '/' : ''}${trimmedPath}`;
   
   // Asegurar que las rutas de API terminen con / (sin afectar query params)
   const [basePath, queryString] = url.split('?');
