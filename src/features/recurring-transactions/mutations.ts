@@ -3,7 +3,7 @@ import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type { RecurringTransaction, CreateRecurringTransactionPayload, UpdateRecurringTransactionPayload } from '@/lib/types';
 
 async function postRecurringTransaction(payload: CreateRecurringTransactionPayload): Promise<RecurringTransaction> {
-  const response = await apiRequest('/recurring-transactions', {
+  const response = await apiRequest('/recurring-transactions/', {
     method: 'POST',
     body: JSON.stringify(payload),
   });

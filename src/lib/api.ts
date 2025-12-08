@@ -58,7 +58,7 @@ const normalizeTransaction = (raw: any): Transaction => ({
 });
 
 export async function getAccounts(): Promise<ApiCollectionResult<Account[]>> {
-  const response = await apiRequest('/accounts');
+  const response = await apiRequest('/accounts/');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -81,7 +81,7 @@ export async function getAccountTypes(): Promise<ApiCollectionResult<AccountType
 }
 
 export async function getTransactions(): Promise<ApiCollectionResult<Transaction[]>> {
-  const response = await apiRequest('/transactions');
+  const response = await apiRequest('/transactions/');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -103,7 +103,7 @@ export async function getTransactionsByDateRange(
 }
 
 export async function getCategories(): Promise<ApiCollectionResult<Category[]>> {
-  const response = await apiRequest('/categories');
+  const response = await apiRequest('/categories/');
   if (!response.ok) {
     return { data: [], isMock: true };
   }
@@ -112,7 +112,7 @@ export async function getCategories(): Promise<ApiCollectionResult<Category[]>> 
 }
 
 export async function postAccount(payload: CreateAccountPayload): Promise<Account> {
-  const response = await apiRequest('/accounts', {
+  const response = await apiRequest('/accounts/', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -146,7 +146,7 @@ export async function deleteAccount(accountId: string): Promise<void> {
 }
 
 export async function postCategory(payload: CreateCategoryPayload): Promise<Category> {
-  const response = await apiRequest('/categories', {
+  const response = await apiRequest('/categories/', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -180,7 +180,7 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 }
 
 export async function postTransaction(payload: CreateTransactionPayload): Promise<Transaction> {
-  const response = await apiRequest('/transactions', {
+  const response = await apiRequest('/transactions/', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -214,7 +214,7 @@ export async function deleteTransaction(transactionId: string): Promise<void> {
 }
 
 export async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
-  const response = await apiRequest('/recurring-transactions');
+  const response = await apiRequest('/recurring-transactions/');
   if (!response.ok) {
     return { data: [], isMock: true };
   }

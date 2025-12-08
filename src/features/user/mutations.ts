@@ -25,7 +25,7 @@ async function putProfile(payload: UpdateProfilePayload): Promise<StoredProfile>
 }
 
 async function putPassword(payload: ChangePasswordPayload): Promise<void> {
-  const response = await apiRequest('/users/password', {
+  const response = await apiRequest('/users/password/', {
     method: 'PUT',
     body: JSON.stringify(payload),
   });

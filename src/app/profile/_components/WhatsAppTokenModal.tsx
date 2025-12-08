@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/shared/ui';
 import { useCreateChatTokenMutation, useRegenerateChatTokenMutation } from '@/features/user/mutations';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
+import Link from 'next/link';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
 
@@ -91,7 +92,18 @@ export default function WhatsAppTokenModal() {
           <Box className="rounded-lg bg-neutral-100 p-3 dark:bg-neutral-800">
             <Typography variant="body" className="text-neutral-600 dark:text-neutral-400">
               <strong>1.</strong> Generá tu token usando el botón de abajo.<br />
-              <strong>2.</strong> Copiá el token y envialo por WhatsApp al <strong>+54 9 11 1234 5678</strong>.<br />
+              <strong>2.</strong> Copiá el token y envialo por WhatsApp al {hasToken && formattedToken ? (
+                <Link 
+                  href={`https://wa.me/5491170602206?text=${encodeURIComponent(`Hola mi token es ${formattedToken}`)}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-green-600 underline hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                >
+                  +54 9 11 7060 2206
+                </Link>
+              ) : (
+                <span className="text-neutral-400 dark:text-neutral-500">+54 9 11 7060 2206</span>
+              )}.<br />
               <strong>3.</strong> ¡Listo! Ya podés gestionar tus finanzas desde WhatsApp.
             </Typography>
           </Box>

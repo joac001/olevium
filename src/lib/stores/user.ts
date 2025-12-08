@@ -52,7 +52,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ loading: true });
 
     try {
-      const { data } = await http.get<UserProfile>('/users/me');
+      const { data } = await http.get<UserProfile>('/users/me/');
       set({
         user: data,
         loading: false,
