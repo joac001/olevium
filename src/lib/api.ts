@@ -6,6 +6,7 @@ import type {
   CreateAccountPayload,
   CreateCategoryPayload,
   CreateTransactionPayload,
+  FeedbackPayload,
   Transaction,
   UpdateAccountPayload,
   UpdateCategoryPayload,
@@ -250,4 +251,21 @@ export async function getRecurringTransactions(): Promise<ApiCollectionResult<Re
     };
   });
   return { data: normalized, isMock: false };
+}
+
+export async function postFeedback(payload: FeedbackPayload): Promise<void> {
+  const response = await apiRequest('/feedback/', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: payload.type,
+      message: payload.message,
+      page_path: payload.page_path,
+      metadata: payload.metadata,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo enviar el feedback (status ${response.status})`);
+  }
 }
