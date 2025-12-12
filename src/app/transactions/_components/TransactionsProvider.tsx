@@ -20,6 +20,7 @@ import { mockAccounts, mockTransactions } from '@/lib/mockData';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatAccountName } from '@/lib/format';
 import type { DateFilter, TypeFilter, TransactionsSummary } from './types';
+import { toSignedAmount } from '@/lib/utils/transactions';
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
@@ -94,8 +95,9 @@ function filterTransactions(
   const term = searchTerm.trim().toLowerCase();
 
   return transactions.filter((tx) => {
-    const isIncome = tx.type_id === INCOME_TYPE_ID || tx.amount > 0;
-    const isExpense = tx.type_id === EXPENSE_TYPE_ID || tx.amount < 0;
+    const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+    const isIncome = signedAmount >= 0;
+    const isExpense = signedAmount < 0;
     if (typeFilter === 'income' && !isIncome) return false;
     if (typeFilter === 'expense' && !isExpense) return false;
 
@@ -188,13 +190,14 @@ export default function TransactionsProvider({ children }: { children: ReactNode
   const summary = useMemo<TransactionsSummary>(() => {
     const totals = filteredTransactions.reduce(
       (acc, tx) => {
-        const isIncome = tx.type_id === INCOME_TYPE_ID || tx.amount > 0;
-        if (isIncome) {
-          acc.incomeTotal += Math.abs(tx.amount);
+        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+
+        if (signedAmount >= 0) {
+          acc.incomeTotal += Math.abs(signedAmount);
         } else {
-          acc.expenseTotal += Math.abs(tx.amount);
+          acc.expenseTotal += Math.abs(signedAmount);
         }
-        acc.netTotal += tx.amount;
+        acc.netTotal += signedAmount;
         return acc;
       },
       { incomeTotal: 0, expenseTotal: 0, netTotal: 0 }

@@ -27,6 +27,7 @@ import { mockAccounts, mockTransactions } from '@/lib/mockData';
 import type { Account, Transaction } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/auth';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
+import { toSignedAmount } from '@/lib/utils/transactions';
 
 ChartJS.register(
   ArcElement,
@@ -148,9 +149,9 @@ export default function DashboardPage() {
     let expenses = 0;
 
     filteredTransactions.forEach((tx) => {
-      const isIncome = tx.type_id === INCOME_TYPE_ID || tx.amount > 0;
-      const amount = Math.abs(Number(tx.amount));
-      if (isIncome) incomes += amount;
+      const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+      const amount = Math.abs(signedAmount);
+      if (signedAmount >= 0) incomes += amount;
       else expenses += amount;
     });
 
@@ -185,8 +186,9 @@ export default function DashboardPage() {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (!buckets.has(key)) buckets.set(key, { income: 0, expense: 0 });
         const bucket = buckets.get(key)!;
-        const amount = Math.abs(Number(tx.amount));
-        if (tx.type_id === INCOME_TYPE_ID || tx.amount > 0) bucket.income += amount;
+        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+        const amount = Math.abs(signedAmount);
+        if (signedAmount >= 0) bucket.income += amount;
         else bucket.expense += amount;
       });
       const orderedKeys = Array.from(buckets.keys()).sort();
@@ -215,8 +217,9 @@ export default function DashboardPage() {
         const dateKey = new Date(tx.date).toISOString().slice(0, 10);
         if (!dailyMap.has(dateKey)) return;
         const bucket = dailyMap.get(dateKey)!;
-        const amount = Math.abs(Number(tx.amount));
-        if (tx.type_id === INCOME_TYPE_ID || tx.amount > 0) {
+        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+        const amount = Math.abs(signedAmount);
+        if (signedAmount >= 0) {
           bucket.income += amount;
         } else {
           bucket.expense += amount;
@@ -234,7 +237,8 @@ export default function DashboardPage() {
   const categorySlices = useMemo(() => {
     const totals = new Map<string, number>();
     filteredTransactions.forEach((tx) => {
-      if (tx.type_id !== EXPENSE_TYPE_ID && Number(tx.amount) >= 0) return;
+      const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+      if (signedAmount >= 0) return;
       const categoryValue = tx.category;
       const name =
         typeof categoryValue === 'string'
@@ -243,7 +247,7 @@ export default function DashboardPage() {
             ? (categoryValue as any).description ?? 'Sin categoría'
             : 'Sin categoría';
       const current = totals.get(name) ?? 0;
-      totals.set(name, current + Math.abs(Number(tx.amount)));
+      totals.set(name, current + Math.abs(signedAmount));
     });
 
     return Array.from(totals.entries())
@@ -553,32 +557,33 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 {recentTransactions.map((tx) => {
                   const categoryValue = tx.category;
-                  const category =
-                    typeof categoryValue === 'string'
-                      ? categoryValue
-                      : categoryValue && typeof categoryValue === 'object'
-                        ? (categoryValue as any).description ?? 'Sin categoría'
-                        : 'Sin categoría';
-                  return (
-                    <article
-                      key={tx.transaction_id}
-                      className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
-                    >
+                const category =
+                  typeof categoryValue === 'string'
+                    ? categoryValue
+                    : categoryValue && typeof categoryValue === 'object'
+                      ? (categoryValue as any).description ?? 'Sin categoría'
+                      : 'Sin categoría';
+                const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+                return (
+                  <article
+                    key={tx.transaction_id}
+                    className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+                  >
                       <div>
                         <p className="font-medium text-sm text-white">
                           {tx.description ?? category ?? 'Movimiento'}
                         </p>
                         <p className="text-xs text-muted">{formatDateWithTime(tx.date)}</p>
                       </div>
-                      <div className="text-right">
-                        <p
-                          className={
-                            tx.type_id === INCOME_TYPE_ID || Number(tx.amount) > 0
-                              ? 'text-emerald-400 font-semibold'
-                              : 'text-accent-400 font-semibold'
-                          }
-                        >
-                          {formatSignedCurrency(Number(tx.amount))}
+                    <div className="text-right">
+                      <p
+                        className={
+                          signedAmount >= 0
+                            ? 'text-emerald-400 font-semibold'
+                            : 'text-accent-400 font-semibold'
+                        }
+                      >
+                        {formatSignedCurrency(signedAmount)}
                         </p>
                         <p className="text-xs text-slate-500">{category}</p>
                       </div>
