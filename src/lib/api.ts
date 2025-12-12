@@ -42,20 +42,25 @@ const normalizeCategory = (raw: any): Category => ({
   is_default: Boolean(raw.is_default ?? false),
 });
 
-const normalizeTransaction = (raw: any): Transaction => ({
-  transaction_id: String(raw.transaction_id ?? ''),
-  account_id: String(raw.account_id ?? ''),
-  user_id: String(raw.user_id ?? ''),
-  amount: Number(raw.amount ?? 0),
-  type_id: Number(raw.type_id ?? raw.transaction_type_id ?? 0),
-  category_id: raw.category_id ? String(raw.category_id) : '',
-  description: raw.description ?? null,
-  date: String(raw.date ?? raw.transaction_date ?? new Date().toISOString()),
-  created_at: String(raw.created_at ?? new Date().toISOString()),
-  category: raw.category ?? null,
-  account: raw.account ?? null,
-  transaction_type: raw.type ?? null,
-});
+const normalizeTransaction = (raw: any): Transaction => {
+  const typeId = Number(raw.type_id ?? raw.transaction_type_id ?? 0);
+  const amount = Number(raw.amount ?? 0);
+
+  return {
+    transaction_id: String(raw.transaction_id ?? ''),
+    account_id: String(raw.account_id ?? ''),
+    user_id: String(raw.user_id ?? ''),
+    amount,
+    type_id: typeId,
+    category_id: raw.category_id ? String(raw.category_id) : '',
+    description: raw.description ?? null,
+    date: String(raw.date ?? raw.transaction_date ?? new Date().toISOString()),
+    created_at: String(raw.created_at ?? new Date().toISOString()),
+    category: raw.category ?? null,
+    account: raw.account ?? null,
+    transaction_type: raw.type ?? null,
+  };
+};
 
 export async function getAccounts(): Promise<ApiCollectionResult<Account[]>> {
   const response = await apiRequest('/accounts/');
@@ -180,9 +185,14 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 }
 
 export async function postTransaction(payload: CreateTransactionPayload): Promise<Transaction> {
+  const safePayload: CreateTransactionPayload = {
+    ...payload,
+    amount: Math.abs(payload.amount),
+  };
+
   const response = await apiRequest('/transactions/', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify(safePayload),
   });
   if (!response.ok) {
     const detail = await parseErrorMessage(response);
@@ -193,9 +203,14 @@ export async function postTransaction(payload: CreateTransactionPayload): Promis
 }
 
 export async function putTransaction(transactionId: string, payload: UpdateTransactionPayload): Promise<Transaction> {
+  const safePayload: UpdateTransactionPayload = {
+    ...payload,
+    ...(payload.amount !== undefined ? { amount: Math.abs(payload.amount) } : {}),
+  };
+
   const response = await apiRequest(`/transactions/${transactionId}`, {
     method: 'PUT',
-    body: JSON.stringify(payload),
+    body: JSON.stringify(safePayload),
   });
   if (!response.ok) {
     const detail = await parseErrorMessage(response);

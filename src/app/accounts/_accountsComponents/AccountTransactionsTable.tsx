@@ -4,6 +4,7 @@ import { useMemo, useCallback } from 'react';
 
 import { Box, Typography, Card, ActionButton } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
+import { toSignedAmount } from '@/lib/utils/transactions';
 import type { AccountTransaction } from '@/types';
 import { useModal } from '@/context/ModalContext';
 import EditTransactionForm from './EditTransactionForm';
@@ -94,6 +95,7 @@ export default function AccountTransactionsTable({
         const isCurrentYear = new Date(transaction.date).getFullYear() === currentYear;
         const formattedDate = formatDate(transaction.date, isCurrentYear ? 'dd/mm' : 'dd/mm/aa');
         const isCredit = transaction.typeId === 2;
+        const signedAmount = toSignedAmount(transaction.amount, transaction.typeId);
         const amountClass = isCredit
           ? '[color:var(--color-success-light)]'
           : '[color:var(--color-danger-light)]';
@@ -121,7 +123,7 @@ export default function AccountTransactionsTable({
                   </Typography>
                 </div>
                 <Typography variant="body" className={`text-sm font-semibold ${amountClass}`}>
-                  {formatAmount(transaction.amount, currency)}
+                  {formatAmount(signedAmount, currency)}
                 </Typography>
               </Box>
 
@@ -178,7 +180,7 @@ export default function AccountTransactionsTable({
                 {formattedDate}
               </Typography>
               <Typography variant="body" className={`text-base font-semibold ${amountClass}`}>
-                {formatAmount(transaction.amount, currency)}
+                {formatAmount(signedAmount, currency)}
               </Typography>
               <Box className="flex items-center justify-end gap-2">
                 <ActionButton

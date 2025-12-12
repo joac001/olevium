@@ -133,7 +133,7 @@ export default function EditTransactionFormImproved({
           type="number"
           step="0.01"
           label="Monto"
-          defaultValue={transaction.amount}
+          defaultValue={Math.abs(transaction.amount)}
           required
           icon="fas fa-money-bill-wave"
         />
