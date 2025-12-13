@@ -27,17 +27,26 @@ export default function FeedbackWidget() {
 
     try {
       setIsSubmitting(true);
+      const metadata =
+        typeof window !== 'undefined'
+          ? {
+              userAgent: window.navigator.userAgent,
+              language: window.navigator.language,
+              platform: window.navigator.platform,
+              viewport: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+              },
+              url: window.location.href,
+              appVersion: process.env.NEXT_PUBLIC_APP_VERSION,
+            }
+          : undefined;
+
       await postFeedback({
         type,
         message: trimmed,
         page_path: pathname || '/',
-        metadata:
-          typeof window !== 'undefined'
-            ? {
-                userAgent: window.navigator.userAgent,
-                language: window.navigator.language,
-              }
-            : undefined,
+        metadata,
       });
       showSuccess('Gracias por tu feedback', {
         operation: 'create',
@@ -83,9 +92,9 @@ export default function FeedbackWidget() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex gap-2">
                 {[
-                  { value: 'bug', label: 'Bug' },
-                  { value: 'feature', label: 'Idea' },
-                  { value: 'other', label: 'Otro' },
+                  { value: 'bug', label: 'Tengo un problema' },
+                  { value: 'feature', label: 'Quiero proponer una mejora' },
+                  { value: 'other', label: 'Otro comentario' },
                 ].map(option => (
                   <button
                     key={option.value}
