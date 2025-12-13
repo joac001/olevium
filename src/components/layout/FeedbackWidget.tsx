@@ -15,6 +15,7 @@ export default function FeedbackWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
+  const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pathname = usePathname();
@@ -24,23 +25,37 @@ export default function FeedbackWidget() {
     event.preventDefault();
     const trimmed = message.trim();
     if (!trimmed) return;
+    const trimmedDetails = details.trim();
 
     try {
       setIsSubmitting(true);
       const metadata =
         typeof window !== 'undefined'
           ? {
-              userAgent: window.navigator.userAgent,
-              language: window.navigator.language,
-              platform: window.navigator.platform,
-              viewport: {
-                width: window.innerWidth,
-                height: window.innerHeight,
+              technical: {
+                userAgent: window.navigator.userAgent,
+                language: window.navigator.language,
+                platform: window.navigator.platform,
+                viewport: {
+                  width: window.innerWidth,
+                  height: window.innerHeight,
+                },
+                url: window.location.href,
+                appVersion: process.env.NEXT_PUBLIC_APP_VERSION,
               },
-              url: window.location.href,
-              appVersion: process.env.NEXT_PUBLIC_APP_VERSION,
+              user_context: trimmedDetails
+                ? {
+                    notes: trimmedDetails,
+                  }
+                : undefined,
             }
-          : undefined;
+          : trimmedDetails
+            ? {
+                user_context: {
+                  notes: trimmedDetails,
+                },
+              }
+            : undefined;
 
       await postFeedback({
         type,
@@ -54,6 +69,7 @@ export default function FeedbackWidget() {
         userFriendlyOperation: 'feedback',
       });
       setMessage('');
+      setDetails('');
       setType('bug');
       setIsOpen(false);
     } catch (error) {
@@ -87,7 +103,8 @@ export default function FeedbackWidget() {
               Enviar feedback
             </Typography>
             <Typography variant="caption" className="mb-4 text-[color:var(--text-muted)]">
-              Contanos qué problema encontraste o qué te gustaría mejorar.
+              Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, incluí qué
+              estabas haciendo y qué esperabas que pase.
             </Typography>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex gap-2">
@@ -117,11 +134,21 @@ export default function FeedbackWidget() {
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   className="w-full min-h-[120px] resize-y rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-muted)] px-3 py-2 text-sm text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="Ej: Encontré un error al crear una cuenta..."
+                  placeholder="Ej: Estaba creando una cuenta nueva y al guardar me apareció un error sin mensaje."
                 />
                 <p className="mt-1 text-xs text-[color:var(--text-muted)]">
-                  Se enviará también la pantalla actual para ayudarnos a reproducir el problema.
+                  Se enviará también la pantalla actual y algunos datos técnicos para ayudarnos a
+                  reproducir el problema.
                 </p>
+              </div>
+
+              <div>
+                <textarea
+                  value={details}
+                  onChange={e => setDetails(e.target.value)}
+                  className="w-full min-h-[80px] resize-y rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-muted)] px-3 py-2 text-xs text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  placeholder="Información adicional opcional: pasos para reproducir, qué esperabas que pase, capturas, etc."
+                />
               </div>
 
               <div className="flex justify-end gap-2">
