@@ -8,8 +8,8 @@ import Typography from '@/components/shared/ui/text/Typography';
 import Skeleton from '@/components/shared/ui/feedback/Skeleton';
 import Button from '@/components/shared/ui/buttons/Button';
 import { useNotification } from '@/context/NotificationContext';
-import { getFeedback, postFeedback } from '@/lib/api';
-import type { FeedbackItem, FeedbackPayload } from '@/lib/types';
+import { getFeedback } from '@/lib/api';
+import type { FeedbackItem } from '@/lib/types';
 
 type FilterType = FeedbackItem['type'] | 'all';
 type FilterStatus = FeedbackItem['status'] | 'all';
@@ -150,7 +150,7 @@ export default function DevFeedbackPage() {
                 </Typography>
               </Box>
 
-                <Typography variant="body">{item.message}</Typography>
+              <Typography variant="body">{item.message}</Typography>
 
               <Box className="flex flex-col gap-1 text-[10px] text-[color:var(--text-muted)]">
                 {item.page_path && <span>Pantalla: {item.page_path}</span>}
@@ -167,81 +167,10 @@ export default function DevFeedbackPage() {
                   <span className="truncate">User agent: {String(item.metadata.userAgent)}</span>
                 )}
               </Box>
-
-              <Box className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wide text-[color:var(--text-muted)] mr-2">
-                  Gestionar estado:
-                </span>
-                <Button
-                  text="Marcar triage"
-                  type="secondary"
-                  className="!px-3 !py-1 !text-xs"
-                  onClick={async () => {
-                    try {
-                      setLoading(true);
-                      const res = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '')}/feedback/${item.feedback_id}`,
-                        {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({ status: 'triaged' }),
-                          credentials: 'include',
-                        }
-                      );
-                      if (!res.ok) {
-                        throw new Error(`No se pudo actualizar (status ${res.status})`);
-                      }
-                      await loadFeedback();
-                    } catch (error) {
-                      showError(error, {
-                        operation: 'update',
-                        resource: 'feedback',
-                        userFriendlyOperation: 'feedback',
-                      });
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                />
-                <Button
-                  text="Marcar resuelto"
-                  type="success"
-                  className="!px-3 !py-1 !text-xs"
-                  onClick={async () => {
-                    try {
-                      setLoading(true);
-                      const res = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '')}/feedback/${item.feedback_id}`,
-                        {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({ status: 'resolved' }),
-                          credentials: 'include',
-                        }
-                      );
-                      if (!res.ok) {
-                        throw new Error(`No se pudo actualizar (status ${res.status})`);
-                      }
-                      await loadFeedback();
-                    } catch (error) {
-                      showError(error, {
-                        operation: 'update',
-                        resource: 'feedback',
-                        userFriendlyOperation: 'feedback',
-                      });
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                />
-              </Box>
             </Box>
           ))}
       </Box>
     </Container>
   );
 }
+
