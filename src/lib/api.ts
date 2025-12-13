@@ -7,6 +7,7 @@ import type {
   CreateCategoryPayload,
   CreateTransactionPayload,
   FeedbackPayload,
+  FeedbackItem,
   Transaction,
   UpdateAccountPayload,
   UpdateCategoryPayload,
@@ -268,4 +269,32 @@ export async function postFeedback(payload: FeedbackPayload): Promise<void> {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo enviar el feedback (status ${response.status})`);
   }
+}
+
+export async function getFeedback(params?: {
+  type?: FeedbackItem['type'];
+  status?: FeedbackItem['status'];
+  limit?: number;
+}): Promise<ApiCollectionResult<FeedbackItem[]>> {
+  const searchParams = new URLSearchParams();
+  if (params?.type) searchParams.set('type', params.type);
+  if (params?.status) searchParams.set('status', params.status);
+  if (params?.limit) searchParams.set('limit', String(params.limit));
+
+  const query = searchParams.toString();
+  const response = await apiRequest(`/feedback/${query ? `?${query}` : ''}`);
+  if (!response.ok) {
+    return { data: [], isMock: true };
+  }
+  const raw = (await response.json()) as FeedbackItem[];
+  const normalized = raw.map(item => ({
+    ...item,
+    feedback_id: String(item.feedback_id),
+    user_id: item.user_id ?? null,
+    page_path: item.page_path ?? null,
+    status: item.status,
+    type: item.type,
+    created_at: String(item.created_at),
+  }));
+  return { data: normalized, isMock: false };
 }

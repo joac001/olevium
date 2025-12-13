@@ -88,3 +88,14 @@ export type FeedbackPayload = {
   page_path?: string;
   metadata?: Record<string, unknown>;
 };
+
+export type FeedbackItem = {
+  feedback_id: string;
+  user_id: string | null;
+  type: 'bug' | 'feature' | 'other';
+  message: string;
+  page_path: string | null;
+  metadata?: Record<string, unknown> | null;
+  status: 'new' | 'triaged' | 'in_github' | 'resolved';
+  created_at: string;
+};
