@@ -306,7 +306,7 @@ export default function CategoriesShell() {
                 variant="caption"
                 className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
               >
-                Categorías al límite
+                Presupuestos en alerta
               </Typography>
               <Typography variant="body" className="text-sm font-semibold text-[color:var(--text-primary)]">
                 {budgetsSummary.overCount} / {budgetsSummary.categoriesWithBudget}
