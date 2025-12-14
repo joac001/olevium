@@ -255,7 +255,7 @@ export default function CategoriesShell() {
         ]}
       >
         {budgetsSummary && (
-          <Box className="mb-4 grid gap-3 rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)] p-3 md:grid-cols-4">
+          <Box className="mb-4 grid gap-3 rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)] p-3 md:grid-cols-3">
             <Box className="flex flex-col">
               <Typography
                 variant="caption"
@@ -299,17 +299,6 @@ export default function CategoriesShell() {
               </Typography>
               <Typography variant="body" className="text-sm font-semibold text-[color:var(--text-primary)]">
                 ${Math.max(budgetsSummary.remaining, 0).toFixed(2)}
-              </Typography>
-            </Box>
-            <Box className="flex flex-col">
-              <Typography
-                variant="caption"
-                className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
-              >
-                Presupuestos en alerta
-              </Typography>
-              <Typography variant="body" className="text-sm font-semibold text-[color:var(--text-primary)]">
-                {budgetsSummary.overCount} / {budgetsSummary.categoriesWithBudget}
               </Typography>
             </Box>
           </Box>
