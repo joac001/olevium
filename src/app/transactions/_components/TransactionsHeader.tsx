@@ -4,7 +4,8 @@ import { ActionButton, Banner, Box, Typography } from '@/components/shared/ui';
 import { useTransactionsPage } from './TransactionsProvider';
 
 export default function TransactionsHeader() {
-  const { usingMockData, handleCreateTransaction } = useTransactionsPage();
+  const { usingMockData, handleCreateTransaction, handleExportCsv, isExporting } =
+    useTransactionsPage();
 
   return (
     <Box className="flex flex-col gap-3">
@@ -15,12 +16,21 @@ export default function TransactionsHeader() {
           hábitos financieros.
         </Typography>
       </Box>
-      <ActionButton
-        icon="fas fa-plus"
-        type="primary"
-        text="Nueva transacción"
-        onClick={handleCreateTransaction}
-      />
+      <Box className="flex flex-wrap items-center gap-2">
+        <ActionButton
+          icon="fas fa-plus"
+          type="primary"
+          text="Nueva transacción"
+          onClick={handleCreateTransaction}
+        />
+        <ActionButton
+          icon="fas fa-file-arrow-down"
+          type="accent"
+          text={isExporting ? 'Exportando CSV...' : 'Exportar CSV'}
+          onClick={handleExportCsv}
+          disabled={isExporting}
+        />
+      </Box>
       {usingMockData && (
         <Banner
           icon="fas fa-flask"
