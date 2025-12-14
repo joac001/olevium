@@ -26,10 +26,10 @@ Este archivo agrupa las tareas del MVP para la app web (Next.js). La idea es ir 
 
 ## 4. Export CSV
 
-- [ ] **Botón de exportar:** En la vista principal de transacciones, agregar botón “Exportar CSV”.
+- [x] **Botón de exportar:** En la vista principal de transacciones, agregar botón “Exportar CSV”.
 - [ ] **Filtros de exportación:** Respetar los mismos filtros que la tabla (fecha, cuenta, categoría) y enviarlos al endpoint de export.
-- [ ] **Descarga de archivo:** Implementar descarga real (`Content-Disposition: attachment`) usando el endpoint backend.
-- [ ] **Feedback de carga:** Mostrar spinner o estado “Generando CSV…” mientras se espera la respuesta.
+- [x] **Descarga de archivo:** Implementar descarga real (`Content-Disposition: attachment`) usando el endpoint backend.
+- [x] **Feedback de carga:** Mostrar spinner o estado “Generando CSV…” mientras se espera la respuesta.
 
 ## 5. Ruedita de configuraciones
 
@@ -47,9 +47,8 @@ Este archivo agrupa las tareas del MVP para la app web (Next.js). La idea es ir 
 
 ## 7. Feedback in-app (bugs & ideas)
 
-- [ ] **Botón/entry point:** Agregar un botón fijo o item de menú “Enviar feedback / Reportar problema”.
-- [ ] **Modal de feedback:** Form simple con tipo (`Bug`, `Idea`, `Otro`) y textarea para el mensaje.
-- [ ] **Contexto automático:** Incluir automáticamente `page_path` y algunos metadatos (navegador, idioma) al llamar al backend.
-- [ ] **Flujo de éxito:** Mostrar mensaje de agradecimiento y limpiar el form cuando el envío fue exitoso.
-- [ ] **Manejo de errores:** Si el endpoint falla, mostrar un mensaje claro y permitir reintentar.
-
+- [x] **Botón/entry point:** Agregar un botón fijo o item de menú “Enviar feedback / Reportar problema”.
+- [x] **Modal de feedback:** Form simple con tipo (`Bug`, `Idea`, `Otro`) y textarea para el mensaje.
+- [x] **Contexto automático:** Incluir automáticamente `page_path` y algunos metadatos (navegador, idioma) al llamar al backend.
+- [x] **Flujo de éxito:** Mostrar mensaje de agradecimiento y limpiar el form cuando el envío fue exitoso.
+- [x] **Manejo de errores:** Si el endpoint falla, mostrar un mensaje claro y permitir reintentar.

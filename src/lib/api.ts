@@ -305,3 +305,69 @@ export async function postFeedback(payload: FeedbackPayload): Promise<void> {
     throw new Error(detail ?? `No se pudo enviar el feedback (status ${response.status})`);
   }
 }
+
+// Presupuestos por categoría
+
+export type CategoryBudgetSummary = {
+  budget_id: string;
+  category_id: string;
+  category_name: string;
+  year: number;
+  month: number;
+  amount: number;
+  currency_id: number;
+  currency_label: string | null;
+  spent: number;
+  remaining: number;
+  used_percent: number;
+  is_over_budget: boolean;
+};
+
+export type CategoryBudgetUpsertPayload = {
+  category_id: string;
+  year: number;
+  month: number;
+  amount: number;
+  currency_id: number;
+};
+
+export async function getCategoryBudgets(
+  year: number,
+  month: number
+): Promise<ApiCollectionResult<CategoryBudgetSummary[]>> {
+  const params = new URLSearchParams({
+    year: String(year),
+    month: String(month),
+  });
+  const response = await apiRequest(`/budgets?${params.toString()}`);
+  if (!response.ok) {
+    return { data: [], isMock: true };
+  }
+  const raw = (await response.json()) as any[];
+  const normalized: CategoryBudgetSummary[] = raw.map(item => ({
+    budget_id: String(item.budget_id),
+    category_id: String(item.category_id),
+    category_name: String(item.category_name ?? ''),
+    year: Number(item.year ?? year),
+    month: Number(item.month ?? month),
+    amount: Number(item.amount ?? 0),
+    currency_id: Number(item.currency_id ?? 0),
+    currency_label: item.currency_label ?? null,
+    spent: Number(item.spent ?? 0),
+    remaining: Number(item.remaining ?? 0),
+    used_percent: Number(item.used_percent ?? 0),
+    is_over_budget: Boolean(item.is_over_budget ?? false),
+  }));
+  return { data: normalized, isMock: false };
+}
+
+export async function upsertCategoryBudget(payload: CategoryBudgetUpsertPayload): Promise<void> {
+  const response = await apiRequest('/budgets/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo guardar el presupuesto (status ${response.status})`);
+  }
+}
