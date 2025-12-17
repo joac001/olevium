@@ -2,8 +2,8 @@
 
 ## Autenticación
 - [ ] Login/logout desde la UI (happy path)
-  - [ ] LoginForm: render básico y submit exitoso
-  - [ ] Logout desde NavBar/WelcomePanel con feedback visual
+  - [x] LoginForm: render básico y submit exitoso
+  - [x] Logout desde NavBar/WelcomePanel con feedback visual (NavBar)
 - [ ] Manejo de expiración de sesión y tokens inválidos (redirecciones, mensajes)
 
 ## Cuentas y transacciones
