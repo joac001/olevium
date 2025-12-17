@@ -41,7 +41,7 @@ const mapTransactionCategorySummary = (
 const mapTransaction = (payload: ApiUserTransaction): AccountTransaction => ({
   transactionId: payload.transaction_id,
   accountId: payload.account_id,
-  amount: payload.amount,
+  amount: Number(payload.amount ?? 0),
   typeId: payload.type_id,
   date: payload.date,
   createdAt: payload.created_at,
@@ -163,9 +163,11 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     description,
   }) => {
     try {
+      const normalizedAmount = Math.abs(amount);
+      const delta = typeId === 1 ? -normalizedAmount : normalizedAmount;
       const payload: Record<string, unknown> = {
         account_id: accountId,
-        amount,
+        amount: normalizedAmount,
         date,
         type_id: typeId,
       };
@@ -184,8 +186,6 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         },
       }));
 
-      // type_id: 1 = salida (resta), 2 = entrada (suma)
-      const delta = typeId === 1 ? -amount : amount;
       useAccountsStore.getState().applyBalanceDelta(accountId, delta);
       return mapped;
     } catch (error) {
@@ -211,7 +211,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       // Construir body solo con campos definidos
       const body: Record<string, unknown> = {};
 
-      if (payload.amount !== undefined) body.amount = payload.amount;
+      if (payload.amount !== undefined) body.amount = Math.abs(payload.amount);
       if (payload.date !== undefined) body.date = payload.date;
       if (payload.categoryId !== undefined) body.category_id = payload.categoryId;
       if (payload.accountId !== undefined) body.account_id = payload.accountId;
@@ -234,24 +234,19 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       if (previousTransaction) {
         const accountsStore = useAccountsStore.getState();
+        const previousDelta =
+          previousTransaction.typeId === 1
+            ? -previousTransaction.amount
+            : previousTransaction.amount;
+        const mappedDelta = mapped.typeId === 1 ? -mapped.amount : mapped.amount;
+
         if (previousAccountId && previousAccountId !== mapped.accountId) {
-          // Revertir el delta original en la cuenta anterior
-          const oldDelta =
-            previousTransaction.typeId === 1
-              ? -previousTransaction.amount
-              : previousTransaction.amount;
-          accountsStore.applyBalanceDelta(previousAccountId, -oldDelta);
-          // Aplicar el nuevo delta en la cuenta nueva
-          const newDelta = mapped.typeId === 1 ? -mapped.amount : mapped.amount;
-          accountsStore.applyBalanceDelta(mapped.accountId, newDelta);
+          // Revertir el delta original en la cuenta anterior y aplicar en la nueva
+          accountsStore.applyBalanceDelta(previousAccountId, -previousDelta);
+          accountsStore.applyBalanceDelta(mapped.accountId, mappedDelta);
         } else {
           // Mismo accountId: revertir delta anterior y aplicar nuevo delta
-          const oldDelta =
-            previousTransaction.typeId === 1
-              ? -previousTransaction.amount
-              : previousTransaction.amount;
-          const newDelta = mapped.typeId === 1 ? -mapped.amount : mapped.amount;
-          const delta = newDelta - oldDelta;
+          const delta = mappedDelta - previousDelta;
           accountsStore.applyBalanceDelta(mapped.accountId, delta);
         }
       }
@@ -291,9 +286,10 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       });
 
       if (targetAccountId && targetTransaction) {
-        // Revertir el delta: si fue salida (resta), ahora sumamos; si fue entrada (suma), ahora restamos
         const originalDelta =
-          targetTransaction.typeId === 1 ? -targetTransaction.amount : targetTransaction.amount;
+          targetTransaction.typeId === 1
+            ? -targetTransaction.amount
+            : targetTransaction.amount;
         useAccountsStore.getState().applyBalanceDelta(targetAccountId, -originalDelta);
       }
     } catch (error) {

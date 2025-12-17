@@ -69,17 +69,19 @@ function buildInitialState(props: TransactionFormModalProps): TransactionFormSta
     };
   }
 
-  const isIncome = transaction.type_id === INCOME_TYPE_ID || transaction.amount > 0;
+  const resolvedTypeId =
+    transaction.type_id ?? (transaction.amount > 0 ? INCOME_TYPE_ID : EXPENSE_TYPE_ID);
+  const isIncome = resolvedTypeId === INCOME_TYPE_ID;
   return {
     accountId: String(transaction.account_id),
     amount: String(Math.abs(transaction.amount)),
-    typeId: String(isIncome ? INCOME_TYPE_ID : EXPENSE_TYPE_ID),
+    typeId: String(resolvedTypeId ?? EXPENSE_TYPE_ID),
     date: toDateLocal(transaction.date),
     description: transaction.description ?? '',
     categoryMode: 'existing',
     categoryId: transaction.category_id ? String(transaction.category_id) : '',
     newCategoryDescription: '',
-    newCategoryType: String(transaction.type_id ?? (isIncome ? INCOME_TYPE_ID : EXPENSE_TYPE_ID)),
+    newCategoryType: String(resolvedTypeId ?? EXPENSE_TYPE_ID),
     newCategoryColor: CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff',
     newCategoryIcon: ''
   };
@@ -167,13 +169,12 @@ export default function TransactionFormModal({
       return null;
     }
 
-    const rawAmount = Math.abs(Number(formValues.amount) || 0);
+    const normalizedAmount = Math.abs(Number(formValues.amount) || 0);
     const typeId = Number(formValues.typeId);
-    const signedAmount = typeId === EXPENSE_TYPE_ID ? -rawAmount : rawAmount;
 
     const payload: CreateTransactionPayload = {
       account_id: String(formValues.accountId),
-      amount: signedAmount,
+      amount: normalizedAmount,
       type_id: typeId,
       date: new Date(formValues.date || new Date()).toISOString(),
       description: formValues.description.trim() || undefined
