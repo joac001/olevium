@@ -6,14 +6,14 @@ import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useAuthStore } from '@/lib/stores/auth';
 import type { TransactionCategory, TransactionType } from '@/types';
 
-interface TransactionDataContextValue {
+export interface TransactionDataContextValue {
   transactionTypes: TransactionType[];
   transactionTypesLoading: boolean;
   categories: TransactionCategory[];
   categoriesLoading: boolean;
 }
 
-const TransactionDataContext = createContext<TransactionDataContextValue | undefined>(undefined);
+export const TransactionDataContext = createContext<TransactionDataContextValue | undefined>(undefined);
 
 export function useTransactionData() {
   const context = useContext(TransactionDataContext);
