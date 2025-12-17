@@ -13,7 +13,9 @@
 - [x] Formularios de creación/edición de cuentas y transacciones (validaciones, submit exitoso/erróneo)
   - [x] Normalización de CreateAccountForm (accountFormUtils)
   - [x] Normalización de CreateTransactionForm (transactionFormUtils)
-- [ ] Listados/tablas con filtros por cuenta, rango de fechas y fecha exacta
+- [x] Listados/tablas con filtros por cuenta, rango de fechas y fecha exacta
+  - [x] Lógica de signos (toSignedAmount)
+  - [x] Render básico de AccountTransactionsTable (vacío y con datos)
 
 ## Categorías
 - [ ] Creación/edición/eliminación de categorías desde la UI (incluyendo validaciones de duplicados)
