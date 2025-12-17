@@ -31,7 +31,9 @@
 
 ## Integración con backend
 - [x] React Query: queries/mutations llaman a los endpoints correctos y manejan estados loading/error/success
-- [ ] Manejo de errores HTTP y mensajes de feedback al usuario (toast, banners, etc.)
+- [x] Manejo de errores HTTP y mensajes de feedback al usuario (toast, banners, etc.)
+  - [x] ErrorProcessor: mapeo de códigos HTTP, mensajes de backend y contextos
+  - [x] Hooks de error: useErrorHandler, useFormErrorHandler, useAuthErrorHandler integrados con NotificationContext
 
 ## E2E (Playwright/Cypress)
 - [ ] Flujo completo: login → crear cuenta → crear transacción → ver reflejo en dashboard/balances
