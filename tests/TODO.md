@@ -18,15 +18,19 @@
   - [x] Render básico de AccountTransactionsTable (vacío y con datos)
 
 ## Categorías
-- [ ] Creación/edición/eliminación de categorías desde la UI (incluyendo validaciones de duplicados)
-- [ ] Refresco correcto de listados y uso de categorías en formularios de transacciones
+- [x] Creación/edición/eliminación de categorías desde la UI (incluyendo validaciones de duplicados)
+  - [x] Store: createCategory/updateCategory/deleteCategory actualizan listado
+- [x] Refresco correcto de listados y uso de categorías en formularios de transacciones
+  - [x] Normalización de payload de transacciones con categorías (transactionFormUtils)
 
 ## Recurring transactions
-- [ ] Crear/listar/eliminar recurrencias desde la UI
+- [x] Crear/listar/eliminar recurrencias desde la UI
+  - [x] Normalización de listados (getRecurringTransactions)
+  - [x] Mutaciones HTTP (create/update/delete) con manejo de errores
 - [ ] Visualización correcta de occurrences pendientes/confirmadas
 
 ## Integración con backend
-- [ ] React Query: queries/mutations llaman a los endpoints correctos y manejan estados loading/error/success
+- [x] React Query: queries/mutations llaman a los endpoints correctos y manejan estados loading/error/success
 - [ ] Manejo de errores HTTP y mensajes de feedback al usuario (toast, banners, etc.)
 
 ## E2E (Playwright/Cypress)
