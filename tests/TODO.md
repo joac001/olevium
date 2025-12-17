@@ -10,7 +10,9 @@
 - [x] Stores de Zustand: actualización correcta de balances y listas (accounts/transactions)
   - [x] applyBalanceDelta actualiza balances en accounts/accountDetails
   - [x] createTransaction agrega a accountTransactions y ajusta balance
-- [ ] Formularios de creación/edición de cuentas y transacciones (validaciones, submit exitoso/erróneo)
+- [x] Formularios de creación/edición de cuentas y transacciones (validaciones, submit exitoso/erróneo)
+  - [x] Normalización de CreateAccountForm (accountFormUtils)
+  - [x] Normalización de CreateTransactionForm (transactionFormUtils)
 - [ ] Listados/tablas con filtros por cuenta, rango de fechas y fecha exacta
 
 ## Categorías
