@@ -4,6 +4,7 @@
 - [ ] Login/logout desde la UI (happy path)
   - [x] LoginForm: render básico y submit exitoso
   - [x] Logout desde NavBar/WelcomePanel con feedback visual (NavBar)
+  - [x] E2E login básico con Playwright (auth-login.spec)
 - [x] Manejo de expiración de sesión y tokens inválidos (redirecciones, mensajes)
 
 ## Cuentas y transacciones
@@ -37,4 +38,6 @@
 
 ## E2E (Playwright/Cypress)
 - [ ] Flujo completo: login → crear cuenta → crear transacción → ver reflejo en dashboard/balances
+  - [x] Configuración de Playwright (playwright.config.ts, script test:e2e)
+  - [x] Test de login básico (auth-login.spec) condicionado por variables E2E_USER_*
 - [ ] Flujos de error comunes (backend caído, 401, 403, 500) y comportamiento esperado en UI
