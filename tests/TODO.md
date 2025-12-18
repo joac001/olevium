@@ -1,10 +1,11 @@
 # Frontend test checklist
 
 ## Autenticación
-- [ ] Login/logout desde la UI (happy path)
+- [x] Login/logout desde la UI (happy path)
   - [x] LoginForm: render básico y submit exitoso
   - [x] Logout desde NavBar/WelcomePanel con feedback visual (NavBar)
   - [x] E2E login básico con Playwright (auth-login.spec)
+  - [x] E2E logout desde el panel (WelcomePanel → botón "Cerrar sesión") redirigiendo a `/auth` (`e2e/auth-logout.spec.ts`)
 - [x] Manejo de expiración de sesión y tokens inválidos (redirecciones, mensajes)
 
 ## Cuentas y transacciones
