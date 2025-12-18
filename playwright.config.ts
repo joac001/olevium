@@ -1,4 +1,21 @@
 import { defineConfig, devices } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const e2eEnvPath = path.resolve(__dirname, "e2e/.env.e2e.local");
+if (fs.existsSync(e2eEnvPath)) {
+  const raw = fs.readFileSync(e2eEnvPath, "utf-8");
+  for (const line of raw.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const [key, ...rest] = trimmed.split("=");
+    if (!key) continue;
+    const value = rest.join("=").trim();
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
 
 export default defineConfig({
   testDir: "./e2e",
@@ -16,4 +33,3 @@ export default defineConfig({
     },
   ],
 });
-
