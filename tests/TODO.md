@@ -11,9 +11,12 @@
 - [x] Stores de Zustand: actualización correcta de balances y listas (accounts/transactions)
   - [x] applyBalanceDelta actualiza balances en accounts/accountDetails
   - [x] createTransaction agrega a accountTransactions y ajusta balance
+  - [x] updateTransaction y deleteTransaction actualizan listas y balances (misma cuenta y cambio de cuenta)
 - [x] Formularios de creación/edición de cuentas y transacciones (validaciones, submit exitoso/erróneo)
   - [x] Normalización de CreateAccountForm (accountFormUtils)
   - [x] Normalización de CreateTransactionForm (transactionFormUtils)
+  - [x] EditTransactionForm: inicialización con datos existentes, submit exitoso/erróneo
+  - [x] DeleteTransactionForm: muestra resumen correcto y elimina el movimiento actualizando callbacks/feedback
 - [x] Listados/tablas con filtros por cuenta, rango de fechas y fecha exacta
   - [x] Lógica de signos (toSignedAmount)
   - [x] Render básico de AccountTransactionsTable (vacío y con datos)
@@ -21,6 +24,7 @@
 ## Categorías
 - [x] Creación/edición/eliminación de categorías desde la UI (incluyendo validaciones de duplicados)
   - [x] Store: createCategory/updateCategory/deleteCategory actualizan listado
+  - [x] Flujos E2E básicos de categorías de usuario (crear/editar/eliminar) en `e2e/categories-flow.spec.ts`, condicionado por `E2E_CATEGORIES_FLOW`
 - [x] Refresco correcto de listados y uso de categorías en formularios de transacciones
   - [x] Normalización de payload de transacciones con categorías (transactionFormUtils)
 

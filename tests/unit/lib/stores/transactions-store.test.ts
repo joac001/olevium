@@ -233,4 +233,210 @@ describe("useTransactionsStore - balances y listas", () => {
     expect(categories).toHaveLength(1);
     expect(categories[0].categoryId).toBe("cat-2");
   });
+
+  it("updateTransaction actualiza la transacción en la misma cuenta y ajusta el balance", async () => {
+    const initialTx = {
+      transactionId: "tx-1" as any,
+      accountId: "acc-1" as any,
+      amount: 50,
+      typeId: 1,
+      date: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      categoryId: null,
+      category: null,
+      transactionType: null,
+      typeName: null,
+      description: "Gasto original",
+    };
+
+    useTransactionsStore.setState(state => ({
+      ...state,
+      accountTransactions: {
+        "acc-1": [initialTx as any],
+      },
+    }));
+
+    const apiUpdated: ApiUserTransaction = makeApiTransaction({
+      transaction_id: "tx-1" as any,
+      account_id: "acc-1" as any,
+      amount: 80,
+      type_id: 1,
+      description: "Gasto editado",
+    });
+
+    const putSpy = vi
+      .spyOn(http, "put")
+      .mockResolvedValue({ data: apiUpdated } as any);
+
+    await useTransactionsStore.getState().updateTransaction("tx-1" as any, {
+      transactionId: "tx-1" as any,
+      accountId: "acc-1" as any,
+      amount: 80,
+      date: apiUpdated.date,
+      typeId: 1,
+      categoryId: null,
+      category: null,
+      description: apiUpdated.description,
+    });
+
+    expect(putSpy).toHaveBeenCalledWith(
+      "/transactions/tx-1",
+      expect.objectContaining({
+        account_id: "acc-1",
+        amount: 80,
+        type_id: 1,
+      }),
+    );
+
+    const txState = useTransactionsStore.getState();
+    const list = txState.accountTransactions["acc-1"];
+    expect(list).toHaveLength(1);
+    expect(list?.[0].amount).toBe(80);
+    expect(list?.[0].description).toBe("Gasto editado");
+
+    const account = useAccountsStore
+      .getState()
+      .accounts.find(a => a.accountId === "acc-1");
+    const detail = useAccountsStore.getState().accountDetails["acc-1"];
+
+    // Balance inicial 100, gasto pasa de 50 a 80 => delta -30
+    expect(account?.balance).toBe(70);
+    expect(detail?.balance).toBe(70);
+  });
+
+  it("updateTransaction mueve la transacción a otra cuenta y ajusta ambos balances", async () => {
+    const initialTx = {
+      transactionId: "tx-1" as any,
+      accountId: "acc-1" as any,
+      amount: 50,
+      typeId: 1,
+      date: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      categoryId: null,
+      category: null,
+      transactionType: null,
+      typeName: null,
+      description: "Gasto original",
+    };
+
+    useTransactionsStore.setState(state => ({
+      ...state,
+      accountTransactions: {
+        "acc-1": [initialTx as any],
+        "acc-2": [],
+      },
+    }));
+
+    useAccountsStore.setState(state => ({
+      ...state,
+      accounts: [
+        makeAccount({ accountId: "acc-1" as any, balance: 100 }),
+        makeAccount({ accountId: "acc-2" as any, balance: 200 }),
+      ],
+      accountDetails: {
+        "acc-1": makeAccount({ accountId: "acc-1" as any, balance: 100 }),
+        "acc-2": makeAccount({ accountId: "acc-2" as any, balance: 200 }),
+      },
+    }));
+
+    const apiUpdated: ApiUserTransaction = makeApiTransaction({
+      transaction_id: "tx-1" as any,
+      account_id: "acc-2" as any,
+      amount: 80,
+      type_id: 1,
+      description: "Gasto movido",
+    });
+
+    const putSpy = vi
+      .spyOn(http, "put")
+      .mockResolvedValue({ data: apiUpdated } as any);
+
+    await useTransactionsStore.getState().updateTransaction("tx-1" as any, {
+      transactionId: "tx-1" as any,
+      accountId: "acc-2" as any,
+      amount: 80,
+      date: apiUpdated.date,
+      typeId: 1,
+      categoryId: null,
+      category: null,
+      description: apiUpdated.description,
+    });
+
+    expect(putSpy).toHaveBeenCalledWith(
+      "/transactions/tx-1",
+      expect.objectContaining({
+        account_id: "acc-2",
+        amount: 80,
+        type_id: 1,
+      }),
+    );
+
+    const txState = useTransactionsStore.getState();
+    expect(txState.accountTransactions["acc-1"]).toHaveLength(0);
+    expect(txState.accountTransactions["acc-2"]).toHaveLength(1);
+    expect(txState.accountTransactions["acc-2"][0].accountId).toBe("acc-2");
+    expect(txState.accountTransactions["acc-2"][0].amount).toBe(80);
+
+    const accState = useAccountsStore.getState();
+    const acc1 = accState.accounts.find(a => a.accountId === "acc-1");
+    const acc2 = accState.accounts.find(a => a.accountId === "acc-2");
+    const det1 = accState.accountDetails["acc-1"];
+    const det2 = accState.accountDetails["acc-2"];
+
+    // Se revierte el gasto de 50 en acc-1 (+50) y se aplica gasto de 80 en acc-2 (-80)
+    expect(acc1?.balance).toBe(150);
+    expect(det1?.balance).toBe(150);
+    expect(acc2?.balance).toBe(120);
+    expect(det2?.balance).toBe(120);
+  });
+
+  it("deleteTransaction elimina la transacción y revierte el impacto en el balance", async () => {
+    const tx = {
+      transactionId: "tx-1" as any,
+      accountId: "acc-1" as any,
+      amount: 50,
+      typeId: 1,
+      date: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      categoryId: null,
+      category: null,
+      transactionType: null,
+      typeName: null,
+      description: "Gasto a eliminar",
+    };
+
+    useTransactionsStore.setState(state => ({
+      ...state,
+      accountTransactions: {
+        "acc-1": [tx as any],
+      },
+    }));
+
+    useAccountsStore.setState(state => ({
+      ...state,
+      accounts: [makeAccount({ accountId: "acc-1" as any, balance: 50 })],
+      accountDetails: {
+        "acc-1": makeAccount({ accountId: "acc-1" as any, balance: 50 }),
+      },
+    }));
+
+    const deleteSpy = vi
+      .spyOn(http, "delete")
+      .mockResolvedValue({} as any);
+
+    await useTransactionsStore.getState().deleteTransaction("tx-1" as any);
+
+    expect(deleteSpy).toHaveBeenCalledWith("/transactions/tx-1");
+
+    const txState = useTransactionsStore.getState();
+    expect(txState.accountTransactions["acc-1"]).toHaveLength(0);
+
+    const accState = useAccountsStore.getState();
+    const account = accState.accounts.find(a => a.accountId === "acc-1");
+    const detail = accState.accountDetails["acc-1"];
+
+    // Balance inicial 50 con gasto 50 aplicado; al eliminarlo, vuelve a 100
+    expect(account?.balance).toBe(100);
+    expect(detail?.balance).toBe(100);
+  });
 });
