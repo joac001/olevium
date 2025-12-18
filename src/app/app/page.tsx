@@ -82,8 +82,16 @@ export default function DashboardPage() {
     async (options?: { forceMock?: boolean }) => {
       setIsRefreshing(true);
       try {
-        const token = accessToken ?? (typeof window !== 'undefined' ? window.localStorage.getItem('olevium.accessToken') : null);
-        if (!token || options?.forceMock) {
+        const isDemoRoute =
+          typeof window !== 'undefined' && window.location.pathname.startsWith('/app-demo');
+
+        const token =
+          accessToken ??
+          (typeof window !== 'undefined'
+            ? window.localStorage.getItem('olevium.accessToken')
+            : null);
+
+        if (!token || options?.forceMock || isDemoRoute) {
           setState({ accounts: mockAccounts, transactions: mockTransactions, usingMockData: true });
           return;
         }
@@ -748,4 +756,3 @@ function DashboardSkeleton() {
     </Container>
   );
 }
-
