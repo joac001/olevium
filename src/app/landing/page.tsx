@@ -73,11 +73,11 @@ export default function LandingPage() {
             <Link href="/auth">
               <ActionButton icon="fas fa-right-to-bracket" text="Iniciar sesión o crear cuenta" />
             </Link>
-            <Link href="/app">
+            <Link href="/app-demo">
               <ActionButton
                 icon="fas fa-chart-pie"
                 type="secondary"
-                text="Ver la app en acción"
+                text="Ver la app en acción (demo)"
               />
             </Link>
           </Box>

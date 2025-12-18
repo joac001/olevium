@@ -111,7 +111,7 @@ function NavBar({ title, links }: NavBarProps) {
     if (!pathname) return false;
 
     const publicExact = ['/'];
-    const publicPrefixes = ['/auth', '/landing'];
+    const publicPrefixes = ['/auth', '/landing', '/app-demo'];
 
     if (publicExact.includes(pathname)) {
       return true;
