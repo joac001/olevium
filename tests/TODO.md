@@ -37,7 +37,11 @@
   - [x] Hooks de error: useErrorHandler, useFormErrorHandler, useAuthErrorHandler integrados con NotificationContext
 
 ## E2E (Playwright/Cypress)
-- [ ] Flujo completo: login → crear cuenta → crear transacción → ver reflejo en dashboard/balances
+- [x] Flujo completo: login → crear cuenta → crear transacción → ver reflejo en dashboard/balances
   - [x] Configuración de Playwright (playwright.config.ts, script test:e2e)
   - [x] Test de login básico (auth-login.spec) condicionado por variables E2E_USER_*
-- [ ] Flujos de error comunes (backend caído, 401, 403, 500) y comportamiento esperado en UI
+  - [x] Flujo cuentas/transacciones completo (login + creación de cuenta + creación de transacción + ver reflejo en dashboard) en `e2e/accounts-flow.spec.ts`, condicionado por `E2E_FULL_FLOW`
+- [x] Flujos de error comunes (backend caído, 401, 403, 500) y comportamiento esperado en UI
+  - [x] 500 al cargar cuentas desde `/accounts` muestra notificación de error (`e2e/error-flows.spec.ts`)
+  - [x] 401 en endpoint protegido redirige al login (`/auth`) (`e2e/error-flows.spec.ts`)
+  - [x] 403 al crear transacción muestra error contextual de creación (`e2e/error-flows.spec.ts`)
