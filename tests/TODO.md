@@ -20,6 +20,7 @@
 - [x] Listados/tablas con filtros por cuenta, rango de fechas y fecha exacta
   - [x] Lógica de signos (toSignedAmount)
   - [x] Render básico de AccountTransactionsTable (vacío y con datos)
+  - [x] E2E de /transactions: creación desde "Nueva transacción" + filtros de búsqueda/categoría en `e2e/transactions-flow.spec.ts` condicionado por `E2E_TRANSACTIONS_FLOW`
 
 ## Categorías
 - [x] Creación/edición/eliminación de categorías desde la UI (incluyendo validaciones de duplicados)
