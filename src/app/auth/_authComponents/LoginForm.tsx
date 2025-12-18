@@ -51,7 +51,7 @@ export default function LoginForm() {
         const context = createOperationContext('login', 'sesión', 'la sesión');
         showSuccess('¡Bienvenido! Redirigiendo a tu panel de control.', context);
 
-        router.push('/');
+        router.push('/app');
       } catch (error) {
         const context = createOperationContext('login', 'sesión', 'la sesión');
         showError(error, context);

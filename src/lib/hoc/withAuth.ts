@@ -36,7 +36,14 @@ export function withAuth<P extends object>(WrappedComponent: React.ComponentType
 
     const isPublicRoute = useMemo(() => {
       if (!pathname) return false;
-      const publicPrefixes = ['/auth', '/verify-cta', '/verify-email'];
+
+      const publicExact = ['/'];
+      const publicPrefixes = ['/auth', '/landing'];
+
+      if (publicExact.includes(pathname)) {
+        return true;
+      }
+
       return publicPrefixes.some(prefix => pathname.startsWith(prefix));
     }, [pathname]);
 
