@@ -15,14 +15,14 @@ test.describe("Logout E2E", () => {
     await page.getByLabel(/correo electrónico/i).fill(email!);
     await page.getByLabel(/contraseña/i).fill(password!);
 
-    await page.getByRole("button", { name: /iniciar sesión/i }).click();
+    await page.getByRole("button", { name: /iniciar sesión/i }).last().click();
 
     await page.waitForURL((url) => !url.pathname.startsWith("/auth"), {
       timeout: 15000,
     });
 
     await expect(
-      page.getByText(/panel de inicio/i).first(),
+      page.getByRole("heading", { name: /resumen financiero/i }),
     ).toBeVisible({ timeout: 15000 });
 
     await page.getByRole("button", { name: /cerrar sesión/i }).click();
@@ -34,4 +34,3 @@ test.describe("Logout E2E", () => {
     ).toBeVisible({ timeout: 15000 });
   });
 });
-

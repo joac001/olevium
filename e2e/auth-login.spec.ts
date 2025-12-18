@@ -15,7 +15,7 @@ test.describe("Auth E2E", () => {
     await page.getByLabel(/correo electrónico/i).fill(email!);
     await page.getByLabel(/contraseña/i).fill(password!);
 
-    await page.getByRole("button", { name: /iniciar sesión/i }).click();
+    await page.getByRole("button", { name: /iniciar sesión/i }).last().click();
 
     // Esperar a que dejemos la pantalla de auth
     await page.waitForURL((url) => !url.pathname.startsWith("/auth"), {
@@ -24,8 +24,7 @@ test.describe("Auth E2E", () => {
 
     // Validar que aparece algo característico del dashboard
     await expect(
-      page.getByText(/panel de inicio/i).first(),
+      page.getByRole("heading", { name: /resumen financiero/i }),
     ).toBeVisible({ timeout: 15000 });
   });
 });
-

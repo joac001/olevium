@@ -23,7 +23,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: "list",
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:8765",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8765",
     trace: "on-first-retry",
   },
   projects: [
