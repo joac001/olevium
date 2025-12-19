@@ -223,12 +223,32 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       set(prev => {
         const accountId = mapped.accountId;
-        const current = prev.accountTransactions[accountId] ?? [];
+        const sourceAccountId = previousAccountId ?? accountId;
+
+        const nextAccountTransactions: Record<string, AccountTransaction[]> = {
+          ...prev.accountTransactions,
+        };
+
+        // Siempre remover la transacción previa de su cuenta de origen (si existe)
+        const previousList = nextAccountTransactions[sourceAccountId] ?? [];
+        nextAccountTransactions[sourceAccountId] = previousList.filter(
+          tx => tx.transactionId !== transactionId
+        );
+
+        // Insertar o actualizar en la cuenta actual
+        const targetList = nextAccountTransactions[accountId] ?? [];
+        const existingIndex = targetList.findIndex(tx => tx.transactionId === transactionId);
+
+        if (existingIndex >= 0) {
+          targetList[existingIndex] = mapped;
+        } else {
+          targetList.unshift(mapped);
+        }
+
+        nextAccountTransactions[accountId] = targetList;
+
         return {
-          accountTransactions: {
-            ...prev.accountTransactions,
-            [accountId]: current.map(tx => (tx.transactionId === transactionId ? mapped : tx)),
-          },
+          accountTransactions: nextAccountTransactions,
         };
       });
 
