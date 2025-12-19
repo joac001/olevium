@@ -81,3 +81,10 @@ export type UpdateRecurringTransactionPayload = Partial<CreateRecurringTransacti
 };
 
 export type Currency = ApiCurrency;
+
+export type FeedbackPayload = {
+  type: 'bug' | 'feature' | 'other';
+  message: string;
+  page_path?: string;
+  metadata?: Record<string, unknown>;
+};
