@@ -6,7 +6,7 @@ import {
   useContext,
   useMemo,
   useState,
-  type ReactNode
+  type ReactNode,
 } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +15,7 @@ import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
 import { useTransactionsQuery } from '@/features/transactions/queries';
 import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
-import { getAccounts, getCategories } from '@/lib/api';
+import { exportTransactionsCsv, getAccounts, getCategories } from '@/lib/api';
 import { mockAccounts, mockTransactions } from '@/lib/mockData';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatAccountName } from '@/lib/format';
@@ -36,6 +36,7 @@ type TransactionsContextValue = {
     dateFilter: DateFilter;
     searchTerm: string;
   };
+  isExporting: boolean;
   setTypeFilter: (value: TypeFilter) => void;
   setCategoryFilter: (value: string) => void;
   setDateFilter: (value: DateFilter) => void;
@@ -51,6 +52,7 @@ type TransactionsContextValue = {
   handleCreateTransaction: () => void;
   handleEditTransaction: (transaction: Transaction) => void;
   handleDeleteTransaction: (transaction: Transaction) => Promise<void>;
+  handleExportCsv: () => void;
 };
 
 export function useTransactionsPage() {
@@ -143,6 +145,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
   const [categoryFilter, setCategoryFilterState] = useState<string>('all');
   const [dateFilter, setDateFilterState] = useState<DateFilter>('30d');
   const [searchTerm, setSearchTermState] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   const transactionsQuery = useTransactionsQuery();
   const accountsQuery = useQuery({ queryKey: ['accounts'], queryFn: getAccounts });
@@ -309,6 +312,65 @@ export default function TransactionsProvider({ children }: { children: ReactNode
     [accountDictionary, deleteTransactionMutation, refetchTransactions, showNotification]
   );
 
+  const handleExportCsv = useCallback(async () => {
+    if (usingMockData) {
+      showNotification(
+        'fas fa-triangle-exclamation',
+        'danger',
+        'Sin conexión real',
+        'No se puede exportar CSV mientras se muestran datos de ejemplo.'
+      );
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+
+      const now = new Date();
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      if (dateFilter === '30d' || dateFilter === '90d') {
+        const days = dateFilter === '30d' ? 30 : 90;
+        const from = new Date(now);
+        from.setDate(now.getDate() - days);
+        startDate = from.toISOString().slice(0, 10);
+        endDate = now.toISOString().slice(0, 10);
+      }
+
+      const blob = await exportTransactionsCsv({
+        startDate,
+        endDate,
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      link.href = url;
+      link.download = `olevium-transacciones-${today}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showNotification(
+        'fas fa-file-arrow-down',
+        'success',
+        'Exportación iniciada',
+        'El archivo CSV se está descargando.'
+      );
+    } catch (error) {
+      console.error('Error al exportar CSV', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo exportar las transacciones a CSV.';
+      showNotification('fas fa-triangle-exclamation', 'danger', 'Error al exportar', message);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [dateFilter, showNotification, usingMockData]);
+
   const value = useMemo<TransactionsContextValue>(
     () => ({
       isLoading,
@@ -319,6 +381,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
         dateFilter,
         searchTerm
       },
+      isExporting,
       setTypeFilter: setTypeFilterState,
       setCategoryFilter: setCategoryFilterState,
       setDateFilter: setDateFilterState,
@@ -333,7 +396,8 @@ export default function TransactionsProvider({ children }: { children: ReactNode
       filteredTransactions,
       handleCreateTransaction,
       handleEditTransaction,
-      handleDeleteTransaction
+      handleDeleteTransaction,
+      handleExportCsv
     }),
     [
       accountDictionary,
@@ -350,6 +414,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
       handleEditTransaction,
       isLoading,
       searchTerm,
+      isExporting,
       summary,
       typeFilter,
       usingMockData

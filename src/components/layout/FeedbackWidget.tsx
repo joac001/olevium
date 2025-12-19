@@ -83,7 +83,8 @@ function FeedbackModalContent() {
     <Card tone="accent" title="Enviar feedback">
       <Box className="space-y-4">
         <Typography variant="body" className="text-[color:var(--text-muted)]">
-          Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, explica de la manera más detallada posible qué estabas haciendo y qué esperabas que pasara.
+          Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, explica de la
+          manera más detallada posible qué estabas haciendo y qué esperabas que pasara.
         </Typography>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Box className="flex flex-wrap gap-2">
@@ -115,12 +116,7 @@ function FeedbackModalContent() {
           </Box>
 
           <Box className="flex justify-end gap-2">
-            <Button
-              text="Cancelar"
-              onClick={hideModal}
-              type="neutral"
-              htmlType="button"
-            />
+            <Button text="Cancelar" onClick={hideModal} type="neutral" htmlType="button" />
             <Button
               text={isSubmitting ? 'Enviando...' : 'Enviar'}
               disabled={isSubmitting || !message.trim()}
