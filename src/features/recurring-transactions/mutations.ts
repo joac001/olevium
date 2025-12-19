@@ -1,8 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, parseErrorMessage } from '@/lib/http';
-import type { RecurringTransaction, CreateRecurringTransactionPayload, UpdateRecurringTransactionPayload } from '@/lib/types';
+import type {
+  RecurringTransaction,
+  CreateRecurringTransactionPayload,
+  UpdateRecurringTransactionPayload,
+} from '@/lib/types';
 
-async function postRecurringTransaction(payload: CreateRecurringTransactionPayload): Promise<RecurringTransaction> {
+export async function postRecurringTransaction(
+  payload: CreateRecurringTransactionPayload,
+): Promise<RecurringTransaction> {
   const response = await apiRequest('/recurring-transactions/', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -14,7 +20,7 @@ async function postRecurringTransaction(payload: CreateRecurringTransactionPaylo
   return (await response.json()) as RecurringTransaction;
 }
 
-async function putRecurringTransaction(
+export async function putRecurringTransaction(
   recurringTransactionId: string,
   payload: UpdateRecurringTransactionPayload
 ): Promise<RecurringTransaction> {
@@ -29,7 +35,7 @@ async function putRecurringTransaction(
   return (await response.json()) as RecurringTransaction;
 }
 
-async function deleteRecurringTransaction(recurringTransactionId: string): Promise<void> {
+export async function deleteRecurringTransaction(recurringTransactionId: string): Promise<void> {
   const response = await apiRequest(`/recurring-transactions/${recurringTransactionId}`, {
     method: 'DELETE',
   });

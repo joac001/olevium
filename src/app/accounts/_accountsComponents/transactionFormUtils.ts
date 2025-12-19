@@ -229,7 +229,7 @@ export const normalizeTransactionFormData = ({
     return null;
   }
 
-  const amount = Number(amountValue);
+  const amount = Math.abs(Number(amountValue));
   if (!Number.isFinite(amount)) {
     showNotification(
       'fa-solid fa-triangle-exclamation',

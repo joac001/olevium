@@ -3,16 +3,14 @@
 import { useState, type FormEvent } from 'react';
 import { usePathname } from 'next/navigation';
 
-import Box from '@/components/shared/ui/content/Box';
-import Typography from '@/components/shared/ui/text/Typography';
-import Button from '@/components/shared/ui/buttons/Button';
+import { Box, Card, Typography, Button, ActionButton, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
+import { useModal } from '@/context/ModalContext';
 import { postFeedback } from '@/lib/api';
 
 type FeedbackType = 'bug' | 'feature' | 'other';
 
-export default function FeedbackWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+function FeedbackModalContent() {
   const [type, setType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
   const [details, setDetails] = useState('');
@@ -20,6 +18,7 @@ export default function FeedbackWidget() {
 
   const pathname = usePathname();
   const { showSuccess, showError } = useNotification();
+  const { hideModal } = useModal();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -68,10 +67,7 @@ export default function FeedbackWidget() {
         resource: 'feedback',
         userFriendlyOperation: 'feedback',
       });
-      setMessage('');
-      setDetails('');
-      setType('bug');
-      setIsOpen(false);
+      hideModal();
     } catch (error) {
       showError(error, {
         operation: 'create',
@@ -84,92 +80,71 @@ export default function FeedbackWidget() {
   };
 
   return (
-    <>
-      {/* Botón flotante */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-[1100] flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg hover:scale-105 transition-transform"
-        aria-label="Enviar feedback"
-      >
-        <i className="fas fa-message" aria-hidden />
-      </button>
-
-      {/* Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/40 px-4">
-          <Box className="w-full max-w-md rounded-2xl bg-[var(--surface-elevated)] p-5 shadow-2xl">
-            <Typography variant="h2" className="mb-2">
-              Enviar feedback
-            </Typography>
-            <Typography variant="caption" className="mb-4 text-[color:var(--text-muted)]">
-              Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, incluí qué
-              estabas haciendo y qué esperabas que pase.
-            </Typography>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2">
-                {[
-                  { value: 'bug', label: 'Tengo un problema' },
-                  { value: 'feature', label: 'Quiero proponer una mejora' },
-                  { value: 'other', label: 'Otro comentario' },
-                ].map(option => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setType(option.value as FeedbackType)}
-                    className={[
-                      'flex-1 rounded-full border px-3 py-1 text-sm transition-colors',
-                      type === option.value
-                        ? 'bg-[var(--color-primary)] text-white border-transparent'
-                        : 'bg-[color:var(--surface-muted)] text-[color:var(--text-muted)] border-[color:var(--border-subtle)]',
-                    ].join(' ')}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              <div>
-                <textarea
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                  className="w-full min-h-[120px] resize-y rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-muted)] px-3 py-2 text-sm text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="Ej: Estaba creando una cuenta nueva y al guardar me apareció un error sin mensaje."
-                />
-                <p className="mt-1 text-xs text-[color:var(--text-muted)]">
-                  Se enviará también la pantalla actual y algunos datos técnicos para ayudarnos a
-                  reproducir el problema.
-                </p>
-              </div>
-
-              <div>
-                <textarea
-                  value={details}
-                  onChange={e => setDetails(e.target.value)}
-                  className="w-full min-h-[80px] resize-y rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-muted)] px-3 py-2 text-xs text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="Información adicional opcional: pasos para reproducir, qué esperabas que pase, capturas, etc."
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  text="Cancelar"
-                  onClick={() => setIsOpen(false)}
-                  type="neutral"
-                  htmlType="button"
-                />
-                <Button
-                  text={isSubmitting ? 'Enviando...' : 'Enviar'}
-                  disabled={isSubmitting || !message.trim()}
-                  htmlType="submit"
-                  icon="fas fa-paper-plane"
-                  iconPosition="end"
-                />
-              </div>
-            </form>
+    <Card tone="accent" title="Enviar feedback">
+      <Box className="space-y-4">
+        <Typography variant="body" className="text-[color:var(--text-muted)]">
+          Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, explica de la
+          manera más detallada posible qué estabas haciendo y qué esperabas que pasara.
+        </Typography>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Box className="flex flex-wrap gap-2">
+            {[
+              { value: 'bug', label: 'Tengo un problema' },
+              { value: 'feature', label: 'Quiero proponer una mejora' },
+              { value: 'other', label: 'Otro comentario' },
+            ].map(option => (
+              <ActionButton
+                key={option.value}
+                icon={type === option.value ? 'fas fa-check-circle' : 'fas fa-circle'}
+                type={type === option.value ? 'accent' : 'neutral'}
+                text={option.label}
+                onClick={() => setType(option.value as FeedbackType)}
+                className="flex-1"
+              />
+            ))}
           </Box>
-        </div>
-      )}
-    </>
+
+          <Box className="space-y-1">
+            <Input
+              label="Tu mensaje"
+              value={message}
+              onValueChange={value => setMessage(String(value ?? ''))}
+              placeholder="Ej: Estaba creando una cuenta nueva y al guardar me apareció un error sin mensaje."
+              rows={4}
+              required
+            />
+          </Box>
+
+          <Box className="flex justify-end gap-2">
+            <Button text="Cancelar" onClick={hideModal} type="neutral" htmlType="button" />
+            <Button
+              text={isSubmitting ? 'Enviando...' : 'Enviar'}
+              disabled={isSubmitting || !message.trim()}
+              htmlType="submit"
+              icon="fas fa-paper-plane"
+              iconPosition="end"
+            />
+          </Box>
+        </form>
+      </Box>
+    </Card>
+  );
+}
+
+export default function FeedbackWidget() {
+  const { showModal } = useModal();
+
+  const handleOpenFeedback = () => {
+    showModal(<FeedbackModalContent />);
+  };
+
+  return (
+    <ActionButton
+      icon="fas fa-message"
+      type="accent"
+      tooltip="Enviar feedback"
+      onClick={handleOpenFeedback}
+      className="fixed bottom-4 right-4 z-[1100] h-11 w-11 rounded-full shadow-lg"
+    />
   );
 }
