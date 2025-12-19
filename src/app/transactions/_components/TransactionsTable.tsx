@@ -2,6 +2,7 @@
 
 import { Card, Box, Typography, ActionButton } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
+import { toSignedAmount } from '@/lib/utils/transactions';
 import { useTransactionsPage } from './TransactionsProvider';
 
 const EXPENSE_TYPE_ID = 1;
@@ -63,7 +64,8 @@ export default function TransactionsTable() {
                   account?.name ??
                   (tx as any)?.account?.name ??
                   `Cuenta ${tx.account_id}`;
-                const isIncome = tx.type_id === INCOME_TYPE_ID || tx.amount > 0;
+                const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+                const isIncome = signedAmount >= 0;
                 const categoryValue = tx.category;
                 const category =
                   typeof categoryValue === 'string'
@@ -89,7 +91,7 @@ export default function TransactionsTable() {
                         isIncome ? 'text-[color:var(--color-success)]' : 'text-[color:var(--color-danger)]'
                       }`}
                     >
-                      {formatCurrency(tx.amount, currency)}
+                      {formatCurrency(signedAmount, currency)}
                     </td>
                     <td className="px-4 py-3">
                       <Box className="flex justify-end gap-2">

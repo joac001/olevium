@@ -8,6 +8,7 @@ import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
+import { toSignedAmount } from '@/lib/utils/transactions';
 
 interface DeleteTransactionFormProps {
   transaction: AccountTransaction;
@@ -23,6 +24,10 @@ export default function DeleteTransactionForm({
   const deleteTransaction = useTransactionsStore(state => state.deleteTransaction);
   const { showNotification, showError, showSuccess } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const signedAmount = useMemo(
+    () => toSignedAmount(transaction.amount, transaction.typeId),
+    [transaction.amount, transaction.typeId]
+  );
 
   const buttons = useMemo(
     () => [
@@ -65,10 +70,7 @@ export default function DeleteTransactionForm({
     ]
   );
 
-  const amountLabel = useMemo(
-    () => formatAmount(transaction.amount, currency),
-    [transaction.amount, currency]
-  );
+  const amountLabel = useMemo(() => formatAmount(signedAmount, currency), [signedAmount, currency]);
   const dateLabel = useMemo(() => formatDate(transaction.date, 'dd/mm/aaaa'), [transaction.date]);
 
   return (
