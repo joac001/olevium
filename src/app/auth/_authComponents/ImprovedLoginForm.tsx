@@ -42,7 +42,7 @@ export default function ImprovedLoginForm() {
       });
 
       if (success) {
-        router.push('/');
+        router.push('/app');
       }
 
       setIsSubmitting(false);

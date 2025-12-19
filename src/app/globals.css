@@ -442,4 +442,67 @@ body {
   .z-navbar {
     z-index: 1100;
   }
+
+  /* Landing animations */
+  .animate-pulse-slow {
+    animation: pulse-slow 8s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 12s ease-in-out infinite;
+  }
+
+  .animate-rise-soft {
+    animation: rise-soft 0.9s ease-out 0.1s both;
+  }
+
+  .animate-fade-in-soft {
+    animation: fade-in-soft 0.8s ease-out 0.2s both;
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-6px, -10px, 0) rotate(1deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes rise-soft {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes fade-in-soft {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
