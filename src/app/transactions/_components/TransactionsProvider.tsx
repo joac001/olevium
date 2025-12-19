@@ -357,6 +357,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
         'El archivo CSV se está descargando.'
       );
     } catch (error) {
+      console.error('Error al exportar CSV', error);
       const message =
         error instanceof Error
           ? error.message
