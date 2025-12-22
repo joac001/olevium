@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Box, FormWrapper, Input, Typography, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
+import { useAuthErrorHandler } from '@/lib/hooks/useErrorHandler';
 import { useAuthStore } from '@/lib/stores/auth';
-import { createOperationContext } from '@/lib/utils/errorSystem';
 
 export default function LoginForm() {
   const router = useRouter();
-  const { showNotification, showError, showSuccess } = useNotification();
+  const { showNotification } = useNotification();
+  const { handleLogin } = useAuthErrorHandler();
   const login = useAuthStore(state => state.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,30 +44,25 @@ export default function LoginForm() {
 
       setIsSubmitting(true);
 
-      try {
+      const success = await handleLogin(async () => {
         await login(emailValue, passwordValue);
+      });
 
-        const context = createOperationContext('login', 'sesión', 'la sesión');
-        showSuccess('¡Bienvenido! Redirigiendo a tu panel de control.', context);
-
+      if (success) {
         router.push('/dashboard');
-      } catch (error) {
-        const context = createOperationContext('login', 'sesión', 'la sesión');
-        showError(error, context);
-        return;
-      } finally {
-        setIsSubmitting(false);
       }
+
+      setIsSubmitting(false);
     },
-    [login, router, showNotification, showError, showSuccess]
+    [login, router, showNotification, handleLogin]
   );
 
   return (
     <FormWrapper onSubmit={handleSubmit} buttons={buttons} className="flex flex-col gap-6">
       <Box className="space-y-4">
-        <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
+        {/* <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
           Ingresa tus credenciales para acceder a todas las funcionalidades de Olevium.
-        </Typography>
+        </Typography> */}
 
         <Input
           name="email"

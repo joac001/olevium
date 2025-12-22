@@ -33,7 +33,6 @@ import {
 import DashboardSkeleton from '../_skeletons/DashboardSkeleton';
 import { formatCurrency, formatDateWithTime, formatSignedCurrency } from '@/lib/format';
 import { getAccounts, getTransactions } from '@/lib/api';
-import { mockAccounts, mockTransactions } from '@/lib/mockData';
 import type { Account, Transaction } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/auth';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
@@ -54,17 +53,13 @@ ChartJS.register(
 type DashboardState = {
   accounts: Account[];
   transactions: Transaction[];
-  usingMockData: boolean;
 };
 
 const initialState: DashboardState = {
   accounts: [],
   transactions: [],
-  usingMockData: false,
 };
 
-const EXPENSE_TYPE_ID = 1;
-const INCOME_TYPE_ID = 2;
 const categoryPalette = [
   '#3f8aff',
   '#9f67ff',
@@ -97,43 +92,37 @@ export default function DashboardPage() {
   const [grouping, setGrouping] = useState<'daily' | 'monthly'>('daily');
   const accessToken = useAuthStore(s => s.accessToken);
 
-  const loadData = useCallback(
-    async (options?: { forceMock?: boolean }) => {
-      setIsRefreshing(true);
-      try {
-        const isDemoRoute =
-          typeof window !== 'undefined' && window.location.pathname.startsWith('/app-demo');
+  const loadData = useCallback(async () => {
+    setIsRefreshing(true);
+    setIsLoading(true);
 
-        const token =
-          accessToken ??
-          (typeof window !== 'undefined'
-            ? window.localStorage.getItem('olevium.accessToken')
-            : null);
+    const token =
+      accessToken ??
+      (typeof window !== 'undefined'
+        ? window.localStorage.getItem('olevium.accessToken')
+        : null);
 
-        if (!token || options?.forceMock || isDemoRoute) {
-          setState({ accounts: mockAccounts, transactions: mockTransactions, usingMockData: true });
-          return;
-        }
+    if (!token) {
+      setIsRefreshing(false);
+      return;
+    }
 
-        const [accountsResult, transactionsResult] = await Promise.all([
-          getAccounts(),
-          getTransactions(),
-        ]);
-        setState({
-          accounts: accountsResult.data,
-          transactions: transactionsResult.data,
-          usingMockData: accountsResult.isMock || transactionsResult.isMock,
-        });
-      } catch (error) {
-        console.warn('[olevium] usando datos de ejemplo tras error', error);
-        setState({ accounts: mockAccounts, transactions: mockTransactions, usingMockData: true });
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [accessToken]
-  );
+    try {
+      const [accountsResult, transactionsResult] = await Promise.all([
+        getAccounts(),
+        getTransactions(),
+      ]);
+      setState({
+        accounts: accountsResult.data,
+        transactions: transactionsResult.data,
+      });
+      setIsLoading(false);
+    } catch (error) {
+      console.warn('[olevium] no se pudo cargar el dashboard', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     void loadData();
@@ -454,7 +443,7 @@ export default function DashboardPage() {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <DashboardCard
               title="Saldo consolidado (ARS)"
-              subtitle={state.usingMockData ? 'Datos de ejemplo' : 'Saldo real según tus cuentas'}
+              subtitle="Saldo real según tus cuentas"
               value={formatCurrency(totalBalanceARS)}
               accent="from-emerald-500/40 via-emerald-400/20 to-emerald-500/10"
               icon={<Wallet className="h-5 w-5" />}

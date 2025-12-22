@@ -74,9 +74,9 @@ export default function SignupForm() {
   return (
     <FormWrapper onSubmit={handleSubmit} buttons={buttons} className="flex flex-col gap-6">
       <Box className="space-y-4">
-        <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
+        {/* <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
           Completa el formulario para crear tu espacio financiero en Olevium.
-        </Typography>
+        </Typography> */}
 
         <Input
           name="name"

@@ -3,10 +3,12 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Button, Typography } from '@/components/shared/ui';
+import { useRouter } from 'next/navigation';
 
 export function CTASection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: false, amount: 0.5 });
+  const router = useRouter();
 
   return (
     <section
@@ -34,7 +36,12 @@ export function CTASection() {
           Registrate y empezá a usar Olevium hoy mismo. Es completamente gratis.
         </Typography>
 
-        <Button type="primary" text="Regístrate gratis" className="px-10 py-4 text-lg" />
+        <Button
+          type="primary"
+          text="Regístrate gratis"
+          className="px-10 py-4 text-lg"
+          onClick={() => router.push('/auth')}
+        />
       </motion.div>
     </section>
   );

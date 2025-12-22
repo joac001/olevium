@@ -16,7 +16,6 @@ import { useNotification } from '@/context/NotificationContext';
 import { useTransactionsQuery } from '@/features/transactions/queries';
 import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
 import { getAccounts, getCategories } from '@/lib/api';
-import { mockAccounts, mockTransactions } from '@/lib/mockData';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatAccountName } from '@/lib/format';
 import type { DateFilter, TypeFilter, TransactionsSummary } from './types';
@@ -29,7 +28,6 @@ const TransactionsContext = createContext<TransactionsContextValue | null>(null)
 
 type TransactionsContextValue = {
   isLoading: boolean;
-  usingMockData: boolean;
   filters: {
     typeFilter: TypeFilter;
     categoryFilter: string;
@@ -153,15 +151,12 @@ export default function TransactionsProvider({ children }: { children: ReactNode
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
 
-  const transactions = transactionsQuery.data?.data ?? mockTransactions;
-  const accounts = accountsQuery.data?.data ?? mockAccounts;
+  const transactions = transactionsQuery.data?.data ?? [];
+  const accounts = accountsQuery.data?.data ?? [];
   const categories = categoriesQuery.data?.data ?? [];
 
   const isLoading =
     transactionsQuery.isLoading || accountsQuery.isLoading || categoriesQuery.isLoading;
-  const usingMockData = Boolean(
-    transactionsQuery.data?.isMock || accountsQuery.data?.isMock || categoriesQuery.data?.isMock
-  );
 
   const accountDictionary = useMemo(() => buildAccountDictionary(accounts), [accounts]);
   const categoryDictionary = useMemo(() => buildCategoryDictionary(categories), [categories]);
@@ -312,7 +307,6 @@ export default function TransactionsProvider({ children }: { children: ReactNode
   const value = useMemo<TransactionsContextValue>(
     () => ({
       isLoading,
-      usingMockData,
       filters: {
         typeFilter,
         categoryFilter,
@@ -351,8 +345,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
       isLoading,
       searchTerm,
       summary,
-      typeFilter,
-      usingMockData
+      typeFilter
     ]
   );
 
