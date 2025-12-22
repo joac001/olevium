@@ -7,7 +7,9 @@ import {
   Input,
   DropMenu,
   Typography,
-  ActionButton
+  ActionButton,
+  DateInput,
+  ButtonBase
 } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
@@ -282,20 +284,14 @@ export default function TransactionFormModal({
             placeholder="0"
           />
 
-          <Box className="space-y-1">
-            <label className="text-xs uppercase tracking-wide text-muted" htmlFor="transaction-date">
-              Fecha
-            </label>
-            <input
-              id="transaction-date"
-              type="date"
-              value={formValues.date}
-              onChange={(event) =>
-                handleFieldChange((prev) => ({ ...prev, date: event.target.value }))
-              }
-              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
-            />
-          </Box>
+          <DateInput
+            label="Fecha"
+            required
+            value={formValues.date}
+            onValueChange={(value) =>
+              handleFieldChange((prev) => ({ ...prev, date: value }))
+            }
+          />
         </Box>
 
         <Input
@@ -371,100 +367,93 @@ export default function TransactionFormModal({
                 placeholder="Nombre de la nueva categoría"
               />
               <Box className="space-y-2">
-                <label className="text-xs uppercase tracking-wide text-muted" htmlFor="new-category-color">
-                  Color (hex)
-                </label>
-                <Box className="flex items-center gap-2">
-                  <input
-                    id="new-category-color"
-                    type="text"
-                    value={formValues.newCategoryColor}
-                    onChange={(event) =>
-                      handleFieldChange((prev) => ({
-                        ...prev,
-                        newCategoryColor: event.target.value.trim().toUpperCase()
-                      }))
-                    }
-                    placeholder="#AABBCC"
-                    className="flex-1 rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleFieldChange((prev) => ({ ...prev, newCategoryColor: '' }))
-                    }
-                    className="rounded-xl bg-white/10 px-4 py-2 text-sm text-slate-200 transition hover:bg-white/20"
+                <Box className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <Box className="flex-1">
+                    <Input
+                      label="Color (hex)"
+                      value={formValues.newCategoryColor}
+                      onValueChange={(value) =>
+                        handleFieldChange((prev) => ({
+                          ...prev,
+                          newCategoryColor: String(value ?? '').trim().toUpperCase()
+                        }))
+                      }
+                      placeholder="#AABBCC"
+                    />
+                  </Box>
+                  <ButtonBase
+                    htmlType="button"
+                    onClick={() => handleFieldChange((prev) => ({ ...prev, newCategoryColor: '' }))}
+                    className="!rounded-xl !border-0 !bg-white/10 !px-4 !py-2 text-sm text-slate-200 transition hover:!bg-white/20"
+                    ariaLabel="Limpiar color"
                   >
                     Limpiar
-                  </button>
+                  </ButtonBase>
                 </Box>
                 <Box className="flex flex-wrap gap-2">
                   {CATEGORY_COLOR_OPTIONS.map((option) => (
-                    <button
+                    <ButtonBase
                       key={option.value}
-                      type="button"
+                      htmlType="button"
                       onClick={() =>
                         handleFieldChange((prev) => ({ ...prev, newCategoryColor: option.value }))
                       }
-                      className={`h-8 w-8 rounded-full border-2 transition ${
+                      className={`!h-8 !w-8 !rounded-full !border-2 !p-0 transition ${
                         formValues.newCategoryColor === option.value
-                          ? 'border-white ring-2 ring-white/60'
-                          : 'border-white/10 hover:border-white/40'
+                          ? '!border-white ring-2 ring-white/60'
+                          : '!border-white/10 hover:!border-white/40'
                       }`}
                       style={{ backgroundColor: option.value }}
-                      aria-label={`Color ${option.label}`}
+                      ariaLabel={`Color ${option.label}`}
                     />
                   ))}
                 </Box>
               </Box>
 
               <Box className="space-y-2">
-                <label className="text-xs uppercase tracking-wide text-muted" htmlFor="new-category-icon">
-                  Emoji (opcional)
-                </label>
-                <input
-                  id="new-category-icon"
-                  type="text"
+                <Input
+                  label="Emoji (opcional)"
                   value={formValues.newCategoryIcon}
-                  onChange={(event) =>
+                  onValueChange={(value) =>
                     handleFieldChange((prev) => ({
                       ...prev,
-                      newCategoryIcon: Array.from(event.target.value).slice(0, 4).join('')
+                      newCategoryIcon: Array.from(String(value ?? '')).slice(0, 4).join('')
                     }))
                   }
                   placeholder="Ej: 💡"
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
                 />
                 <Box className="flex flex-wrap gap-2">
                   {CATEGORY_EMOJI_SUGGESTIONS.map((emoji) => (
-                    <button
+                    <ButtonBase
                       key={emoji}
-                      type="button"
+                      htmlType="button"
                       onClick={() =>
                         handleFieldChange((prev) => ({ ...prev, newCategoryIcon: emoji }))
                       }
-                      className={`rounded-xl px-3 py-2 text-base transition ${
+                      className={`!rounded-xl !border-0 !px-3 !py-2 text-base transition ${
                         formValues.newCategoryIcon === emoji
-                          ? 'bg-white/20 text-white'
-                          : 'bg-white/5 text-slate-200 hover:bg-white/10'
+                          ? '!bg-white/20 !text-white'
+                          : '!bg-white/5 !text-slate-200 hover:!bg-white/10'
                       }`}
+                      ariaLabel={`Emoji ${emoji}`}
                     >
                       {emoji}
-                    </button>
+                    </ButtonBase>
                   ))}
-                  <button
-                    type="button"
+                  <ButtonBase
+                    htmlType="button"
                     onClick={() =>
                       handleFieldChange((prev) => ({ ...prev, newCategoryIcon: '' }))
                     }
-                    className={`rounded-xl px-3 py-2 text-xs transition ${
+                    className={`!rounded-xl !border-0 !px-3 !py-2 text-xs transition ${
                       formValues.newCategoryIcon === ''
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/5 text-slate-200 hover:bg-white/10'
+                        ? '!bg-white/20 !text-white'
+                        : '!bg-white/5 !text-slate-200 hover:!bg-white/10'
                     }`}
+                    ariaLabel="Sin emoji"
                   >
                     Sin emoji
-                  </button>
+                  </ButtonBase>
                 </Box>
               </Box>
             </Box>
@@ -473,8 +462,8 @@ export default function TransactionFormModal({
 
         {formError && (
           <Box className="rounded-xl bg-[color:var(--color-warning)]/10 p-3">
-            <Typography variant="caption">
-              <span className="font-semibold text-[color:var(--color-warning)]">{formError}</span>
+            <Typography variant="caption" className="font-semibold text-[color:var(--color-warning)]">
+              {formError}
             </Typography>
           </Box>
         )}

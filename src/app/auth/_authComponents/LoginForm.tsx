@@ -2,9 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import NextLink from 'next/link';
-
-import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, Typography, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuthStore } from '@/lib/stores/auth';
@@ -89,12 +87,13 @@ export default function LoginForm() {
         />
 
         <Box className="flex justify-end">
-          <NextLink
+          <AppLink
             href="/auth/forgot-password"
+            variant="unstyled"
             className="text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors duration-200"
           >
             ¿Olvidaste tu contraseña?
-          </NextLink>
+          </AppLink>
         </Box>
       </Box>
     </FormWrapper>

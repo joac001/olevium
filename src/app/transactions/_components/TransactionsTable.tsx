@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Box, Typography, ActionButton } from '@/components/shared/ui';
+import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
 import { useTransactionsPage } from './TransactionsProvider';
@@ -38,22 +38,22 @@ export default function TransactionsTable() {
               Array.from({ length: 4 }).map((_, idx) => (
                 <tr key={`sk-row-${idx}`}>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-24 rounded-md" />
+                    <Skeleton width="96px" height="16px" rounded="0.375rem" />
                   </td>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-40 rounded-md" />
+                    <Skeleton width="160px" height="16px" rounded="0.375rem" />
                   </td>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-28 rounded-md" />
+                    <Skeleton width="112px" height="16px" rounded="0.375rem" />
                   </td>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-36 rounded-md" />
+                    <Skeleton width="144px" height="16px" rounded="0.375rem" />
                   </td>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-20 rounded-md" />
+                    <Skeleton width="80px" height="16px" rounded="0.375rem" />
                   </td>
                   <td className="px-4 py-4">
-                    <span className="skeleton block h-4 w-24 rounded-md" />
+                    <Skeleton width="96px" height="16px" rounded="0.375rem" />
                   </td>
                 </tr>
               ))

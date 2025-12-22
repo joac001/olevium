@@ -84,11 +84,13 @@ export default function AccountTransactionsTable({
   return (
     <Box className="space-y-3 p-4 overflow-hidden rounded-3xl border border-[color:var(--surface-muted)]">
       <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:justify-center md:bg-[color:var(--surface-glass)] md:px-4 md:py-3 md:text-xs md:font-semibold md:uppercase md:tracking-[0.22em] md:text-[color:var(--text-muted)] md:rounded-2xl">
-        <span>Concepto</span>
-        <span>Categoría</span>
-        <span>Fecha</span>
-        <span>Monto</span>
-        <span className="text-right">Acciones</span>
+        <Box as="span">Concepto</Box>
+        <Box as="span">Categoría</Box>
+        <Box as="span">Fecha</Box>
+        <Box as="span">Monto</Box>
+        <Box as="span" className="text-right">
+          Acciones
+        </Box>
       </Box>
 
       {ordered.map(transaction => {

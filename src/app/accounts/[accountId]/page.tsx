@@ -1,7 +1,5 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-
-import { Container, Box } from '@/components/shared/ui';
+import { Container, Box, AppLink } from '@/components/shared/ui';
 import AccountDetailShell from '../_accountsComponents/AccountDetailShell';
 
 interface AccountDetailPageProps {
@@ -22,13 +20,14 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
   return (
     <Container className="py-10">
       <Box className="space-y-2">
-        <Link
+        <AppLink
           href="/accounts"
+          variant="unstyled"
           className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--text-primary)]"
         >
           <i className="fas fa-arrow-left" aria-hidden />
           Volver
-        </Link>
+        </AppLink>
         <AccountDetailShell accountId={accountId} />
       </Box>
     </Container>

@@ -2,9 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Button, Typography } from '@/components/shared/ui';
 
 export function HeroSection() {
+  const router = useRouter();
+
   return (
     <section className="relative h-screen flex flex-col items-center justify-between py-16 snap-start">
       {/* Título superior */}
@@ -32,9 +35,15 @@ export function HeroSection() {
         <Button
           type="neutral"
           text="Iniciar sesión"
+          onClick={() => router.push('/auth')}
           className="px-8 py-3 text-lg border border-[var(--border-strong)] w-full sm:w-auto"
         />
-        <Button type="primary" text="Registrarse" className="px-8 py-3 text-lg w-full sm:w-auto" />
+        <Button
+          type="primary"
+          text="Registrarse"
+          onClick={() => router.push('/auth')}
+          className="px-8 py-3 text-lg w-full sm:w-auto"
+        />
       </motion.div>
 
       {/* Flecha hacia abajo */}

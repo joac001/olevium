@@ -87,10 +87,15 @@ export default function DeleteTransactionForm({
           </Typography>
           <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
             Fecha:{' '}
-            <span className="font-semibold text-[color:var(--text-primary)]">{dateLabel}</span>
+            <Box as="span" className="font-semibold text-[color:var(--text-primary)]">
+              {dateLabel}
+            </Box>
           </Typography>
           <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Monto: <span className="font-semibold">{amountLabel}</span>
+            Monto:{' '}
+            <Box as="span" className="font-semibold">
+              {amountLabel}
+            </Box>
           </Typography>
         </Box>
       </Box>

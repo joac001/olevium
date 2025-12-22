@@ -215,15 +215,15 @@ export default function AccountDetailShell({ accountId }: AccountDetailShellProp
           <Box className="space-y-3">
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
               Tipo de cuenta:{' '}
-              <span className="font-semibold text-[color:var(--text-primary)]">
+              <Box as="span" className="font-semibold text-[color:var(--text-primary)]">
                 {typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}
-              </span>
+              </Box>
             </Typography>
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
               Moneda:{' '}
-              <span className="font-semibold text-[color:var(--text-primary)]">
+              <Box as="span" className="font-semibold text-[color:var(--text-primary)]">
                 {resolvedAccount.currency ?? 'Sin moneda'}
-              </span>
+              </Box>
             </Typography>
             <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
               Creada el {formatDate(resolvedAccount.createdAt, 'dd/mm/aaaa')}

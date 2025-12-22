@@ -2,9 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import NextLink from 'next/link';
-
-import { Box, Card, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, Card, FormWrapper, Input, Typography, Button, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { resetPassword } from '@/features/auth/mutations';
@@ -118,13 +116,13 @@ export default function ResetPasswordForm() {
           </Box>
 
           <Box className="pt-4">
-            <NextLink
-              href="/auth/forgot-password"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors"
-            >
-              <i className="fas fa-redo" />
-              Solicitar nuevo enlace
-            </NextLink>
+            <Button
+              type="primary"
+              text="Solicitar nuevo enlace"
+              icon="fas fa-redo"
+              onClick={() => router.push('/auth/forgot-password')}
+              className="!px-6 !py-3"
+            />
           </Box>
         </Box>
       </Card>
@@ -151,13 +149,13 @@ export default function ResetPasswordForm() {
           </Box>
 
           <Box className="pt-4">
-            <NextLink
-              href="/auth"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors"
-            >
-              <i className="fas fa-sign-in-alt" />
-              Iniciar sesión ahora
-            </NextLink>
+            <Button
+              type="primary"
+              text="Iniciar sesión ahora"
+              icon="fas fa-sign-in-alt"
+              onClick={() => router.push('/auth')}
+              className="!px-6 !py-3"
+            />
           </Box>
         </Box>
       </Card>
@@ -208,13 +206,14 @@ export default function ResetPasswordForm() {
 
         {formState === 'error' && (
           <Box className="text-center pt-2">
-            <NextLink
+            <AppLink
               href="/auth/forgot-password"
+              variant="unstyled"
               className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
             >
               <i className="fas fa-redo" />
               Solicitar nuevo enlace
-            </NextLink>
+            </AppLink>
           </Box>
         )}
 

@@ -1,9 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import NextLink from 'next/link';
-
-import { Box, Card, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, Card, FormWrapper, Input, Typography, AppLink, ButtonBase } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { forgotPassword } from '@/features/auth/mutations';
@@ -71,7 +69,9 @@ export default function ForgotPasswordForm() {
             </Typography>
             <Typography variant="body" className="text-[var(--text-muted)]">
               Si existe una cuenta asociada a{' '}
-              <span className="font-medium text-[var(--text-primary)]">{submittedEmail}</span>,
+              <Box as="span" className="font-medium text-[var(--text-primary)]">
+                {submittedEmail}
+              </Box>
               recibirás un email con instrucciones para restablecer tu contraseña.
             </Typography>
           </Box>
@@ -79,22 +79,24 @@ export default function ForgotPasswordForm() {
           <Box className="space-y-3 pt-4">
             <Typography variant="body" className="text-sm text-[var(--text-muted)]">
               ¿No recibiste el correo? Revisa tu carpeta de spam o{' '}
-              <button
-                type="button"
+              <ButtonBase
+                htmlType="button"
                 onClick={() => setFormState('idle')}
-                className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium transition-colors"
+                className="!border-0 !bg-transparent !px-0 !py-0 text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium transition-colors hover:!shadow-none"
+                ariaLabel="Intentar de nuevo"
               >
                 intenta de nuevo
-              </button>
+              </ButtonBase>
             </Typography>
 
-            <NextLink
+            <AppLink
               href="/auth"
+              variant="unstyled"
               className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
             >
               <i className="fas fa-arrow-left" />
               Volver al inicio de sesión
-            </NextLink>
+            </AppLink>
           </Box>
         </Box>
       </Card>
@@ -128,13 +130,14 @@ export default function ForgotPasswordForm() {
         </FormWrapper>
 
         <Box className="text-center pt-2">
-          <NextLink
+          <AppLink
             href="/auth"
+            variant="unstyled"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
           >
             <i className="fas fa-arrow-left" />
             Volver al inicio de sesión
-          </NextLink>
+          </AppLink>
         </Box>
       </Box>
     </Card>

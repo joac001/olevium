@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import clsx from 'clsx';
 import {
@@ -20,7 +19,18 @@ import {
 import { Doughnut, Line } from 'react-chartjs-2';
 import { BadgeCheck, Database, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 
-import { Container, Card, Box, Typography, ActionButton, Skeleton, DropMenu } from '@/components/shared/ui';
+import {
+  Container,
+  Card,
+  Box,
+  Typography,
+  ActionButton,
+  Skeleton,
+  DropMenu,
+  DateInput,
+  MonthInput,
+  AppLink,
+} from '@/components/shared/ui';
 import { formatCurrency, formatDateWithTime, formatSignedCurrency } from '@/lib/format';
 import { getAccounts, getTransactions } from '@/lib/api';
 import { mockAccounts, mockTransactions } from '@/lib/mockData';
@@ -384,30 +394,22 @@ export default function DashboardPage() {
             />
           </div>
           {period === 'month' && (
-            <div className="w-44 space-y-1">
-              <label className="text-xs uppercase tracking-wide text-[color:var(--text-muted)]">
-                Mes
-              </label>
-              <input
-                type="month"
+            <Box className="w-44">
+              <MonthInput
+                label="Mes"
                 value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--field-surface)] px-3 py-2 text-sm text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--interactive-ring)]"
+                onValueChange={setSelectedMonth}
               />
-            </div>
+            </Box>
           )}
           {period === 'day' && (
-            <div className="w-44 space-y-1">
-              <label className="text-xs uppercase tracking-wide text-[color:var(--text-muted)]">
-                Día
-              </label>
-              <input
-                type="date"
+            <Box className="w-44">
+              <DateInput
+                label="Día"
                 value={selectedDay}
-                onChange={(e) => setSelectedDay(e.target.value)}
-                className="w-full rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--field-surface)] px-3 py-2 text-sm text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--interactive-ring)]"
+                onValueChange={setSelectedDay}
               />
-            </div>
+            </Box>
           )}
           <div className="w-44">
             <DropMenu
@@ -418,9 +420,11 @@ export default function DashboardPage() {
             />
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
-              {transactionsCountPeriod} movimientos en el período
-            </span>
+            <Box as="span" className="rounded-full bg-emerald-500/10 px-3 py-1">
+              <Typography variant="body" as="span" className="text-xs font-medium text-emerald-300">
+                {transactionsCountPeriod} movimientos en el período
+              </Typography>
+            </Box>
             <ActionButton
               icon="fas fa-rotate"
               text={isRefreshing ? 'Actualizando...' : 'Actualizar datos'}
@@ -528,18 +532,20 @@ export default function DashboardPage() {
                               className="h-2 w-2 rounded-full"
                               style={{ backgroundColor: color }}
                             />
-                            <span className="text-sm text-slate-200">{name}</span>
+                            <Typography variant="body" as="span" className="text-sm text-slate-200">
+                              {name}
+                            </Typography>
                           </div>
-                          <span className="text-xs text-slate-400">
+                          <Typography variant="body" as="span" className="text-xs text-slate-400">
                             {percentage}% · {formatCurrency(value)}
-                          </span>
+                          </Typography>
                         </div>
                       );
                     })}
                     {categorySlices.length === 0 && (
-                      <p className="text-sm text-[color:var(--text-muted)]">
+                      <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
                         Aún no hay gastos suficientes para mostrar un desglose.
-                      </p>
+                      </Typography>
                     )}
                   </div>
                 </div>
@@ -564,12 +570,14 @@ export default function DashboardPage() {
                     className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted">{currency}</span>
-                      <span className="font-semibold text-lg text-white">
+                      <Typography variant="body" as="span" className="text-xs text-muted">
+                        {currency}
+                      </Typography>
+                      <Typography variant="body" as="span" className="text-lg font-semibold text-white">
                         {formatCurrency(value, currency)}
-                      </span>
+                      </Typography>
                     </div>
-                    <span className="text-xs text-slate-500">
+                    <Typography variant="body" as="span" className="text-xs text-slate-500">
                       {state.accounts.filter((acc) => {
                         const accCurrency =
                           typeof acc.currency === 'string'
@@ -578,7 +586,7 @@ export default function DashboardPage() {
                         return accCurrency === currency;
                       }).length}{' '}
                       cuentas
-                    </span>
+                    </Typography>
                   </div>
                 ))}
               </div>
@@ -587,7 +595,13 @@ export default function DashboardPage() {
             <Card>
               <Box className="flex items-center justify-between">
                 <Typography variant="h2">Transacciones recientes</Typography>
-                <LinkButton href="/transactions">Ver todas</LinkButton>
+                <AppLink
+                  href="/transactions"
+                  variant="unstyled"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+                >
+                  Ver todas →
+                </AppLink>
               </Box>
               <div className="space-y-3">
                 {recentTransactions.map((tx) => {
@@ -605,13 +619,17 @@ export default function DashboardPage() {
                     className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
                   >
                       <div>
-                        <p className="font-medium text-sm text-white">
+                        <Typography variant="body" as="p" className="text-sm font-medium text-white">
                           {tx.description ?? category ?? 'Movimiento'}
-                        </p>
-                        <p className="text-xs text-muted">{formatDateWithTime(tx.date)}</p>
+                        </Typography>
+                        <Typography variant="body" as="p" className="text-xs text-muted">
+                          {formatDateWithTime(tx.date)}
+                        </Typography>
                       </div>
                     <div className="text-right">
-                      <p
+                      <Typography
+                        variant="body"
+                        as="p"
                         className={
                           signedAmount >= 0
                             ? 'text-emerald-400 font-semibold'
@@ -619,14 +637,18 @@ export default function DashboardPage() {
                         }
                       >
                         {formatSignedCurrency(signedAmount)}
-                        </p>
-                        <p className="text-xs text-slate-500">{category}</p>
+                        </Typography>
+                        <Typography variant="body" as="p" className="text-xs text-slate-500">
+                          {category}
+                        </Typography>
                       </div>
                     </article>
                   );
                 })}
                 {!recentTransactions.length && (
-                  <div className="text-sm text-muted">No hay transacciones registradas aún.</div>
+                  <Typography variant="body" as="div" className="text-sm text-muted">
+                    No hay transacciones registradas aún.
+                  </Typography>
                 )}
               </div>
             </Card>
@@ -651,20 +673,26 @@ function DashboardCard({
   accent: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-background-elevated/80 p-6 shadow-soft">
-      <div
+    <Box className="relative overflow-hidden rounded-2xl border border-white/5 bg-background-elevated/80 p-6 shadow-soft">
+      <Box
         className={clsx('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-25 blur-3xl', accent)}
         aria-hidden
       />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-muted">{subtitle}</p>
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 text-white shadow-inset">{icon}</div>
-      </div>
-      <p className="relative mt-4 text-2xl font-semibold text-slate-50">{value}</p>
-    </div>
+      <Box className="relative flex items-center justify-between">
+        <Box>
+          <Typography variant="caption" className="text-muted">
+            {subtitle}
+          </Typography>
+          <Typography variant="body" as="h3" className="text-sm font-semibold text-white">
+            {title}
+          </Typography>
+        </Box>
+        <Box className="rounded-xl bg-white/10 p-3 text-white shadow-inset">{icon}</Box>
+      </Box>
+      <Typography variant="h2" className="relative mt-4 text-2xl font-semibold text-slate-50">
+        {value}
+      </Typography>
+    </Box>
   );
 }
 
@@ -675,17 +703,6 @@ function BarIndicator() {
       <rect x="8" y="8" width="3" height="10" rx="1.5" opacity="0.7" />
       <rect x="14" y="4" width="3" height="14" rx="1.5" />
     </svg>
-  );
-}
-
-function LinkButton({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10"
-    >
-      {children} →
-    </Link>
   );
 }
 

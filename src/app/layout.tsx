@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NavBar title="Olevium" links={links} />
           <main>{children}</main>
           <Typography variant="caption" className="block text-center mt-8 mb-4">
-            &copy; {new Date().getFullYear()} Olevium - v0.1.0 : Prototype
+            &copy; {new Date().getFullYear()} Olevium - v0.1.1
           </Typography>
         </ClientProviders>
       </body>

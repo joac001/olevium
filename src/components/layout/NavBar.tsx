@@ -163,7 +163,13 @@ function NavBar({ title, links }: NavBarProps) {
               </div>
             </button>
 
-            <Typography variant="h1">{title}</Typography>
+            <button
+              onClick={() => router.push('/app')}
+              aria-label="Ir al inicio"
+              className="focus:outline-none"
+            >
+              <Typography variant="h1">{title}</Typography>
+            </button>
           </Box>
 
           {/* Botón cerrar sesión */}

@@ -1,9 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
-
-import { Box, Typography } from '@/components/shared/ui';
+import { Box, Typography, ButtonBase, AppLink } from '@/components/shared/ui';
 import { formatAmount } from '@/lib/utils/parser';
 import type { Account, AccountType } from '@/types';
 
@@ -70,19 +68,24 @@ export default function AccountsTable({
             </Box>
 
             <Box className="mt-4 space-y-3">
-              <button
-                type="button"
-                onClick={() => !disableAdd && onAddAccount?.(type.typeId)}
+              <ButtonBase
+                htmlType="button"
+                onClick={() => onAddAccount?.(type.typeId)}
                 disabled={disableAdd}
-                className="flex h-16 w-full items-center justify-center rounded-2xl border-2 border-dashed border-[color:var(--color-accent)] bg-[color:var(--surface-glass)] text-2xl font-semibold text-[color:var(--color-accent)] transition-transform duration-150 hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+                fullWidth
+                className="!h-16 !rounded-2xl !border-2 !border-dashed !border-[color:var(--color-accent)] !bg-[color:var(--surface-glass)] !p-0 !text-2xl !font-semibold !text-[color:var(--color-accent)] disabled:!cursor-not-allowed disabled:!opacity-40"
+                ariaLabel={`Agregar cuenta ${type.name}`}
               >
-                <span className="leading-none">+</span>
-              </button>
+                <Typography variant="body" as="span" className="text-2xl leading-none">
+                  +
+                </Typography>
+              </ButtonBase>
 
               {list.map(account => (
-                <Link
+                <AppLink
                   key={account.accountId}
                   href={`/accounts/${account.accountId}`}
+                  variant="unstyled"
                   className="flex flex-col gap-2 rounded-r-2xl bg-[color:var(--surface-glass)] p-4 border-l-4 border-l-[color:var(--color-secondary-soft)] pl-3 transition-all duration-150 ease-in-out hover:border-l-8 hover:bg-[color:var(--surface-glass-hover)] shadow-md hover:shadow-xl md:rounded-2xl md:border-l-0 md:flex-row md:items-center md:justify-between"
                 >
                   <Box className="text-left">
@@ -102,7 +105,7 @@ export default function AccountsTable({
                   >
                     {formatAmount(account.balance, account.currency)}
                   </Typography>
-                </Link>
+                </AppLink>
               ))}
             </Box>
           </Box>
