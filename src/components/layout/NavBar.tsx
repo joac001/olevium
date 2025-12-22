@@ -111,7 +111,7 @@ function NavBar({ title, links }: NavBarProps) {
     if (!pathname) return false;
 
     const publicExact = ['/'];
-    const publicPrefixes = ['/auth', '/landing', '/app-demo'];
+    const publicPrefixes = ['/auth'];
 
     if (publicExact.includes(pathname)) {
       return true;
@@ -164,7 +164,7 @@ function NavBar({ title, links }: NavBarProps) {
             </button>
 
             <button
-              onClick={() => router.push('/app')}
+              onClick={() => router.push('/dashboard')}
               aria-label="Ir al inicio"
               className="focus:outline-none"
             >

@@ -11,12 +11,12 @@ import { useAccountsStore } from '@/lib/stores/accounts';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { AccountDetail, AccountTransaction } from '@/types';
-import AccountTransactionsTable from './AccountTransactionsTable';
-import EditAccountForm from './EditAccountForm';
-import DeleteAccountForm from './DeleteAccountForm';
-import CreateTransactionForm from './CreateTransactionForm';
-import AccountDetailCardSkeleton from '../_accountsSkeletons/AccountDetailCardSkeleton';
-import AccountTransactionsTableSkeleton from '../_accountsSkeletons/AccountTransactionsTableSkeleton';
+import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
+import EditAccountForm from '../../_components/EditAccountForm';
+import DeleteAccountForm from '../../_components/DeleteAccountForm';
+import CreateTransactionForm from '../../_components/CreateTransactionForm';
+import AccountDetailCardSkeleton from '../_skeletons/AccountDetailCardSkeleton';
+import AccountTransactionsTableSkeleton from '../_skeletons/AccountTransactionsTableSkeleton';
 
 interface AccountDetailShellProps {
   accountId: string;

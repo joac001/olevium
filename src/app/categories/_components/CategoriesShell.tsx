@@ -9,7 +9,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import { useTransactionData } from '@/context/TransactionContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import CategoriesListSkeleton from '../_categoriesSkeletons/CategoriesListSkeleton';
+import CategoriesListSkeleton from '../_skeletons/CategoriesListSkeleton';
 import EditCategoryForm from './EditCategoryForm';
 import DeleteCategoryForm from './DeleteCategoryForm';
 import CreateCategoryForm from './CreateCategoryForm';

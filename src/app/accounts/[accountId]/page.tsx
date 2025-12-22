@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Container, Box, AppLink } from '@/components/shared/ui';
-import AccountDetailShell from '../_accountsComponents/AccountDetailShell';
+import AccountDetailShell from './_components/AccountDetailShell';
 
 interface AccountDetailPageProps {
   params: Promise<{

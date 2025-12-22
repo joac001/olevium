@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 const links: NavLink[] = [
-  { icon: 'fas fa-home', label: 'Inicio', href: '/app' } as NavLink,
+  { icon: 'fas fa-home', label: 'Inicio', href: '/dashboard' } as NavLink,
   { icon: 'fas fa-wallet', label: 'Cuentas', href: '/accounts' } as NavLink,
   { icon: 'fas fa-tags', label: 'Categorías', href: '/categories' } as NavLink,
   { icon: 'fas fa-table', label: 'Transacciones', href: '/transactions' } as NavLink,

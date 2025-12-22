@@ -38,7 +38,7 @@ export function withAuth<P extends object>(WrappedComponent: React.ComponentType
       if (!pathname) return false;
 
       const publicExact = ['/'];
-      const publicPrefixes = ['/auth', '/landing', '/app-demo'];
+      const publicPrefixes = ['/auth'];
 
       if (publicExact.includes(pathname)) {
         return true;
@@ -50,7 +50,7 @@ export function withAuth<P extends object>(WrappedComponent: React.ComponentType
     useEffect(() => {
       if (!loading && checked && !accessToken && !isPublicRoute) {
         // Usar replace para evitar loops en el historial
-        router.replace('/auth');
+        router.replace('/');
       }
     }, [loading, checked, accessToken, isPublicRoute, router]);
 

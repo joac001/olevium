@@ -1,5 +1,5 @@
 import { Container, Box, Card, Typography } from '@/components/shared/ui';
-import VerifyEmailHandler from '../_authComponents/VerifyEmailHandler';
+import VerifyEmailHandler from './_components/VerifyEmailHandler';
 
 type VerifyEmailPageProps = {
   searchParams: Promise<{

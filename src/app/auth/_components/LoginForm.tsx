@@ -2,15 +2,15 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, Typography, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
-import { useAuthErrorHandler } from '@/lib/hooks/useErrorHandler';
+import { useNotification } from '@/context/NotificationContext';
 import { useAuthStore } from '@/lib/stores/auth';
+import { createOperationContext } from '@/lib/utils/errorSystem';
 
-export default function ImprovedLoginForm() {
+export default function LoginForm() {
   const router = useRouter();
-  const { handleLogin } = useAuthErrorHandler();
+  const { showNotification, showError, showSuccess } = useNotification();
   const login = useAuthStore(state => state.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,22 +32,33 @@ export default function ImprovedLoginForm() {
       const passwordValue = formData.get('password');
 
       if (typeof emailValue !== 'string' || typeof passwordValue !== 'string') {
+        showNotification(
+          'fa-solid fa-triangle-exclamation',
+          'danger',
+          'Error de autenticación',
+          'Completa los campos requeridos para continuar.'
+        );
         return;
       }
 
       setIsSubmitting(true);
 
-      const success = await handleLogin(async () => {
+      try {
         await login(emailValue, passwordValue);
-      });
 
-      if (success) {
-        router.push('/app');
+        const context = createOperationContext('login', 'sesión', 'la sesión');
+        showSuccess('¡Bienvenido! Redirigiendo a tu panel de control.', context);
+
+        router.push('/dashboard');
+      } catch (error) {
+        const context = createOperationContext('login', 'sesión', 'la sesión');
+        showError(error, context);
+        return;
+      } finally {
+        setIsSubmitting(false);
       }
-
-      setIsSubmitting(false);
     },
-    [login, router, handleLogin]
+    [login, router, showNotification, showError, showSuccess]
   );
 
   return (
@@ -74,6 +85,16 @@ export default function ImprovedLoginForm() {
           required
           icon="fas fa-lock"
         />
+
+        <Box className="flex justify-end">
+          <AppLink
+            href="/auth/forgot-password"
+            variant="unstyled"
+            className="text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors duration-200"
+          >
+            ¿Olvidaste tu contraseña?
+          </AppLink>
+        </Box>
       </Box>
     </FormWrapper>
   );

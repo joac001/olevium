@@ -113,7 +113,7 @@ export default function AccountTransactionsTable({
           >
             <Box className="flex flex-col gap-3 md:hidden">
               <Box className="flex items-start justify-between gap-4">
-                <div>
+                <Box>
                   <Typography
                     variant="caption"
                     className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
@@ -123,7 +123,7 @@ export default function AccountTransactionsTable({
                   <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
                     {description}
                   </Typography>
-                </div>
+                </Box>
                 <Typography variant="body" className={`text-sm font-semibold ${amountClass}`}>
                   {formatAmount(signedAmount, currency)}
                 </Typography>

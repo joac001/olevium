@@ -25,12 +25,12 @@ import {
   Box,
   Typography,
   ActionButton,
-  Skeleton,
   DropMenu,
   DateInput,
   MonthInput,
   AppLink,
 } from '@/components/shared/ui';
+import DashboardSkeleton from '../_skeletons/DashboardSkeleton';
 import { formatCurrency, formatDateWithTime, formatSignedCurrency } from '@/lib/format';
 import { getAccounts, getTransactions } from '@/lib/api';
 import { mockAccounts, mockTransactions } from '@/lib/mockData';
@@ -65,7 +65,16 @@ const initialState: DashboardState = {
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
-const categoryPalette = ['#3f8aff', '#9f67ff', '#f472b6', '#f97316', '#22d3ee', '#facc15', '#4ade80', '#fb7185'];
+const categoryPalette = [
+  '#3f8aff',
+  '#9f67ff',
+  '#f472b6',
+  '#f97316',
+  '#22d3ee',
+  '#facc15',
+  '#4ade80',
+  '#fb7185',
+];
 const PERIOD_OPTIONS: DropMenuOption[] = [
   { value: '10d', label: 'Últimos 10 días' },
   { value: '30d', label: 'Últimos 30 días' },
@@ -86,7 +95,7 @@ export default function DashboardPage() {
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<string>('');
   const [grouping, setGrouping] = useState<'daily' | 'monthly'>('daily');
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const accessToken = useAuthStore(s => s.accessToken);
 
   const loadData = useCallback(
     async (options?: { forceMock?: boolean }) => {
@@ -106,7 +115,10 @@ export default function DashboardPage() {
           return;
         }
 
-        const [accountsResult, transactionsResult] = await Promise.all([getAccounts(), getTransactions()]);
+        const [accountsResult, transactionsResult] = await Promise.all([
+          getAccounts(),
+          getTransactions(),
+        ]);
         setState({
           accounts: accountsResult.data,
           transactions: transactionsResult.data,
@@ -139,7 +151,7 @@ export default function DashboardPage() {
       const [year, month] = selectedMonth.split('-').map(Number);
       const monthStart = new Date(year, month - 1, 1);
       const monthEnd = new Date(year, month, 0, 23, 59, 59, 999);
-      return state.transactions.filter((tx) => {
+      return state.transactions.filter(tx => {
         const txDate = new Date(tx.date);
         return txDate >= monthStart && txDate <= monthEnd;
       });
@@ -149,24 +161,30 @@ export default function DashboardPage() {
       const dayStart = new Date(selectedDay);
       const dayEnd = new Date(selectedDay);
       dayEnd.setHours(23, 59, 59, 999);
-      return state.transactions.filter((tx) => {
+      return state.transactions.filter(tx => {
         const txDate = new Date(tx.date);
         return txDate >= dayStart && txDate <= dayEnd;
       });
     }
 
     start.setHours(0, 0, 0, 0);
-    return state.transactions.filter((tx) => {
+    return state.transactions.filter(tx => {
       const txDate = new Date(tx.date);
       return txDate >= start && txDate <= now;
     });
   }, [state.transactions, period, selectedMonth, selectedDay]);
 
-  const { totalBalanceARS, balancesByCurrency, incomesPeriod, expensesPeriod, transactionsCountPeriod } = useMemo(() => {
+  const {
+    totalBalanceARS,
+    balancesByCurrency,
+    incomesPeriod,
+    expensesPeriod,
+    transactionsCountPeriod,
+  } = useMemo(() => {
     let incomes = 0;
     let expenses = 0;
 
-    filteredTransactions.forEach((tx) => {
+    filteredTransactions.forEach(tx => {
       const signedAmount = toSignedAmount(tx.amount, tx.type_id);
       const amount = Math.abs(signedAmount);
       if (signedAmount >= 0) incomes += amount;
@@ -177,7 +195,7 @@ export default function DashboardPage() {
       const currency =
         typeof account.currency === 'string'
           ? account.currency
-          : (account.currency as any)?.label ?? 'ARS';
+          : ((account.currency as any)?.label ?? 'ARS');
       const current = acc[currency] ?? 0;
       acc[currency] = current + Number(account.balance ?? 0);
       return acc;
@@ -199,7 +217,7 @@ export default function DashboardPage() {
 
     if (grouping === 'monthly') {
       const buckets = new Map<string, { income: number; expense: number }>();
-      filteredTransactions.forEach((tx) => {
+      filteredTransactions.forEach(tx => {
         const d = new Date(tx.date);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (!buckets.has(key)) buckets.set(key, { income: 0, expense: 0 });
@@ -210,7 +228,7 @@ export default function DashboardPage() {
         else bucket.expense += amount;
       });
       const orderedKeys = Array.from(buckets.keys()).sort();
-      orderedKeys.forEach((key) => {
+      orderedKeys.forEach(key => {
         labels.push(key);
         const bucket = buckets.get(key)!;
         incomePoints.push(bucket.income);
@@ -231,7 +249,7 @@ export default function DashboardPage() {
         dailyMap.set(key, { income: 0, expense: 0 });
       }
 
-      filteredTransactions.forEach((tx) => {
+      filteredTransactions.forEach(tx => {
         const dateKey = new Date(tx.date).toISOString().slice(0, 10);
         if (!dailyMap.has(dateKey)) return;
         const bucket = dailyMap.get(dateKey)!;
@@ -245,8 +263,8 @@ export default function DashboardPage() {
       });
 
       labels.push(...Array.from(dailyMap.keys()));
-      incomePoints.push(...labels.map((label) => dailyMap.get(label)?.income ?? 0));
-      expensePoints.push(...labels.map((label) => dailyMap.get(label)?.expense ?? 0));
+      incomePoints.push(...labels.map(label => dailyMap.get(label)?.income ?? 0));
+      expensePoints.push(...labels.map(label => dailyMap.get(label)?.expense ?? 0));
     }
 
     return { trendLabels: labels, incomeDataset: incomePoints, expenseDataset: expensePoints };
@@ -254,7 +272,7 @@ export default function DashboardPage() {
 
   const categorySlices = useMemo(() => {
     const totals = new Map<string, number>();
-    filteredTransactions.forEach((tx) => {
+    filteredTransactions.forEach(tx => {
       const signedAmount = toSignedAmount(tx.amount, tx.type_id);
       if (signedAmount >= 0) return;
       const categoryValue = tx.category;
@@ -262,7 +280,7 @@ export default function DashboardPage() {
         typeof categoryValue === 'string'
           ? categoryValue
           : categoryValue && typeof categoryValue === 'object'
-            ? (categoryValue as any).description ?? 'Sin categoría'
+            ? ((categoryValue as any).description ?? 'Sin categoría')
             : 'Sin categoría';
       const current = totals.get(name) ?? 0;
       totals.set(name, current + Math.abs(signedAmount));
@@ -284,7 +302,9 @@ export default function DashboardPage() {
   const doughnutData = useMemo(() => {
     const labels = categorySlices.map(([label]) => label);
     const data = categorySlices.map(([, value]) => value);
-    const backgroundColor = labels.map((_, index) => categoryPalette[index % categoryPalette.length]);
+    const backgroundColor = labels.map(
+      (_, index) => categoryPalette[index % categoryPalette.length]
+    );
 
     return {
       labels,
@@ -292,7 +312,7 @@ export default function DashboardPage() {
         {
           data,
           backgroundColor,
-          borderColor: backgroundColor.map((color) => `${color}CC`),
+          borderColor: backgroundColor.map(color => `${color}CC`),
           borderWidth: 1,
         },
       ],
@@ -382,44 +402,37 @@ export default function DashboardPage() {
       <header className="flex flex-col gap-4">
         <Typography variant="h1">Resumen financiero</Typography>
         <Typography variant="body" className="text-[color:var(--text-muted)] max-w-2xl">
-          Visualiza el pulso de tus finanzas: saldos consolidados, flujo de caja reciente y categorías que más impactan tu presupuesto.
+          Visualiza el pulso de tus finanzas: saldos consolidados, flujo de caja reciente y
+          categorías que más impactan tu presupuesto.
         </Typography>
-        <div className="flex flex-wrap items-end gap-3 text-sm text-slate-200">
-          <div className="w-48">
+        <Box className="flex flex-wrap items-end gap-3 text-sm text-slate-200">
+          <Box className="w-48">
             <DropMenu
               label="Período"
               options={PERIOD_OPTIONS}
               value={period}
-              onValueChange={(value) => setPeriod((value as typeof period) ?? '30d')}
+              onValueChange={value => setPeriod((value as typeof period) ?? '30d')}
             />
-          </div>
+          </Box>
           {period === 'month' && (
             <Box className="w-44">
-              <MonthInput
-                label="Mes"
-                value={selectedMonth}
-                onValueChange={setSelectedMonth}
-              />
+              <MonthInput label="Mes" value={selectedMonth} onValueChange={setSelectedMonth} />
             </Box>
           )}
           {period === 'day' && (
             <Box className="w-44">
-              <DateInput
-                label="Día"
-                value={selectedDay}
-                onValueChange={setSelectedDay}
-              />
+              <DateInput label="Día" value={selectedDay} onValueChange={setSelectedDay} />
             </Box>
           )}
-          <div className="w-44">
+          <Box className="w-44">
             <DropMenu
               label="Agrupar"
               options={GROUPING_OPTIONS}
               value={grouping}
-              onValueChange={(value) => setGrouping((value as typeof grouping) ?? 'daily')}
+              onValueChange={value => setGrouping((value as typeof grouping) ?? 'daily')}
             />
-          </div>
-          <div className="ml-auto flex flex-wrap items-center gap-3">
+          </Box>
+          <Box className="ml-auto flex flex-wrap items-center gap-3">
             <Box as="span" className="rounded-full bg-emerald-500/10 px-3 py-1">
               <Typography variant="body" as="span" className="text-xs font-medium text-emerald-300">
                 {transactionsCountPeriod} movimientos en el período
@@ -430,8 +443,8 @@ export default function DashboardPage() {
               text={isRefreshing ? 'Actualizando...' : 'Actualizar datos'}
               onClick={() => loadData()}
             />
-          </div>
-        </div>
+          </Box>
+        </Box>
       </header>
 
       {isLoading ? (
@@ -479,9 +492,9 @@ export default function DashboardPage() {
                   </Typography>
                 </Box>
               </Box>
-              <div className="h-72 md:h-80">
+              <Box className="h-72 md:h-80">
                 <Line data={lineData} options={lineOptions} />
-              </div>
+              </Box>
             </Card>
 
             <Card>
@@ -493,12 +506,12 @@ export default function DashboardPage() {
                       Distribución de tus principales categorías de egreso.
                     </Typography>
                   </Box>
-                  <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 sm:flex">
+                  <Box className="hidden h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 sm:flex">
                     <BadgeCheck className="h-5 w-5" />
-                  </div>
+                  </Box>
                 </Box>
-                <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-                  <div className="h-52">
+                <Box className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                  <Box className="h-52">
                     <Doughnut
                       data={doughnutData}
                       options={{
@@ -508,9 +521,10 @@ export default function DashboardPage() {
                           },
                           tooltip: {
                             callbacks: {
-                              label: (tooltipItem) => {
+                              label: tooltipItem => {
                                 const label = doughnutData.labels?.[tooltipItem.dataIndex] ?? '';
-                                const value = doughnutData.datasets[0]?.data?.[tooltipItem.dataIndex] ?? 0;
+                                const value =
+                                  doughnutData.datasets[0]?.data?.[tooltipItem.dataIndex] ?? 0;
                                 return `${label}: ${formatCurrency(Number(value))}`;
                               },
                             },
@@ -519,27 +533,30 @@ export default function DashboardPage() {
                         cutout: '65%',
                       }}
                     />
-                  </div>
-                  <div className="space-y-3">
+                  </Box>
+                  <Box className="space-y-3">
                     {categorySlices.map(([name, value], index) => {
                       const color = categoryPalette[index % categoryPalette.length];
                       const percentage =
                         expensesPeriod > 0 ? Math.round((value / expensesPeriod) * 100) : 0;
                       return (
-                        <div key={name} className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2">
-                          <div className="flex items-center gap-3">
-                            <div
+                        <Box
+                          key={name}
+                          className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2"
+                        >
+                          <Box className="flex items-center gap-3">
+                            <Box
                               className="h-2 w-2 rounded-full"
                               style={{ backgroundColor: color }}
                             />
                             <Typography variant="body" as="span" className="text-sm text-slate-200">
                               {name}
                             </Typography>
-                          </div>
+                          </Box>
                           <Typography variant="body" as="span" className="text-xs text-slate-400">
                             {percentage}% · {formatCurrency(value)}
                           </Typography>
-                        </div>
+                        </Box>
                       );
                     })}
                     {categorySlices.length === 0 && (
@@ -547,8 +564,8 @@ export default function DashboardPage() {
                         Aún no hay gastos suficientes para mostrar un desglose.
                       </Typography>
                     )}
-                  </div>
-                </div>
+                  </Box>
+                </Box>
               </Box>
             </Card>
           </section>
@@ -563,33 +580,39 @@ export default function DashboardPage() {
                   </Typography>
                 </Box>
               </Box>
-              <div className="space-y-4">
+              <Box className="space-y-4">
                 {Object.entries(balancesByCurrency).map(([currency, value]) => (
-                  <div
+                  <Box
                     key={currency}
                     className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
                   >
-                    <div className="flex flex-col">
+                    <Box className="flex flex-col">
                       <Typography variant="body" as="span" className="text-xs text-muted">
                         {currency}
                       </Typography>
-                      <Typography variant="body" as="span" className="text-lg font-semibold text-white">
+                      <Typography
+                        variant="body"
+                        as="span"
+                        className="text-lg font-semibold text-white"
+                      >
                         {formatCurrency(value, currency)}
                       </Typography>
-                    </div>
+                    </Box>
                     <Typography variant="body" as="span" className="text-xs text-slate-500">
-                      {state.accounts.filter((acc) => {
-                        const accCurrency =
-                          typeof acc.currency === 'string'
-                            ? acc.currency
-                            : (acc.currency as any)?.label ?? 'ARS';
-                        return accCurrency === currency;
-                      }).length}{' '}
+                      {
+                        state.accounts.filter(acc => {
+                          const accCurrency =
+                            typeof acc.currency === 'string'
+                              ? acc.currency
+                              : ((acc.currency as any)?.label ?? 'ARS');
+                          return accCurrency === currency;
+                        }).length
+                      }{' '}
                       cuentas
                     </Typography>
-                  </div>
+                  </Box>
                 ))}
-              </div>
+              </Box>
             </Card>
 
             <Card>
@@ -603,54 +626,58 @@ export default function DashboardPage() {
                   Ver todas →
                 </AppLink>
               </Box>
-              <div className="space-y-3">
-                {recentTransactions.map((tx) => {
+              <Box className="space-y-3">
+                {recentTransactions.map(tx => {
                   const categoryValue = tx.category;
-                const category =
-                  typeof categoryValue === 'string'
-                    ? categoryValue
-                    : categoryValue && typeof categoryValue === 'object'
-                      ? (categoryValue as any).description ?? 'Sin categoría'
-                      : 'Sin categoría';
-                const signedAmount = toSignedAmount(tx.amount, tx.type_id);
-                return (
-                  <article
-                    key={tx.transaction_id}
-                    className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
-                  >
-                      <div>
-                        <Typography variant="body" as="p" className="text-sm font-medium text-white">
+                  const category =
+                    typeof categoryValue === 'string'
+                      ? categoryValue
+                      : categoryValue && typeof categoryValue === 'object'
+                        ? ((categoryValue as any).description ?? 'Sin categoría')
+                        : 'Sin categoría';
+                  const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+                  return (
+                    <article
+                      key={tx.transaction_id}
+                      className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+                    >
+                      <Box>
+                        <Typography
+                          variant="body"
+                          as="p"
+                          className="text-sm font-medium text-white"
+                        >
                           {tx.description ?? category ?? 'Movimiento'}
                         </Typography>
                         <Typography variant="body" as="p" className="text-xs text-muted">
                           {formatDateWithTime(tx.date)}
                         </Typography>
-                      </div>
-                    <div className="text-right">
-                      <Typography
-                        variant="body"
-                        as="p"
-                        className={
-                          signedAmount >= 0
-                            ? 'text-emerald-400 font-semibold'
-                            : 'text-accent-400 font-semibold'
-                        }
-                      >
-                        {formatSignedCurrency(signedAmount)}
+                      </Box>
+                      <Box className="text-right">
+                        <Typography
+                          variant="body"
+                          as="p"
+                          className={
+                            signedAmount >= 0
+                              ? 'text-emerald-400 font-semibold'
+                              : 'text-accent-400 font-semibold'
+                          }
+                        >
+                          {formatSignedCurrency(signedAmount)}
                         </Typography>
                         <Typography variant="body" as="p" className="text-xs text-slate-500">
                           {category}
                         </Typography>
-                      </div>
+                      </Box>
                     </article>
                   );
                 })}
                 {!recentTransactions.length && (
-                  <Typography variant="body" as="div" className="text-sm text-muted">
+                  <Typography variant="body" as="Box" className="text-sm text-muted">
                     No hay transacciones registradas aún.
                   </Typography>
                 )}
-              </div>
+              </Box>
             </Card>
           </section>
         </>
@@ -675,7 +702,10 @@ function DashboardCard({
   return (
     <Box className="relative overflow-hidden rounded-2xl border border-white/5 bg-background-elevated/80 p-6 shadow-soft">
       <Box
-        className={clsx('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-25 blur-3xl', accent)}
+        className={clsx(
+          'pointer-events-none absolute inset-0 bg-gradient-to-br opacity-25 blur-3xl',
+          accent
+        )}
         aria-hidden
       />
       <Box className="relative flex items-center justify-between">
@@ -698,78 +728,15 @@ function DashboardCard({
 
 function BarIndicator() {
   return (
-    <svg className="h-5 w-5 text-brand-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <svg
+      className="h-5 w-5 text-brand-300"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <rect x="2" y="12" width="3" height="6" rx="1.5" opacity="0.45" />
       <rect x="8" y="8" width="3" height="10" rx="1.5" opacity="0.7" />
       <rect x="14" y="4" width="3" height="14" rx="1.5" />
     </svg>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <Container className="py-8 space-y-8">
-      <Box className="space-y-3">
-        <Skeleton width="35%" height="32px" />
-        <Skeleton width="60%" height="18px" />
-      </Box>
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, idx) => (
-          <Card key={`sk-card-${idx}`} className="p-4">
-            <Box className="space-y-3">
-              <Skeleton width="60%" height="14px" />
-              <Skeleton width="80%" height="14px" />
-              <Skeleton width="50%" height="26px" />
-            </Box>
-          </Card>
-        ))}
-      </section>
-      <section className="grid gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2 p-6 space-y-4">
-          <Skeleton width="50%" height="20px" />
-          <Skeleton width="40%" height="14px" />
-          <Skeleton width="100%" height="200px" />
-        </Card>
-        <Card className="p-6 space-y-4">
-          <Skeleton width="60%" height="20px" />
-          <Skeleton width="50%" height="14px" />
-          <Skeleton width="100%" height="180px" />
-          <Box className="space-y-2">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Box key={`sk-donut-${idx}`} className="flex items-center justify-between">
-                <Skeleton width="40%" height="12px" />
-                <Skeleton width="30%" height="12px" />
-              </Box>
-            ))}
-          </Box>
-        </Card>
-      </section>
-      <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6 space-y-3">
-          <Skeleton width="50%" height="18px" />
-          <Skeleton width="40%" height="14px" />
-          <Box className="space-y-3">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Box key={`sk-bal-${idx}`} className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
-                <Skeleton width="40%" height="16px" />
-                <Skeleton width="20%" height="14px" />
-              </Box>
-            ))}
-          </Box>
-        </Card>
-        <Card className="p-6 space-y-3">
-          <Skeleton width="50%" height="18px" />
-          <Skeleton width="30%" height="14px" />
-          <Box className="space-y-3">
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <Box key={`sk-rec-${idx}`} className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
-                <Skeleton width="60%" height="14px" />
-                <Skeleton width="25%" height="14px" />
-              </Box>
-            ))}
-          </Box>
-        </Card>
-      </section>
-    </Container>
   );
 }

@@ -1,5 +1,5 @@
 import { Container, Box, Typography } from '@/components/shared/ui';
-import CategoriesShell from './_categoriesComponents/CategoriesShell';
+import CategoriesShell from './_components/CategoriesShell';
 
 export default function CategoriesPage() {
   return (
