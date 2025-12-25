@@ -38,7 +38,7 @@ export function CTASection() {
 
         <Button
           type="primary"
-          text="Regístrate gratis"
+          text="Crea una cuenta gratis"
           className="px-10 py-4 text-lg"
           onClick={() => router.push('/auth')}
         />

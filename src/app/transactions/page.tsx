@@ -1,19 +1,24 @@
-import TransactionsProvider from './_components/TransactionsProvider';
-import TransactionsHeader from './_components/TransactionsHeader';
-import TransactionsSummary from './_components/TransactionsSummary';
-import TransactionsFilters from './_components/TransactionsFilters';
-import TransactionsTable from './_components/TransactionsTable';
-import { Container } from '@/components/shared/ui';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { getTransactionsPageData } from './_api';
+import TransactionsShell from './_components/TransactionsShell';
 
-export default function TransactionsPage() {
+export default async function TransactionsPage() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('olevium_access_token');
+  const refreshToken = cookieStore.get('olevium_refresh_token');
+
+  if (!accessToken?.value && !refreshToken?.value) {
+    redirect('/auth');
+  }
+
+  const data = await getTransactionsPageData();
+
   return (
-    <TransactionsProvider>
-      <Container className="gap-6">
-        <TransactionsHeader />
-        <TransactionsSummary />
-        <TransactionsFilters />
-        <TransactionsTable />
-      </Container>
-    </TransactionsProvider>
+    <TransactionsShell
+      initialTransactions={data.transactions}
+      initialAccounts={data.accounts}
+      initialCategories={data.categories}
+    />
   );
 }

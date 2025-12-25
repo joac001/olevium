@@ -26,6 +26,12 @@ export type Transaction = ApiUserTransaction & {
 };
 export type RecurringTransaction = RootRecurringTransaction;
 
+export type TransactionType = {
+  type_id: number;
+  name: string;
+  created_at: string;
+};
+
 export type CreateAccountPayload = {
   name: string;
   type_id: number;
@@ -63,7 +69,13 @@ export type UpdateTransactionPayload = Partial<CreateTransactionPayload>;
 
 export type CreateRecurringTransactionPayload = {
   account_id: string;
-  category_id: string;
+  category_id?: string;
+  category?: {
+    description: string;
+    type_id: number;
+    color?: string | null;
+    icon?: string | null;
+  };
   type_id: number;
   amount: number;
   description?: string;

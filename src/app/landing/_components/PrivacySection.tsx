@@ -61,7 +61,7 @@ export function PrivacySection() {
           </div>
           <h3 className="font-semibold text-sm mb-1 md:mb-2">Bot de WhatsApp</h3>
           <p className="text-xs opacity-70">
-            Registra gastos e ingresos desde tu chat. Sin abrir la app.
+            Registra salidas e ingresos desde tu chat. Sin abrir la app.
           </p>
         </motion.div>
 

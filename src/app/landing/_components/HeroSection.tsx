@@ -40,7 +40,7 @@ export function HeroSection() {
         />
         <Button
           type="primary"
-          text="Registrarse"
+          text="Crear cuenta"
           onClick={() => router.push('/auth')}
           className="px-8 py-3 text-lg w-full sm:w-auto"
         />
@@ -63,10 +63,7 @@ export function HeroSection() {
             ease: 'easeInOut',
           }}
         >
-          <ChevronDown
-            size={40}
-            className="opacity-50 text-[var(--color-primary)]"
-          />
+          <ChevronDown size={40} className="opacity-50 text-[var(--color-primary)]" />
         </motion.div>
       </motion.div>
     </section>

@@ -34,16 +34,15 @@ export default function AccountTransactionsTable({
   const handleEdit = useCallback(
     (transaction: AccountTransaction) => {
       showModal(
-        <Card tone="accent" title="Editar transacción">
-          <EditTransactionForm
-            transaction={transaction}
-            accountId={transaction.accountId}
-            onSuccess={() => {
-              hideModal();
-              onRefresh?.();
-            }}
-          />
-        </Card>
+        <EditTransactionForm
+          transaction={transaction}
+          accountId={transaction.accountId}
+          onCancel={hideModal}
+          onSuccess={() => {
+            hideModal();
+            onRefresh?.();
+          }}
+        />
       );
     },
     [hideModal, onRefresh, showModal]
@@ -111,7 +110,7 @@ export default function AccountTransactionsTable({
             key={transaction.transactionId}
             className="rounded-2xl bg-[color:var(--surface-glass)] p-4 shadow-md"
           >
-            <Box className="flex flex-col gap-3 md:hidden">
+            <Box key="mobile" className="flex flex-col gap-3 md:hidden">
               <Box className="flex items-start justify-between gap-4">
                 <Box>
                   <Typography
@@ -171,7 +170,7 @@ export default function AccountTransactionsTable({
               </Box>
             </Box>
 
-            <Box className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:text-left md:justify-center md:px-4 md:py-3 md:rounded-2xl md:hover:bg-[color:var(--surface-glass-hover)]">
+            <Box key="desktop" className="hidden md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:text-left md:justify-center md:px-4 md:py-3 md:rounded-2xl md:hover:bg-[color:var(--surface-glass-hover)]">
               <Typography variant="body" className="text-sm text-[color:var(--text-primary)]">
                 {description}
               </Typography>

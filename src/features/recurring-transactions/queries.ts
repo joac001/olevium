@@ -48,10 +48,10 @@ async function getRecurringTransactions(): Promise<ApiCollectionResult<Recurring
           is_active: Boolean(item.is_active ?? true),
         };
       });
-    return { data: normalized, isMock: false };
+    return { data: normalized };
   } catch (error) {
-    console.warn('[olevium] usando transacciones recurrentes de ejemplo', error);
-    return { data: [], isMock: true };
+    console.warn('[olevium] error al obtener transacciones recurrentes', error);
+    return { data: [] };
   }
 }
 

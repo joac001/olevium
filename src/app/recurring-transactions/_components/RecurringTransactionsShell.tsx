@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useMemo,
   useState,
   type ReactNode
 } from 'react';
@@ -12,9 +11,11 @@ import dynamic from 'next/dynamic';
 import { Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
-import { useRecurringTransactionsQuery } from '@/features/recurring-transactions/queries';
 import { useDeleteRecurringTransactionMutation } from '@/features/recurring-transactions/mutations';
-import type { RecurringTransaction } from '@/lib/types';
+import { getRecurringTransactions } from '@/lib/api';
+import type { RecurringTransaction, Category } from '@/lib/types';
+import type { Account } from '@/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 const RecurringTransactionFormModal = dynamic(() => import('./RecurringTransactionFormModal'), {
   ssr: false,
@@ -26,10 +27,10 @@ const RecurringTransactionFormModal = dynamic(() => import('./RecurringTransacti
 });
 
 type RecurringTransactionsContextValue = {
-  isLoading: boolean;
   isRefreshing: boolean;
-  usingMockData: boolean;
   recurringTransactions: RecurringTransaction[];
+  accounts: Account[];
+  categories: Category[];
   handleCreateRecurringTransaction: () => void;
   handleEditRecurringTransaction: (transaction: RecurringTransaction) => void;
   handleDeleteRecurringTransaction: (transaction: RecurringTransaction) => Promise<void>;
@@ -41,42 +42,56 @@ const RecurringTransactionsContext = createContext<RecurringTransactionsContextV
 export function useRecurringTransactionsPage() {
   const context = useContext(RecurringTransactionsContext);
   if (!context) {
-    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsProvider');
+    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsShell');
   }
   return context;
 }
 
-export default function RecurringTransactionsProvider({ children }: { children: ReactNode }) {
+interface RecurringTransactionsShellProps {
+  initialRecurringTransactions: RecurringTransaction[];
+  initialAccounts: Account[];
+  initialCategories: Category[];
+  children: ReactNode;
+}
+
+export default function RecurringTransactionsShell({
+  initialRecurringTransactions,
+  initialAccounts,
+  initialCategories,
+  children
+}: RecurringTransactionsShellProps) {
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const recurringTransactionsQuery = useRecurringTransactionsQuery();
-  const { refetch: refetchRecurringTransactions } = recurringTransactionsQuery;
-  const recurringTransactions = recurringTransactionsQuery.data?.data ?? [];
-  const isLoading = recurringTransactionsQuery.isLoading;
-  const usingMockData = recurringTransactionsQuery.data?.isMock ?? false;
+  const [recurringTransactions, setRecurringTransactions] = useState<RecurringTransaction[]>(initialRecurringTransactions);
+  const [accounts] = useState<Account[]>(initialAccounts);
+  const [categories] = useState<Category[]>(initialCategories);
 
   const deleteMutation = useDeleteRecurringTransactionMutation();
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await refetchRecurringTransactions();
+      await queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
+      const { data } = await getRecurringTransactions();
+      setRecurringTransactions(data);
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetchRecurringTransactions]);
+  }, [queryClient]);
 
   const handleCreateRecurringTransaction = useCallback(() => {
     showModal(
       <RecurringTransactionFormModal
         mode="create"
+        accounts={accounts}
+        categories={categories}
         onCancel={hideModal}
         onCompleted={async () => {
           hideModal();
-          await refetchRecurringTransactions();
+          await handleRefresh();
           showNotification(
             'fas fa-circle-check',
             'success',
@@ -86,7 +101,7 @@ export default function RecurringTransactionsProvider({ children }: { children: 
         }}
       />
     );
-  }, [hideModal, refetchRecurringTransactions, showModal, showNotification]);
+  }, [hideModal, handleRefresh, showModal, showNotification, accounts, categories]);
 
   const handleEditRecurringTransaction = useCallback(
     (transaction: RecurringTransaction) => {
@@ -94,10 +109,12 @@ export default function RecurringTransactionsProvider({ children }: { children: 
         <RecurringTransactionFormModal
           mode="edit"
           transaction={transaction}
+          accounts={accounts}
+          categories={categories}
           onCancel={hideModal}
           onCompleted={async () => {
             hideModal();
-            await refetchRecurringTransactions();
+            await handleRefresh();
             showNotification(
               'fas fa-pen-to-square',
               'success',
@@ -108,7 +125,7 @@ export default function RecurringTransactionsProvider({ children }: { children: 
         />
       );
     },
-    [hideModal, refetchRecurringTransactions, showModal, showNotification]
+    [hideModal, handleRefresh, showModal, showNotification, accounts, categories]
   );
 
   const handleDeleteRecurringTransaction = useCallback(
@@ -118,7 +135,10 @@ export default function RecurringTransactionsProvider({ children }: { children: 
 
       try {
         await deleteMutation.mutateAsync(transaction.recurring_transaction_id);
-        await refetchRecurringTransactions();
+        // Update local state
+        setRecurringTransactions(prev =>
+          prev.filter(t => t.recurring_transaction_id !== transaction.recurring_transaction_id)
+        );
         showNotification(
           'fas fa-trash-check',
           'accent',
@@ -130,14 +150,14 @@ export default function RecurringTransactionsProvider({ children }: { children: 
         showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
       }
     },
-    [deleteMutation, refetchRecurringTransactions, showNotification]
+    [deleteMutation, showNotification]
   );
 
   const value: RecurringTransactionsContextValue = {
-    isLoading,
     isRefreshing,
-    usingMockData,
     recurringTransactions,
+    accounts,
+    categories,
     handleCreateRecurringTransaction,
     handleEditRecurringTransaction,
     handleDeleteRecurringTransaction,

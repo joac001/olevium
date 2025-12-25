@@ -1,41 +1,29 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Box, Card, Typography } from '@/components/shared/ui';
-import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
-import { useAccountsStore } from '@/lib/stores/accounts';
 import { formatAmount } from '@/lib/utils/parser';
-import { createOperationContext } from '@/lib/utils/errorSystem';
+import type { Account, AccountType } from '@/types';
 import AccountsTable from './AccountsTable';
 import CreateAccountForm from './CreateAccountForm';
 
-export default function AccountsShell() {
-  const { showNotification, showError } = useNotification();
+interface AccountsShellProps {
+  initialAccounts: Account[];
+  initialAccountTypes: AccountType[];
+}
+
+export default function AccountsShell({ initialAccounts, initialAccountTypes }: AccountsShellProps) {
   const { showModal, hideModal } = useModal();
-  const accounts = useAccountsStore(state => state.accounts);
-  const accountTypes = useAccountsStore(state => state.accountTypes);
-  const loading = useAccountsStore(state => state.loading);
-  const loadingTypes = useAccountsStore(state => state.loadingTypes);
-  const fetchAccounts = useAccountsStore(state => state.fetchAccounts);
-  const fetchAccountTypes = useAccountsStore(state => state.fetchAccountTypes);
-
-  useEffect(() => {
-    fetchAccounts().catch(error => {
-      const context = createOperationContext('fetch', 'cuentas', 'las cuentas');
-      showError(error, context);
-    });
-
-    fetchAccountTypes().catch(error => {
-      const context = createOperationContext('fetch', 'tipos de cuentas', 'los tipos de cuentas');
-      showError(error, context);
-    });
-  }, [fetchAccounts, fetchAccountTypes, showNotification, showError]);
+  const accounts = initialAccounts;
+  const accountTypes = initialAccountTypes;
 
   const balancesByCurrency = useMemo(() => {
     return accounts.reduce<Record<string, number>>((accumulator, account) => {
-      const currency = account.currency ?? 'Sin moneda';
+      const currency = typeof account.currency === 'string'
+        ? account.currency
+        : (account.currency as any)?.label ?? 'Sin moneda';
       accumulator[currency] = (accumulator[currency] ?? 0) + account.balance;
       return accumulator;
     }, {});
@@ -47,7 +35,7 @@ export default function AccountsShell() {
         <Card tone="accent" title="Registrar nueva cuenta">
           <CreateAccountForm
             accountTypes={accountTypes}
-            loadingTypes={loadingTypes}
+            loadingTypes={false}
             defaultTypeId={typeId}
             onSuccess={() => {
               hideModal();
@@ -56,7 +44,7 @@ export default function AccountsShell() {
         </Card>
       );
     },
-    [accountTypes, hideModal, loadingTypes, showModal]
+    [accountTypes, hideModal, showModal]
   );
 
   return (
@@ -86,9 +74,9 @@ export default function AccountsShell() {
           <AccountsTable
             accounts={accounts}
             accountTypes={accountTypes}
-            loading={loading}
+            loading={false}
             onAddAccount={handleOpenCreateAccount}
-            disableAdd={loadingTypes || !accountTypes.length}
+            disableAdd={!accountTypes.length}
           />
         </Box>
       </Card>

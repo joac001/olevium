@@ -3,21 +3,30 @@
 import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
-import { useTransactionsPage } from './TransactionsProvider';
+import type { Category, Transaction } from '@/lib/types';
+import type { Account } from '@/types';
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
 
-export default function TransactionsTable() {
-  const {
-    isLoading,
-    filteredTransactions,
-    accountDictionary,
-    categoryDictionary,
-    summary,
-    handleEditTransaction,
-    handleDeleteTransaction
-  } = useTransactionsPage();
+interface TransactionsTableProps {
+  transactions: Transaction[];
+  accounts: Record<string, Account>;
+  categories: Record<string, Category>;
+  onEditTransaction: (transaction: Transaction) => void;
+  onDeleteTransaction: (transaction: Transaction) => Promise<void>;
+}
+
+export default function TransactionsTable({
+  transactions,
+  accounts: accountDictionary,
+  categories: categoryDictionary,
+  onEditTransaction: handleEditTransaction,
+  onDeleteTransaction: handleDeleteTransaction,
+}: TransactionsTableProps) {
+  const isLoading = false; // Ya no hay loading porque los datos vienen del servidor
+  const filteredTransactions = transactions;
+  const summary = { count: transactions.length };
 
   return (
     <Card title="Detalle de movimientos" subtitle={`${summary.count} registros filtrados`}>
@@ -73,10 +82,7 @@ export default function TransactionsTable() {
                     : categoryValue && typeof categoryValue === 'object'
                       ? (categoryValue as any).description ?? 'Sin categoría'
                       : categoryDictionary[String(tx.category_id)]?.description ?? 'Sin categoría';
-                const currency =
-                  typeof account?.currency === 'string'
-                    ? account?.currency
-                    : account?.currency?.label ?? 'ARS';
+                const currency = account?.currency ?? 'ARS';
 
                 return (
                   <tr key={tx.transaction_id} className="transition hover:bg-white/5">

@@ -1,13 +1,13 @@
 'use client';
 
-import type { AxiosRequestConfig } from 'axios';
+
 import { create } from 'zustand';
 
-import { http } from '@/lib/utils/axios';
+import { api } from '@/lib/http';
 import { useUserStore } from '@/lib/stores/user';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
-import { resolveAxiosError } from '@/lib/utils/errorHandling';
+import { resolveError } from '@/lib/utils/errorHandling';
 
 export interface AuthLoginPayload {
   email: string;
@@ -84,7 +84,7 @@ const mapTokenPair = (pair: TokenPairResponse) => ({
 
 const AUTH_ERROR_FALLBACK = 'No se pudo completar la acción de autenticación.';
 
-const normalizeAuthError = (error: unknown): Error => resolveAxiosError(error, AUTH_ERROR_FALLBACK);
+const normalizeAuthError = (error: unknown): Error => resolveError(error, AUTH_ERROR_FALLBACK);
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
@@ -118,7 +118,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email, password) => {
     set({ loading: true });
     try {
-      const { data } = await http.post<TokenPairResponse>('/auth/login', { email, password });
+      const { data } = await api.post<TokenPairResponse>('/auth/login', { email, password });
       const tokens = mapTokenPair(data);
       if (!tokens.accessToken || !tokens.refreshToken) {
         throw new Error('Respuesta del servidor inválida: faltan tokens de sesión.');
@@ -147,7 +147,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signup: async payload => {
     try {
-      const { data } = await http.post<AuthSignupResponse>('/auth/signup', payload);
+      const { data } = await api.post<AuthSignupResponse>('/auth/signup', payload);
       return data;
     } catch (error) {
       throw normalizeAuthError(error);
@@ -156,7 +156,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   verifyEmail: async token => {
     try {
-      const { data } = await http.get<VerifyEmailResponse>(
+      const { data } = await api.get<VerifyEmailResponse>(
         `/auth/verify-email/${encodeURIComponent(token)}`
       );
       return data;
@@ -191,7 +191,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       storedTokens.refreshToken ??
       refreshToken;
 
-    const baseRefreshConfig: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+    const baseRefreshConfig = {
       skipAuthRefresh: true,
       headers: bearerToken
         ? {
@@ -200,7 +200,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         : undefined,
     };
 
-    const fallbackRefreshConfig: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+    const fallbackRefreshConfig = {
       skipAuthRefresh: true,
       headers: {
         Authorization: `Bearer ${refreshToken}`
@@ -219,7 +219,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     };
 
     try {
-      const { data } = await http.post<TokenPairResponse>(
+      const { data } = await api.post<TokenPairResponse>(
         '/auth/refresh',
         payload,
         baseRefreshConfig
@@ -234,7 +234,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     } catch (error) {
       try {
-        const { data } = await http.post<TokenPairResponse>(
+        const { data } = await api.post<TokenPairResponse>(
           '/auth/refresh',
           payload,
           fallbackRefreshConfig
@@ -327,10 +327,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       if (accessToken) {
-        const config: AxiosRequestConfig & { skipAuthRefresh?: boolean } = {
+        const config = {
           skipAuthRefresh: true,
         };
-        await http.post('/auth/logout', undefined, config);
+        await api.post('/auth/logout', undefined, config);
       }
     } catch (error) {
       // Log el error pero continúa con la limpieza local

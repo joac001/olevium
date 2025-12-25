@@ -6,10 +6,10 @@ import { Box, FormWrapper, Typography } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import type { TransactionCategory } from '@/types';
+import type { Category } from '@/lib/types';
 
 interface DeleteCategoryFormProps {
-  category: TransactionCategory;
+  category: Category;
   onSuccess?: () => void;
 }
 
@@ -34,7 +34,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
     async (formData: FormData) => {
       void formData;
 
-      if (!category.userId) {
+      if (!category.user_id) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -46,7 +46,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
 
       setIsSubmitting(true);
       try {
-        await deleteCategory(category.categoryId);
+        await deleteCategory(category.category_id);
 
         const context = createOperationContext('delete', 'categoría', 'la categoría');
         showSuccess('Categoría eliminada exitosamente.', context);
@@ -60,8 +60,8 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
       }
     },
     [
-      category.categoryId,
-      category.userId,
+      category.category_id,
+      category.user_id,
       deleteCategory,
       onSuccess,
       showNotification,
