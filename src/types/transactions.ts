@@ -36,6 +36,7 @@ export interface ApiTransactionCategory {
   color: Nullable<string>;
   created_at: Iso8601DateTimeString;
   is_default: boolean;
+  is_active: boolean;
   transaction_type?: Nullable<ApiTransactionTypeSummary>;
 }
 
@@ -84,6 +85,7 @@ export interface TransactionCategory {
   color: Nullable<string>;
   createdAt: Iso8601DateTimeString;
   isDefault: boolean;
+  isActive: boolean;
   transactionType: Nullable<TransactionTypeSummary>;
 }
 

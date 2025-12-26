@@ -115,14 +115,18 @@ export default function RecurringTransactionFormModal({
   const categoryOptions: DropMenuOption[] = useMemo(
     () =>
       categories
-        .filter((category) => category.type_id === Number(formValues.typeId))
+        .filter((category) => {
+          const matchesType = category.type_id === Number(formValues.typeId);
+          // Include active categories OR the currently selected category (for edit mode)
+          return matchesType && (category.is_active !== false || String(category.category_id) === formValues.categoryId);
+        })
         .slice()
         .sort((a, b) => a.description.localeCompare(b.description))
         .map((category) => ({
           value: String(category.category_id),
-          label: category.description,
+          label: category.is_active === false ? `${category.description} (inactiva)` : category.description,
         })),
-    [categories, formValues.typeId]
+    [categories, formValues.typeId, formValues.categoryId]
   );
 
   const typeOptions: DropMenuOption[] = [

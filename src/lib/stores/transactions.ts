@@ -68,6 +68,7 @@ const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
   color: payload.color ?? null,
   createdAt: payload.created_at,
   isDefault: payload.is_default,
+  isActive: payload.is_active ?? true,
   transactionType: payload.transaction_type
     ? mapTransactionTypeSummary(payload.transaction_type)
     : null,

@@ -18,6 +18,7 @@ export type Category = {
   icon?: string | null;
   created_at?: string;
   is_default?: boolean;
+  is_active?: boolean;
 };
 
 export type Transaction = ApiUserTransaction & {

@@ -138,7 +138,7 @@ export default function EditCategoryForm({
           label="Tipo"
           options={typeOptions}
           value={typeId}
-          onValueChange={(value) => setTypeId(value ?? '')}
+          onValueChange={(value) => setTypeId(String(value ?? ''))}
           required
           disabled={loadingTypes || !typeOptions.length}
         />

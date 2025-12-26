@@ -3,14 +3,14 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { Box, Card, Typography, ActionButton } from '@/components/shared/ui';
-import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
-import { getCategories } from '@/lib/api';
+import { getCategories, deactivateCategory, reactivateCategory } from '@/lib/api/categories';
 import type { Category, TransactionType } from '@/lib/types';
 import type { User } from '@/lib/api';
 import EditCategoryForm from './EditCategoryForm';
 import DeleteCategoryForm from './DeleteCategoryForm';
 import CreateCategoryForm from './CreateCategoryForm';
+import ConfirmActionForm from './ConfirmActionForm';
 
 interface CategoriesShellProps {
   initialCategories: Category[];
@@ -23,7 +23,6 @@ export default function CategoriesShell({
   initialTransactionTypes,
   initialUser,
 }: CategoriesShellProps) {
-  const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
 
   const [categories, setCategories] = useState<Category[]>(initialCategories);
@@ -108,6 +107,60 @@ export default function CategoriesShell({
     [categoriesList, hideModal, refreshCategories, showModal]
   );
 
+  const openDeactivateModal = useCallback(
+    (categoryId: string) => {
+      const target = categoriesList.find(category => category.category_id === categoryId);
+      if (!target) {
+        return;
+      }
+
+      showModal(
+        <Card tone="accent" title="Desactivar categoría">
+          <ConfirmActionForm
+            title={`¿Desactivar "${target.description}"?`}
+            description="La categoría no aparecerá en los selects de nuevas transacciones, pero se mantendrá en las transacciones existentes."
+            confirmLabel="Desactivar categoría"
+            confirmVariant="accent"
+            onConfirm={() => deactivateCategory(categoryId)}
+            successMessage="Categoría desactivada. Ya no aparecerá en nuevas transacciones."
+            onSuccess={async () => {
+              hideModal();
+              await refreshCategories();
+            }}
+          />
+        </Card>
+      );
+    },
+    [categoriesList, hideModal, refreshCategories, showModal]
+  );
+
+  const openActivateModal = useCallback(
+    (categoryId: string) => {
+      const target = categoriesList.find(category => category.category_id === categoryId);
+      if (!target) {
+        return;
+      }
+
+      showModal(
+        <Card tone="accent" title="Activar categoría">
+          <ConfirmActionForm
+            title={`¿Activar "${target.description}"?`}
+            description="La categoría volverá a aparecer en los selects de nuevas transacciones."
+            confirmLabel="Activar categoría"
+            confirmVariant="accent"
+            onConfirm={() => reactivateCategory(categoryId)}
+            successMessage="Categoría activada. Ya está disponible para nuevas transacciones."
+            onSuccess={async () => {
+              hideModal();
+              await refreshCategories();
+            }}
+          />
+        </Card>
+      );
+    },
+    [categoriesList, hideModal, refreshCategories, showModal]
+  );
+
   const openCreateModal = useCallback(() => {
     showModal(
       <Card tone="accent" title="Crear categoría">
@@ -139,18 +192,30 @@ export default function CategoriesShell({
           <Box className="flex flex-col gap-4">
             {userCategories.map(category => {
               const typeLabel = typeLabelById.get(category.type_id) ?? `Tipo #${category.type_id}`;
+              const isActive = category.is_active !== false;
               return (
                 <Box
                   key={category.category_id}
-                  className="flex flex-row gap-3 rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)] p-4 md:items-center md:justify-between"
+                  className={`flex flex-row gap-3 rounded-2xl border p-4 md:items-center md:justify-between ${
+                    isActive
+                      ? 'border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)]'
+                      : 'border-[color:var(--surface-muted)] bg-[color:var(--surface-muted)]/30 opacity-70'
+                  }`}
                 >
                   <Box className="flex flex-1 flex-col gap-1">
-                    <Typography
-                      variant="body"
-                      className="text-sm font-semibold text-[color:var(--text-primary)]"
-                    >
-                      {category.description}
-                    </Typography>
+                    <Box className="flex items-center gap-2">
+                      <Typography
+                        variant="body"
+                        className="text-sm font-semibold text-[color:var(--text-primary)]"
+                      >
+                        {category.description}
+                      </Typography>
+                      {!isActive && (
+                        <span className="rounded-full bg-[color:var(--color-warning)]/20 px-2 py-0.5 text-[10px] font-medium uppercase text-[color:var(--color-warning)]">
+                          Inactiva
+                        </span>
+                      )}
+                    </Box>
                     <Typography
                       variant="caption"
                       className="text-xs uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
@@ -182,6 +247,21 @@ export default function CategoriesShell({
                       tooltip="Editar categoría"
                       onClick={() => openEditModal(category.category_id)}
                     />
+                    {isActive ? (
+                      <ActionButton
+                        icon="fas fa-eye-slash"
+                        type="neutral"
+                        tooltip="Desactivar categoría"
+                        onClick={() => openDeactivateModal(category.category_id)}
+                      />
+                    ) : (
+                      <ActionButton
+                        icon="fas fa-eye"
+                        type="accent"
+                        tooltip="Activar categoría"
+                        onClick={() => openActivateModal(category.category_id)}
+                      />
+                    )}
                     <ActionButton
                       icon="fas fa-trash"
                       type="danger"

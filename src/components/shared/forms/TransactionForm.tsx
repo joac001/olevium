@@ -168,24 +168,29 @@ export default function TransactionForm({
     }));
   }, [accounts]);
 
-  // Filtrar categorias por tipo de transaccion
+  // Filtrar categorias por tipo de transaccion y estado activo
   const categoryOptions: DropMenuOption[] = useMemo(() => {
     const typeId = Number(formValues.typeId);
+    const currentCategoryId = formValues.categoryId;
     return categories
       .filter(category => {
         const catTypeId = 'typeId' in category ? category.typeId : (category as any).type_id;
-        return catTypeId === typeId;
+        const catId = 'categoryId' in category ? category.categoryId : (category as any).category_id;
+        const isActive = 'isActive' in category ? category.isActive : (category as any).is_active;
+        // Filtrar por tipo y solo mostrar activas (o la actualmente seleccionada en edit mode)
+        return catTypeId === typeId && (isActive !== false || String(catId) === currentCategoryId);
       })
       .slice()
       .sort((a, b) => a.description.localeCompare(b.description))
       .map(category => {
         const catId = 'categoryId' in category ? category.categoryId : (category as any).category_id;
+        const isActive = 'isActive' in category ? category.isActive : (category as any).is_active;
         return {
           value: String(catId),
-          label: category.description,
+          label: isActive === false ? `${category.description} (inactiva)` : category.description,
         };
       });
-  }, [categories, formValues.typeId]);
+  }, [categories, formValues.typeId, formValues.categoryId]);
 
   const typeOptions: DropMenuOption[] = [
     { value: String(EXPENSE_TYPE_ID), label: 'Salida' },

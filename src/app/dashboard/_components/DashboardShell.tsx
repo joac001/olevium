@@ -168,7 +168,7 @@ export default function DashboardShell({
                   label="Mes"
                   options={MONTH_OPTIONS}
                   value={selectedMonth}
-                  onValueChange={value => setSelectedMonth(value ?? '1')}
+                  onValueChange={value => setSelectedMonth(String(value ?? '1'))}
                 />
               </Box>
               <Box className="w-28">
@@ -176,7 +176,7 @@ export default function DashboardShell({
                   label="Año"
                   options={YEAR_OPTIONS}
                   value={selectedYear}
-                  onValueChange={value => setSelectedYear(value ?? String(new Date().getFullYear()))}
+                  onValueChange={value => setSelectedYear(String(value ?? new Date().getFullYear()))}
                 />
               </Box>
             </>

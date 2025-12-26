@@ -46,7 +46,7 @@ const normalizeTypeValue = (raw: number | string | null): number | null => {
 };
 
 const isCategoryValidForType = (category: TransactionCategory, typeId: number | null) =>
-  !typeId || !category.typeId || category.typeId === typeId;
+  (!typeId || !category.typeId || category.typeId === typeId) && category.isActive !== false;
 
 export function useTransactionFormState({
   transactionTypes,
@@ -149,14 +149,18 @@ export function useTransactionFormState({
   const categoryOptions: DropMenuOption[] = useMemo(() => {
     const base: DropMenuOption[] = [{ value: CUSTOM_CATEGORY_VALUE, label: 'Personalizada' }];
     const filtered = categories
-      .filter(category => isCategoryValidForType(category, selectedType))
+      .filter(category => {
+        const matchesType = !selectedType || !category.typeId || category.typeId === selectedType;
+        // Include active categories OR the currently selected category (for edit mode)
+        return matchesType && (category.isActive !== false || category.categoryId === selectedCategory);
+      })
       .map(category => ({
         value: category.categoryId,
-        label: category.description,
+        label: category.isActive === false ? `${category.description} (inactiva)` : category.description,
       }));
 
     return [...base, ...filtered];
-  }, [categories, selectedType]);
+  }, [categories, selectedType, selectedCategory]);
 
   const typeDisabled = transactionTypesLoading && transactionTypes.length === 0;
   const categoryDisabled = categoriesLoading && categories.length === 0;

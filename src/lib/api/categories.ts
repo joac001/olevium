@@ -15,6 +15,7 @@ const normalizeCategory = (raw: any): Category => ({
   icon: raw.icon ?? null,
   created_at: raw.created_at ? String(raw.created_at) : undefined,
   is_default: Boolean(raw.is_default ?? false),
+  is_active: raw.is_active !== false,
 });
 
 export async function getCategories(): Promise<ApiCollectionResult<Category[]>> {
@@ -58,4 +59,47 @@ export async function deleteCategory(categoryId: string): Promise<void> {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo eliminar la categoría (status ${response.status})`);
   }
+}
+
+export async function getActiveCategories(): Promise<ApiCollectionResult<Category[]>> {
+  const response = await apiRequest('/categories/active');
+  if (!response.ok) {
+    return { data: [] };
+  }
+  const raw = (await response.json()) as unknown[];
+  return { data: raw.map(normalizeCategory) };
+}
+
+export async function deactivateCategory(categoryId: string): Promise<Category> {
+  const response = await apiRequest(`/categories/${categoryId}/deactivate`, {
+    method: 'PATCH',
+  });
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo desactivar la categoría (status ${response.status})`);
+  }
+  const raw = await response.json();
+  return normalizeCategory(raw);
+}
+
+export async function reactivateCategory(categoryId: string): Promise<Category> {
+  const response = await apiRequest(`/categories/${categoryId}/reactivate`, {
+    method: 'PATCH',
+  });
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo reactivar la categoría (status ${response.status})`);
+  }
+  const raw = await response.json();
+  return normalizeCategory(raw);
+}
+
+export async function getCategoryTransactionCount(categoryId: string): Promise<number> {
+  const response = await apiRequest(`/categories/${categoryId}/transactions/count`);
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo obtener el conteo (status ${response.status})`);
+  }
+  const data = await response.json();
+  return data.count ?? 0;
 }
