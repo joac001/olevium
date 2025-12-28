@@ -1,19 +1,17 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { Container } from '@/components/shared/ui';
+import {
+  requireAuth,
+  withAuthProtection,
+  handleProtectedResult,
+} from '@/lib/server-auth';
 import { getAccountsPageData } from './_api';
 import AccountsShell from './_components/AccountsShell';
 
 export default async function AccountsPage() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('olevium_access_token');
-  const refreshToken = cookieStore.get('olevium_refresh_token');
+  await requireAuth();
 
-  if (!accessToken?.value && !refreshToken?.value) {
-    redirect('/auth');
-  }
-
-  const data = await getAccountsPageData();
+  const result = await withAuthProtection(() => getAccountsPageData());
+  const data = handleProtectedResult(result);
 
   return (
     <Container className="py-10">

@@ -1,18 +1,16 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import {
+  requireAuth,
+  withAuthProtection,
+  handleProtectedResult,
+} from '@/lib/server-auth';
 import { getTransactionsPageData } from './_api';
 import TransactionsShell from './_components/TransactionsShell';
 
 export default async function TransactionsPage() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('olevium_access_token');
-  const refreshToken = cookieStore.get('olevium_refresh_token');
+  await requireAuth();
 
-  if (!accessToken?.value && !refreshToken?.value) {
-    redirect('/auth');
-  }
-
-  const data = await getTransactionsPageData();
+  const result = await withAuthProtection(() => getTransactionsPageData());
+  const data = handleProtectedResult(result);
 
   return (
     <TransactionsShell

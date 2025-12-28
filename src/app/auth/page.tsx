@@ -1,7 +1,10 @@
 import { Container, Box, Typography, PageHeader } from '@/components/shared/ui';
+import { redirectIfAuthenticated } from '@/lib/server-auth';
 import AuthSwitcher from './_components/AuthSwitcher';
 
-export default function AuthPage() {
+export default async function AuthPage() {
+  await redirectIfAuthenticated();
+
   return (
     <Container className="py-10">
       <PageHeader />

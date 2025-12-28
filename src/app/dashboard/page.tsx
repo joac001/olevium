@@ -1,30 +1,32 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import DashboardShell from './_components/DashboardShell';
 import DashboardSkeleton from './_skeletons/DashboardSkeleton';
 import { getAccounts, getTransactions } from '@/lib/api';
+import {
+  requireAuth,
+  withAuthProtection,
+  handleProtectedResult,
+} from '@/lib/server-auth';
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('olevium_access_token');
-  const refreshToken = cookieStore.get('olevium_refresh_token');
+  await requireAuth();
 
-  if (!accessToken?.value && !refreshToken?.value) {
-    redirect('/auth');
-  }
+  const result = await withAuthProtection(async () => {
+    const [accountsResult, transactionsResult] = await Promise.all([
+      getAccounts(),
+      getTransactions(),
+    ]);
+    return { accounts: accountsResult.data, transactions: transactionsResult.data };
+  });
 
-  const [accountsResult, transactionsResult] = await Promise.all([
-    getAccounts(),
-    getTransactions(),
-  ]);
+  const { accounts, transactions } = handleProtectedResult(result);
 
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardShell
-        initialAccounts={accountsResult.data}
-        initialTransactions={transactionsResult.data}
+        initialAccounts={accounts}
+        initialTransactions={transactions}
       />
     </Suspense>
   );

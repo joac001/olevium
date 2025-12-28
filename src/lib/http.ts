@@ -4,6 +4,28 @@ import { tokenStorage } from '@/lib/utils/tokenStorage';
 const RAW_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 const API_BASE = RAW_BASE.replace(/\/+$/, ''); // sin slash final
 
+/**
+ * Error especial para indicar que la sesión expiró en SSR.
+ * Las páginas SSR deben capturar este error y redirigir a /auth.
+ */
+export class AuthExpiredError extends Error {
+  constructor(message = 'Sesión expirada') {
+    super(message);
+    this.name = 'AuthExpiredError';
+  }
+}
+
+/**
+ * Verifica si un error es de tipo AuthExpiredError
+ * Usa tanto instanceof como verificación de nombre para manejar casos de SSR
+ * donde instanceof puede fallar debido a diferentes instancias de módulos
+ */
+export function isAuthExpiredError(error: unknown): error is AuthExpiredError {
+  if (error instanceof AuthExpiredError) return true;
+  if (error instanceof Error && error.name === 'AuthExpiredError') return true;
+  return false;
+}
+
 type ApiRequestInit = RequestInit & {
   skipAuth?: boolean;
   isRetry?: boolean; // Flag para evitar loops infinitos de refresh
@@ -156,7 +178,14 @@ export async function apiRequest(path: string, init: ApiRequestInit = {}): Promi
     fetchOptions.cache = 'no-store';
   }
 
-  return fetch(url, fetchOptions);
+  const response = await fetch(url, fetchOptions);
+
+  // En SSR, si hay 401 lanzar error para que la página pueda redirigir
+  if (response.status === 401 && typeof window === 'undefined' && !init.skipAuth) {
+    throw new AuthExpiredError('Sesión expirada en servidor');
+  }
+
+  return response;
 }
 
 export async function parseErrorMessage(response: Response): Promise<string | null> {
@@ -209,6 +238,20 @@ async function request<T>(
 
   // Handle 401 Unauthorized
   if (response.status === 401 && typeof window !== 'undefined') {
+    // Leer X-Token-Status para determinar la acción
+    const tokenStatus = response.headers.get('X-Token-Status');
+
+    // Si el token fue revocado o es inválido, logout inmediato sin intentar refresh
+    if (tokenStatus === 'revoked' || tokenStatus === 'invalid') {
+      handleLogout();
+      throw new Error(
+        tokenStatus === 'revoked'
+          ? 'Sesión revocada. Redirigiendo al login...'
+          : 'Sesión inválida. Redirigiendo al login...'
+      );
+    }
+
+    // Para tokens expirados o sin header, intentar refresh
     // No intentar refresh si:
     // - Es un retry (ya intentamos refresh)
     // - El request tiene skipAuth (no necesita auth)
