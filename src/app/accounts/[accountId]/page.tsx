@@ -22,14 +22,7 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
   const accountId = rawAccountId.trim();
 
   const result = await withAuthProtection(() => getAccountDetailPageData(accountId));
-
-  // Si expiró la sesión, handleProtectedResult redirige a /auth
-  // Si hubo otro error (cuenta no existe), mostramos notFound
-  if (!result.success) {
-    handleProtectedResult(result);
-  }
-
-  const data = result.data;
+  const data = await handleProtectedResult(result);
 
   return (
     <Container className="py-10">

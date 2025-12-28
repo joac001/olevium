@@ -11,7 +11,7 @@ export default async function CategoriesPage() {
   await requireAuth();
 
   const result = await withAuthProtection(() => getCategoriesPageData());
-  const data = handleProtectedResult(result);
+  const data = await handleProtectedResult(result);
 
   return (
     <Container className="py-10">

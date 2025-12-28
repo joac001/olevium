@@ -60,11 +60,12 @@ export async function withAuthProtection<T>(
 
 /**
  * Helper para manejar el resultado de withAuthProtection.
- * Redirige a /auth si la sesión expiró, o retorna los datos.
+ * Redirige a /api/auth/clear-session si la sesión expiró (que limpia cookies y redirige a /auth).
  */
-export function handleProtectedResult<T>(result: ProtectedResult<T>): T {
+export async function handleProtectedResult<T>(result: ProtectedResult<T>): Promise<T> {
   if (!result.success) {
-    redirect('/auth');
+    // Redirigir al route handler que limpia cookies y redirige a /auth
+    redirect('/api/auth/clear-session');
   }
   return result.data;
 }

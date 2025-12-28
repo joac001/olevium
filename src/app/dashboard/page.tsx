@@ -20,7 +20,7 @@ export default async function DashboardPage() {
     return { accounts: accountsResult.data, transactions: transactionsResult.data };
   });
 
-  const { accounts, transactions } = handleProtectedResult(result);
+  const { accounts, transactions } = await handleProtectedResult(result);
 
   return (
     <Suspense fallback={<DashboardSkeleton />}>

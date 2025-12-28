@@ -14,7 +14,7 @@ export default async function ProfilePage() {
   await requireAuth();
 
   const result = await withAuthProtection(() => getProfilePageData());
-  const data = handleProtectedResult(result);
+  const data = await handleProtectedResult(result);
 
   return (
     <ProfileShell initialUser={data.user}>

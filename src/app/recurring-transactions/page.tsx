@@ -13,7 +13,7 @@ export default async function RecurringTransactionsPage() {
   await requireAuth();
 
   const result = await withAuthProtection(() => getRecurringTransactionsPageData());
-  const data = handleProtectedResult(result);
+  const data = await handleProtectedResult(result);
 
   return (
     <RecurringTransactionsShell

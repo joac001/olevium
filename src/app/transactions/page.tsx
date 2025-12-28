@@ -10,7 +10,7 @@ export default async function TransactionsPage() {
   await requireAuth();
 
   const result = await withAuthProtection(() => getTransactionsPageData());
-  const data = handleProtectedResult(result);
+  const data = await handleProtectedResult(result);
 
   return (
     <TransactionsShell
