@@ -1,12 +1,12 @@
 'use client';
 
-import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
-import { useRecurringTransactionsPage } from './RecurringTransactionsProvider';
+import { Card, Box, ActionButton } from '@/components/shared/ui';
+import { useRecurringTransactionsPage } from './RecurringTransactionsShell';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { toSignedAmount } from '@/lib/utils/transactions';
 
 export default function RecurringTransactionsTable() {
   const {
-    isLoading,
     recurringTransactions,
     handleEditRecurringTransaction,
     handleDeleteRecurringTransaction,
@@ -26,33 +26,18 @@ export default function RecurringTransactionsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-[color:var(--text-secondary)]">
-            {isLoading ? (
-              Array.from({ length: 4 }).map((_, idx) => (
-                <tr key={`sk-rec-${idx}`}>
-                  <td className="px-4 py-4">
-                    <Skeleton width="60%" height="14px" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="40%" height="14px" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="50%" height="14px" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="70%" height="14px" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="30%" height="14px" />
-                  </td>
-                </tr>
-              ))
-            ) : recurringTransactions.length ? (
-              recurringTransactions.map((transaction) => (
+            {recurringTransactions.length ? (
+              recurringTransactions.map((transaction) => {
+                const signedAmount = toSignedAmount(transaction.amount, transaction.type_id);
+                const isIncome = signedAmount >= 0;
+                return (
                 <tr key={transaction.recurring_transaction_id} className="transition hover:bg-white/5">
                   <td className="px-4 py-3 font-medium text-[color:var(--text-primary)]">
                     {transaction.description}
                   </td>
-                  <td className="px-4 py-3">{formatCurrency(transaction.amount)}</td>
+                  <td className={`px-4 py-3 font-semibold ${isIncome ? 'text-[color:var(--color-success)]' : 'text-[color:var(--color-danger)]'}`}>
+                    {formatCurrency(signedAmount)}
+                  </td>
                   <td className="px-4 py-3">{transaction.frequency}</td>
                   <td className="px-4 py-3">{transaction.next_run_date ? formatDate(transaction.next_run_date) : '-'}</td>
                   <td className="px-4 py-3">
@@ -72,7 +57,8 @@ export default function RecurringTransactionsTable() {
                     </Box>
                   </td>
                 </tr>
-              ))
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center">

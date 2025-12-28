@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu, Typography, Button } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, DropMenu, Typography, Button, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
-import { useTransactionData } from '@/context/TransactionContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { TransactionCategoryCreateInput } from '@/types';
+import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 
 interface CreateCategoryFormProps {
   onSuccess?: () => void;
@@ -18,11 +18,13 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   const { showNotification, showError, showSuccess } = useNotification();
   const createCategory = useTransactionsStore(state => state.createCategory);
   const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
+  const transactionTypes = useTransactionsStore(state => state.transactionTypes);
+  const transactionTypesLoading = useTransactionsStore(state => state.transactionTypesLoading);
   const [typesError, setTypesError] = useState<string | null>(null);
   const [isRequestingTypes, setIsRequestingTypes] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { transactionTypes, transactionTypesLoading } = useTransactionData();
+  const [selectedColor, setSelectedColor] = useState<string>(CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff');
+  const [selectedTypeId, setSelectedTypeId] = useState<string>('');
 
   const ensureTransactionTypes = useCallback(async () => {
     if (transactionTypesLoading || isRequestingTypes) return;
@@ -61,7 +63,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
       transactionTypes.map(type => ({
-        value: type.typeId,
+        value: String(type.typeId),
         label: type.name,
       })),
     [transactionTypes]
@@ -82,10 +84,8 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
   const handleSubmit = useCallback(
     async (formData: FormData) => {
       const descriptionValue = formData.get('description');
-      const typeValue = formData.get('typeId');
-      const colorValue = formData.get('color');
 
-      if (typeof descriptionValue !== 'string' || typeof typeValue !== 'string') {
+      if (typeof descriptionValue !== 'string' || !selectedTypeId) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -106,7 +106,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         return;
       }
 
-      const typeId = Number(typeValue);
+      const typeId = Number(selectedTypeId);
       if (!Number.isFinite(typeId)) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
@@ -117,13 +117,10 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         return;
       }
 
-      const colorRaw =
-        typeof colorValue === 'string' && colorValue.trim().length ? colorValue.trim() : null;
-
       const payload: TransactionCategoryCreateInput = {
         description: trimmedDescription,
         typeId,
-        color: colorRaw,
+        color: selectedColor,
       };
 
       setIsSubmitting(true);
@@ -142,7 +139,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         setIsSubmitting(false);
       }
     },
-    [createCategory, onSuccess, showNotification, showError, showSuccess]
+    [createCategory, onSuccess, selectedColor, selectedTypeId, showNotification, showError, showSuccess]
   );
 
   const isLoadingTypes = transactionTypesLoading || isRequestingTypes;
@@ -163,6 +160,8 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           name="typeId"
           label="Tipo"
           options={typeOptions}
+          value={selectedTypeId}
+          onValueChange={value => setSelectedTypeId(String(value ?? ''))}
           required
           disabled={isLoadingTypes}
           placeholder={
@@ -196,7 +195,27 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           </Box>
         )}
 
-        <Input name="color" label="Color (opcional)" placeholder="#AABBCC" icon="fas fa-palette" />
+        <Box className="space-y-2">
+          <Typography variant="caption" className="uppercase tracking-wide text-[color:var(--text-muted)]">
+            Color
+          </Typography>
+          <Box className="flex flex-wrap gap-2">
+            {CATEGORY_COLOR_OPTIONS.map(option => (
+              <ButtonBase
+                key={option.value}
+                htmlType="button"
+                onClick={() => setSelectedColor(option.value)}
+                className={`!h-8 !w-8 !rounded-full !border-2 !p-0 transition ${
+                  selectedColor === option.value
+                    ? '!border-white ring-2 ring-white/60'
+                    : '!border-white/10 hover:!border-white/40'
+                }`}
+                style={{ backgroundColor: option.value }}
+                ariaLabel={`Color ${option.label}`}
+              />
+            ))}
+          </Box>
+        </Box>
       </Box>
     </FormWrapper>
   );

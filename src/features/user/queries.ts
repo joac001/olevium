@@ -11,10 +11,10 @@ async function getProfile(): Promise<ApiCollectionResult<StoredProfile>> {
     }
     const raw = (await response.json()) as unknown;
     const profile = raw as StoredProfile;
-    return { data: profile, isMock: false };
+    return { data: profile };
   } catch (error) {
-    console.warn('[olevium] usando perfil de ejemplo', error);
-    return { data: { name: 'Usuario de Olevium', email: 'user@olevium.com' }, isMock: true };
+    console.warn('[olevium] error al obtener perfil', error);
+    return { data: { name: 'Usuario de Olevium', email: 'user@olevium.com' } };
   }
 }
 

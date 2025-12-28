@@ -87,7 +87,7 @@ export function KnowledgeSection() {
           borderWidth: 2,
         },
         {
-          label: 'Gastos',
+          label: 'Salidas',
           data: [420000, 440000, 410000, 450000, 430000, 440000],
           borderColor: 'rgb(239, 68, 68)',
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -184,14 +184,14 @@ export function KnowledgeSection() {
               </div>
               <div>
                 <h3 className="font-semibold text-xs md:text-base">Flujo mensual</h3>
-                <p className="text-[10px] md:text-xs opacity-70 mt-0.5">Ingresos vs Gastos</p>
+                <p className="text-[10px] md:text-xs opacity-70 mt-0.5">Ingresos vs Salidas</p>
               </div>
             </div>
             <div className="h-20 md:h-32 mb-1.5 md:mb-3">
               <Line key={`line-${chartKey}`} data={lineData} options={chartOptions} />
             </div>
             <p className="text-[10px] md:text-xs opacity-70">
-              Tus ingresos se mantienen estables mientras tus gastos tienen picos en abril.
+              Tus ingresos se mantienen estables mientras tus salidas tienen picos en abril.
             </p>
           </Card>
         </motion.div>
@@ -209,7 +209,7 @@ export function KnowledgeSection() {
                 <PieChartIcon className="w-4 h-4 md:w-6 md:h-6 text-[var(--color-primary)]" />
               </div>
               <div>
-                <h3 className="font-semibold text-xs md:text-base">Gasto por categoría</h3>
+                <h3 className="font-semibold text-xs md:text-base">Salidas por categoría</h3>
                 <p className="text-[10px] md:text-xs opacity-70 mt-0.5">Distribución actual</p>
               </div>
             </div>
@@ -219,7 +219,7 @@ export function KnowledgeSection() {
               </div>
             </div>
             <p className="text-[10px] md:text-xs opacity-70">
-              El 59% de tus gastos se concentran en Hogar y Alimentación.
+              El 59% de tus salidas se concentran en Hogar y Alimentación.
             </p>
           </Card>
         </motion.div>

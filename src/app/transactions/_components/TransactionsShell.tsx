@@ -1,67 +1,44 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode
-} from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useQuery } from '@tanstack/react-query';
-import { Box, Typography } from '@/components/shared/ui';
+import { Box, Typography, Container } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
-import { useTransactionsQuery } from '@/features/transactions/queries';
 import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
-import { getAccounts, getCategories } from '@/lib/api';
-import type { Account, Category, Transaction } from '@/lib/types';
+import { getTransactions, getCategories } from '@/lib/api';
+import type { Category, Transaction } from '@/lib/types';
+import type { Account } from '@/types';
 import { formatAccountName } from '@/lib/format';
-import type { DateFilter, TypeFilter, TransactionsSummary } from './types';
+import type { DateFilter, TypeFilter, TransactionsSummary as TransactionsSummaryType } from './types';
 import { toSignedAmount } from '@/lib/utils/transactions';
+import TransactionsHeader from './TransactionsHeader';
+import TransactionsSummary from './TransactionsSummary';
+import TransactionsFilters from './TransactionsFilters';
+import TransactionsTable from './TransactionsTable';
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
 
-const TransactionsContext = createContext<TransactionsContextValue | null>(null);
+const TransactionFormModal = dynamic(() => import('./TransactionFormModal'), {
+  ssr: false,
+  loading: () => (
+    <Box className="w-full max-w-xl space-y-4 p-4">
+      <Typography variant="body">Cargando formulario...</Typography>
+    </Box>
+  )
+});
 
-type TransactionsContextValue = {
-  isLoading: boolean;
-  filters: {
-    typeFilter: TypeFilter;
-    categoryFilter: string;
-    dateFilter: DateFilter;
-    searchTerm: string;
-  };
-  setTypeFilter: (value: TypeFilter) => void;
-  setCategoryFilter: (value: string) => void;
-  setDateFilter: (value: DateFilter) => void;
-  setSearchTerm: (value: string) => void;
-  clearFilters: () => void;
-  accounts: Account[];
-  categories: Category[];
-  categoryOptions: Category[];
-  accountDictionary: Record<string, Account>;
-  categoryDictionary: Record<string, Category>;
-  summary: TransactionsSummary;
-  filteredTransactions: Transaction[];
-  handleCreateTransaction: () => void;
-  handleEditTransaction: (transaction: Transaction) => void;
-  handleDeleteTransaction: (transaction: Transaction) => Promise<void>;
-};
-
-export function useTransactionsPage() {
-  const context = useContext(TransactionsContext);
-  if (!context) {
-    throw new Error('useTransactionsPage debe usarse dentro de TransactionsProvider');
-  }
-  return context;
+interface TransactionsShellProps {
+  initialTransactions: Transaction[];
+  initialAccounts: Account[];
+  initialCategories: Category[];
 }
 
 function buildAccountDictionary(accounts: Account[]): Record<string, Account> {
   return accounts.reduce<Record<string, Account>>((acc, account) => {
-    acc[String(account.account_id)] = account;
+    acc[String(account.accountId)] = account;
     return acc;
   }, {});
 }
@@ -124,39 +101,26 @@ function filterTransactions(
   });
 }
 
-const TransactionFormModal = dynamic(() => import('./TransactionFormModal'), {
-  ssr: false,
-  loading: () => (
-    <Box className="w-full max-w-xl space-y-4 p-4">
-      <Typography variant="body">Cargando formulario...</Typography>
-    </Box>
-  )
-});
-
-export default function TransactionsProvider({ children }: { children: ReactNode }) {
+export default function TransactionsShell({
+  initialTransactions,
+  initialAccounts,
+  initialCategories,
+}: TransactionsShellProps) {
+  const queryClient = useQueryClient();
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
 
-  const [typeFilter, setTypeFilterState] = useState<TypeFilter>('all');
-  const [categoryFilter, setCategoryFilterState] = useState<string>('all');
-  const [dateFilter, setDateFilterState] = useState<DateFilter>('30d');
-  const [searchTerm, setSearchTermState] = useState('');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('90d');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const transactionsQuery = useTransactionsQuery();
-  const accountsQuery = useQuery({ queryKey: ['accounts'], queryFn: getAccounts });
-  const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories });
-
-  const { refetch: refetchTransactions } = transactionsQuery;
-  const { refetch: refetchCategories } = categoriesQuery;
+  // Usar datos iniciales del servidor
+  const [transactions, setTransactions] = useState(initialTransactions);
+  const [accounts, setAccounts] = useState(initialAccounts);
+  const [categories, setCategories] = useState(initialCategories);
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
-
-  const transactions = transactionsQuery.data?.data ?? [];
-  const accounts = accountsQuery.data?.data ?? [];
-  const categories = categoriesQuery.data?.data ?? [];
-
-  const isLoading =
-    transactionsQuery.isLoading || accountsQuery.isLoading || categoriesQuery.isLoading;
 
   const accountDictionary = useMemo(() => buildAccountDictionary(accounts), [accounts]);
   const categoryDictionary = useMemo(() => buildCategoryDictionary(categories), [categories]);
@@ -182,7 +146,7 @@ export default function TransactionsProvider({ children }: { children: ReactNode
     [transactions, typeFilter, categoryFilter, dateFilter, searchTerm, categoryDictionary]
   );
 
-  const summary = useMemo<TransactionsSummary>(() => {
+  const summary = useMemo<TransactionsSummaryType>(() => {
     const totals = filteredTransactions.reduce(
       (acc, tx) => {
         const signedAmount = toSignedAmount(tx.amount, tx.type_id);
@@ -206,11 +170,23 @@ export default function TransactionsProvider({ children }: { children: ReactNode
   }, [filteredTransactions]);
 
   const clearFilters = useCallback(() => {
-    setTypeFilterState('all');
-    setCategoryFilterState('all');
-    setDateFilterState('30d');
-    setSearchTermState('');
+    setTypeFilter('all');
+    setCategoryFilter('all');
+    setDateFilter('90d');
+    setSearchTerm('');
   }, []);
+
+  const refetchTransactions = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    const { data } = await getTransactions();
+    setTransactions(data);
+  }, [queryClient]);
+
+  const refetchCategories = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    const { data } = await getCategories();
+    setCategories(data);
+  }, [queryClient]);
 
   const handleCreateTransaction = useCallback(() => {
     showModal(
@@ -304,50 +280,29 @@ export default function TransactionsProvider({ children }: { children: ReactNode
     [accountDictionary, deleteTransactionMutation, refetchTransactions, showNotification]
   );
 
-  const value = useMemo<TransactionsContextValue>(
-    () => ({
-      isLoading,
-      filters: {
-        typeFilter,
-        categoryFilter,
-        dateFilter,
-        searchTerm
-      },
-      setTypeFilter: setTypeFilterState,
-      setCategoryFilter: setCategoryFilterState,
-      setDateFilter: setDateFilterState,
-      setSearchTerm: setSearchTermState,
-      clearFilters,
-      accounts,
-      categories,
-      categoryOptions,
-      accountDictionary,
-      categoryDictionary,
-      summary,
-      filteredTransactions,
-      handleCreateTransaction,
-      handleEditTransaction,
-      handleDeleteTransaction
-    }),
-    [
-      accountDictionary,
-      accounts,
-      categories,
-      categoryDictionary,
-      categoryFilter,
-      categoryOptions,
-      clearFilters,
-      dateFilter,
-      filteredTransactions,
-      handleCreateTransaction,
-      handleDeleteTransaction,
-      handleEditTransaction,
-      isLoading,
-      searchTerm,
-      summary,
-      typeFilter
-    ]
+  return (
+    <Container className="gap-6">
+      <TransactionsHeader onCreateTransaction={handleCreateTransaction} />
+      <TransactionsSummary summary={summary} />
+      <TransactionsFilters
+        typeFilter={typeFilter}
+        categoryFilter={categoryFilter}
+        dateFilter={dateFilter}
+        searchTerm={searchTerm}
+        categories={categoryOptions}
+        onTypeFilterChange={setTypeFilter}
+        onCategoryFilterChange={setCategoryFilter}
+        onDateFilterChange={setDateFilter}
+        onSearchTermChange={setSearchTerm}
+        onClearFilters={clearFilters}
+      />
+      <TransactionsTable
+        transactions={filteredTransactions}
+        accounts={accountDictionary}
+        categories={categoryDictionary}
+        onEditTransaction={handleEditTransaction}
+        onDeleteTransaction={handleDeleteTransaction}
+      />
+    </Container>
   );
-
-  return <TransactionsContext.Provider value={value}>{children}</TransactionsContext.Provider>;
 }

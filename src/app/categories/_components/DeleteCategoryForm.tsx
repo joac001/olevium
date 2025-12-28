@@ -1,86 +1,117 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-import { Box, FormWrapper, Typography } from '@/components/shared/ui';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { Box, Typography, ButtonBase } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import type { TransactionCategory } from '@/types';
+import {
+  deleteCategory as apiDeleteCategory,
+  getCategoryTransactionCount,
+} from '@/lib/api/categories';
+import type { Category } from '@/lib/types';
 
 interface DeleteCategoryFormProps {
-  category: TransactionCategory;
+  category: Category;
   onSuccess?: () => void;
 }
 
 export default function DeleteCategoryForm({ category, onSuccess }: DeleteCategoryFormProps) {
-  const deleteCategory = useTransactionsStore(state => state.deleteCategory);
   const { showNotification, showError, showSuccess } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [transactionCount, setTransactionCount] = useState<number | null>(null);
+  const [loadingCount, setLoadingCount] = useState(true);
 
-  const buttons = useMemo(
-    () => [
-      {
-        text: isSubmitting ? 'Eliminando...' : 'Eliminar',
-        htmlType: 'submit' as const,
-        type: 'danger' as const,
-        disabled: isSubmitting,
-      },
-    ],
-    [isSubmitting]
-  );
-
-  const handleSubmit = useCallback(
-    async (formData: FormData) => {
-      void formData;
-
-      if (!category.userId) {
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Acción no permitida',
-          'No puedes eliminar una categoría predefinida.'
-        );
-        return;
-      }
-
-      setIsSubmitting(true);
+  useEffect(() => {
+    async function fetchCount() {
       try {
-        await deleteCategory(category.categoryId);
-
-        const context = createOperationContext('delete', 'categoría', 'la categoría');
-        showSuccess('Categoría eliminada exitosamente.', context);
-
-        onSuccess?.();
-      } catch (error) {
-        const context = createOperationContext('delete', 'categoría', 'la categoría');
-        showError(error, context);
+        const count = await getCategoryTransactionCount(category.category_id);
+        setTransactionCount(count);
+      } catch {
+        setTransactionCount(0);
       } finally {
-        setIsSubmitting(false);
+        setLoadingCount(false);
       }
-    },
-    [
-      category.categoryId,
-      category.userId,
-      deleteCategory,
-      onSuccess,
-      showNotification,
-      showError,
-      showSuccess,
-    ]
-  );
+    }
+    fetchCount();
+  }, [category.category_id]);
+
+  const handleDelete = useCallback(async () => {
+    if (!category.user_id) {
+      showNotification(
+        'fa-solid fa-triangle-exclamation',
+        'danger',
+        'Accion no permitida',
+        'No puedes eliminar una categoria predefinida.'
+      );
+      return;
+    }
+
+    if (transactionCount && transactionCount > 0) {
+      showNotification(
+        'fa-solid fa-triangle-exclamation',
+        'danger',
+        'Accion no permitida',
+        'Esta categoria tiene transacciones asociadas. Desactivala en su lugar.'
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiDeleteCategory(category.category_id);
+      const context = createOperationContext('delete', 'categoria', 'la categoria');
+      showSuccess('Categoria eliminada permanentemente.', context);
+      onSuccess?.();
+    } catch (error) {
+      const context = createOperationContext('delete', 'categoria', 'la categoria');
+      showError(error, context);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    category.category_id,
+    category.user_id,
+    transactionCount,
+    onSuccess,
+    showNotification,
+    showError,
+    showSuccess,
+  ]);
+
+  const canDelete = transactionCount === 0;
 
   return (
-    <FormWrapper onSubmit={handleSubmit} buttons={buttons} className="flex flex-col gap-5">
+    <Box className="flex flex-col gap-5">
       <Box className="space-y-3">
         <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-          ¿Deseas eliminar la categoría{' '}
+          Categoria:{' '}
           <span className="font-semibold text-[color:var(--text-primary)]">
             {category.description}
           </span>
-          ? Esta acción no se puede deshacer.
         </Typography>
+
+        {loadingCount ? (
+          <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
+            Verificando uso...
+          </Typography>
+        ) : (
+          <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
+            {transactionCount === 0
+              ? 'Esta categoria no tiene transacciones asociadas y puede eliminarse.'
+              : `Esta categoria tiene ${transactionCount} transaccion${transactionCount === 1 ? '' : 'es'} asociada${transactionCount === 1 ? '' : 's'}. No puede eliminarse, pero puedes desactivarla.`}
+          </Typography>
+        )}
       </Box>
-    </FormWrapper>
+
+      <ButtonBase
+        variant="danger"
+        onClick={handleDelete}
+        disabled={isSubmitting || loadingCount || !canDelete}
+        className="w-full"
+      >
+        {isSubmitting ? 'Eliminando...' : 'Eliminar permanentemente'}
+      </ButtonBase>
+    </Box>
   );
 }

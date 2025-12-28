@@ -13,7 +13,6 @@ import { useRouter, usePathname } from 'next/navigation';
 
 import Box from '@/components/shared/ui/content/Box';
 import Typography from '@/components/shared/ui/text/Typography';
-import { withAuth } from '@/lib/hoc/withAuth';
 import { useAuthStore } from '@/lib/stores/auth';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
@@ -231,4 +230,4 @@ function NavBar({ title, links }: NavBarProps) {
   );
 }
 
-export default withAuth<NavBarProps>(NavBar);
+export default NavBar;

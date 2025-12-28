@@ -56,7 +56,7 @@ export function ChaosToOrderSection() {
           Del desorden a la claridad
         </Typography>
         <Typography variant="body" className="text-sm md:text-base opacity-80">
-          Comprende el caos de tus gastos.
+          Comprende el caos de tus salidas.
         </Typography>
       </motion.div>
 
@@ -70,7 +70,7 @@ export function ChaosToOrderSection() {
           className="relative"
         >
           <Typography variant="body" className="text-xs opacity-50 text-center mb-6">
-            Gastos desordenados
+            Salidas desordenadas
           </Typography>
           <div className="relative h-64 w-full">
             {chaosItems.slice(0, 6).map((item, index) => {

@@ -8,6 +8,8 @@ import {
   Input,
   DropMenu,
   Typography,
+  ActionButton,
+  ButtonBase,
 } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
@@ -15,10 +17,10 @@ import {
   useCreateRecurringTransactionMutation,
   useUpdateRecurringTransactionMutation,
 } from '@/features/recurring-transactions/mutations';
-import { useAccountsQuery } from '@/features/accounts/queries';
-import { useCategoriesQuery } from '@/features/categories/queries';
-import type { CreateRecurringTransactionPayload, RecurringTransaction } from '@/lib/types';
+import type { CreateRecurringTransactionPayload, RecurringTransaction, Category } from '@/lib/types';
+import type { Account } from '@/types';
 import { formatAccountName } from '@/lib/format';
+import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
@@ -26,15 +28,23 @@ const INCOME_TYPE_ID = 2;
 type RecurringTransactionFormModalProps = {
   mode: 'create' | 'edit';
   transaction?: RecurringTransaction;
+  accounts: Account[];
+  categories: Category[];
   onCompleted: (status: 'created' | 'updated') => void;
   onCancel: () => void;
 };
+
+type CategoryMode = 'existing' | 'new';
 
 type RecurringTransactionFormState = {
   description: string;
   amount: string;
   accountId: string;
+  categoryMode: CategoryMode;
   categoryId: string;
+  newCategoryDescription: string;
+  newCategoryType: string;
+  newCategoryColor: string;
   typeId: string;
   frequency: string;
   startDate: string;
@@ -44,7 +54,11 @@ const DEFAULT_FORM: RecurringTransactionFormState = {
   description: '',
   amount: '',
   accountId: '',
+  categoryMode: 'existing',
   categoryId: '',
+  newCategoryDescription: '',
+  newCategoryType: String(EXPENSE_TYPE_ID),
+  newCategoryColor: CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff',
   typeId: String(EXPENSE_TYPE_ID),
   frequency: 'monthly',
   startDate: new Date().toISOString().slice(0, 10),
@@ -58,7 +72,11 @@ function buildInitialState(transaction?: RecurringTransaction): RecurringTransac
     description: transaction.description ?? '',
     amount: String(transaction.amount),
     accountId: String(transaction.account_id),
+    categoryMode: 'existing',
     categoryId: String(transaction.category_id),
+    newCategoryDescription: '',
+    newCategoryType: String(transaction.type_id),
+    newCategoryColor: CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff',
     typeId: String(transaction.type_id),
     frequency: transaction.frequency,
     startDate: transaction.start_date,
@@ -68,6 +86,8 @@ function buildInitialState(transaction?: RecurringTransaction): RecurringTransac
 export default function RecurringTransactionFormModal({
   mode,
   transaction,
+  accounts,
+  categories,
   onCompleted,
   onCancel,
 }: RecurringTransactionFormModalProps) {
@@ -76,23 +96,17 @@ export default function RecurringTransactionFormModal({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
-  const accountsQuery = useAccountsQuery();
-  const categoriesQuery = useCategoriesQuery();
-
   const createMutation = useCreateRecurringTransactionMutation();
   const updateMutation = useUpdateRecurringTransactionMutation();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const accounts = accountsQuery.data?.data ?? [];
-  const categories = categoriesQuery.data?.data ?? [];
-
   const accountOptions: DropMenuOption[] = useMemo(
     () =>
       accounts.map((account) => ({
-        value: String(account.account_id),
+        value: String(account.accountId),
         label: formatAccountName(
           account.name,
-          typeof account.currency === 'string' ? account.currency : account.currency?.label
+          account.currency ?? undefined
         ),
       })),
     [accounts]
@@ -101,15 +115,22 @@ export default function RecurringTransactionFormModal({
   const categoryOptions: DropMenuOption[] = useMemo(
     () =>
       categories
+        .filter((category) => {
+          const matchesType = category.type_id === Number(formValues.typeId);
+          // Include active categories OR the currently selected category (for edit mode)
+          return matchesType && (category.is_active !== false || String(category.category_id) === formValues.categoryId);
+        })
+        .slice()
+        .sort((a, b) => a.description.localeCompare(b.description))
         .map((category) => ({
           value: String(category.category_id),
-          label: category.description,
+          label: category.is_active === false ? `${category.description} (inactiva)` : category.description,
         })),
-    [categories]
+    [categories, formValues.typeId, formValues.categoryId]
   );
 
   const typeOptions: DropMenuOption[] = [
-    { value: String(EXPENSE_TYPE_ID), label: 'Gasto' },
+    { value: String(EXPENSE_TYPE_ID), label: 'Salida' },
     { value: String(INCOME_TYPE_ID), label: 'Ingreso' },
   ];
 
@@ -140,19 +161,50 @@ export default function RecurringTransactionFormModal({
     setFormValues((prev) => updater(prev));
   };
 
+  const categoryModeButtons: Array<{ label: string; value: CategoryMode }> = [
+    { label: 'Existente', value: 'existing' },
+    { label: 'Nueva', value: 'new' },
+  ];
+
   const handleSubmit = async () => {
     setFormError(null);
 
+    if (!formValues.accountId) {
+      setFormError('Seleccioná una cuenta');
+      return;
+    }
+    if (!formValues.amount) {
+      setFormError('Ingresá un monto');
+      return;
+    }
+
     const payload: CreateRecurringTransactionPayload = {
       description: formValues.description,
-      amount: (Number(formValues.typeId) === EXPENSE_TYPE_ID ? -1 : 1) * Math.abs(Number(formValues.amount) || 0),
+      amount: Math.abs(Number(formValues.amount) || 0),
       account_id: String(formValues.accountId),
-      category_id: String(formValues.categoryId),
       type_id: Number(formValues.typeId),
-      frequency: formValues.frequency as any,
+      frequency: formValues.frequency as 'daily' | 'weekly' | 'monthly',
       start_date: formValues.startDate,
       interval: 1,
     };
+
+    if (formValues.categoryMode === 'existing') {
+      if (!formValues.categoryId) {
+        setFormError('Elegí una categoría existente o creá una nueva.');
+        return;
+      }
+      payload.category_id = String(formValues.categoryId);
+    } else {
+      if (!formValues.newCategoryDescription.trim()) {
+        setFormError('Ingresá la descripción de la nueva categoría');
+        return;
+      }
+      payload.category = {
+        description: formValues.newCategoryDescription.trim(),
+        type_id: Number(formValues.newCategoryType || formValues.typeId),
+        color: formValues.newCategoryColor?.trim() || undefined,
+      };
+    }
 
     try {
       if (mode === 'create') {
@@ -199,19 +251,114 @@ export default function RecurringTransactionFormModal({
           value={formValues.accountId}
           onValueChange={(value) => handleFieldChange((prev) => ({ ...prev, accountId: String(value ?? '') }))}
         />
-        <DropMenu
-          label="Categoría"
-          required
-          options={categoryOptions}
-          value={formValues.categoryId}
-          onValueChange={(value) => handleFieldChange((prev) => ({ ...prev, categoryId: String(value ?? '') }))}
-        />
+        <Box className="space-y-3">
+          <Typography
+            variant="caption"
+            className="uppercase tracking-wide text-[color:var(--text-muted)]"
+          >
+            Categoría
+          </Typography>
+          <Box className="flex gap-2">
+            {categoryModeButtons.map(({ label, value }) => {
+              const isActive = formValues.categoryMode === value;
+              return (
+                <ActionButton
+                  key={value}
+                  icon={isActive ? 'fas fa-check-circle' : 'fas fa-circle'}
+                  type={isActive ? 'accent' : 'neutral'}
+                  text={label}
+                  onClick={() =>
+                    handleFieldChange(prev => ({
+                      ...prev,
+                      categoryMode: value,
+                      newCategoryType: value === 'new' ? prev.typeId : prev.newCategoryType,
+                    }))
+                  }
+                />
+              );
+            })}
+          </Box>
+
+          {formValues.categoryMode === 'existing' ? (
+            <DropMenu
+              label="Seleccioná una categoría"
+              required
+              options={categoryOptions}
+              value={formValues.categoryId}
+              onValueChange={(value) =>
+                handleFieldChange((prev) => ({
+                  ...prev,
+                  categoryId: value != null ? String(value) : '',
+                }))
+              }
+              placeholder="Elegí una categoría"
+            />
+          ) : (
+            <Box className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <DropMenu
+                label="Tipo de la nueva categoría"
+                required
+                options={typeOptions}
+                value={formValues.newCategoryType}
+                onValueChange={(value) =>
+                  handleFieldChange((prev) => ({
+                    ...prev,
+                    newCategoryType: value != null ? String(value) : prev.newCategoryType,
+                  }))
+                }
+              />
+              <Input
+                label="Descripción"
+                required
+                value={formValues.newCategoryDescription}
+                onValueChange={(value) =>
+                  handleFieldChange((prev) => ({
+                    ...prev,
+                    newCategoryDescription: String(value ?? ''),
+                  }))
+                }
+                placeholder="Nombre de la nueva categoría"
+              />
+              <Box className="space-y-2">
+                <Box className="flex flex-wrap gap-2">
+                  {CATEGORY_COLOR_OPTIONS.map(option => (
+                    <ButtonBase
+                      key={option.value}
+                      htmlType="button"
+                      onClick={() =>
+                        handleFieldChange((prev) => ({ ...prev, newCategoryColor: option.value }))
+                      }
+                      className={`!h-8 !w-8 !rounded-full !border-2 !p-0 transition ${
+                        formValues.newCategoryColor === option.value
+                          ? '!border-white ring-2 ring-white/60'
+                          : '!border-white/10 hover:!border-white/40'
+                      }`}
+                      style={{ backgroundColor: option.value }}
+                      ariaLabel={`Color ${option.label}`}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </Box>
         <DropMenu
           label="Tipo"
           required
           options={typeOptions}
           value={formValues.typeId}
-          onValueChange={(value) => handleFieldChange((prev) => ({ ...prev, typeId: String(value ?? '') }))}
+          onValueChange={(value) =>
+            handleFieldChange((prev) => {
+              const nextType = String(value ?? '');
+              const typeChanged = nextType !== prev.typeId;
+              return {
+                ...prev,
+                typeId: nextType,
+                // Clear category selection when type changes
+                categoryId: typeChanged ? '' : prev.categoryId
+              };
+            })
+          }
         />
         <DropMenu
           label="Frecuencia"

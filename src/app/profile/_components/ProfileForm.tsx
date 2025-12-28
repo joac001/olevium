@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, FormWrapper, Input, Typography, Skeleton } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
 import { useUpdateProfileMutation } from '@/features/user/mutations';
-import { useProfilePage } from './ProfileProvider';
+import { useProfilePage } from './ProfileShell';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function ProfileForm() {
-  const { profile, isLoading } = useProfilePage();
+  const { user } = useProfilePage();
   const { showNotification } = useNotification();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,11 +16,11 @@ export default function ProfileForm() {
   const updateProfileMutation = useUpdateProfileMutation();
 
   useEffect(() => {
-    if (profile) {
-      setName(profile.name ?? '');
-      setEmail(profile.email ?? '');
+    if (user) {
+      setName(user.username ?? '');
+      setEmail(user.email ?? '');
     }
-  }, [profile]);
+  }, [user]);
 
   const handleSubmit = async () => {
     try {
@@ -40,17 +40,6 @@ export default function ProfileForm() {
       disabled: updateProfileMutation.isPending,
     },
   ];
-
-  if (isLoading) {
-    return (
-      <Box className="w-full max-w-lg space-y-3">
-        <Skeleton width="45%" height="20px" />
-        <Skeleton height="46px" rounded="14px" />
-        <Skeleton height="46px" rounded="14px" />
-        <Skeleton height="42px" rounded="12px" />
-      </Box>
-    );
-  }
 
   return (
     <Box className="w-full max-w-lg">

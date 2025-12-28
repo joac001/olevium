@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { Container, Box, AppLink } from '@/components/shared/ui';
+import { requireAuth, withAuthProtection, handleProtectedResult } from '@/lib/server-auth';
 import AccountDetailShell from './_components/AccountDetailShell';
+import { getAccountDetailPageData } from './_api';
 
 interface AccountDetailPageProps {
   params: Promise<{
@@ -9,6 +11,8 @@ interface AccountDetailPageProps {
 }
 
 export default async function AccountDetailPage({ params }: AccountDetailPageProps) {
+  await requireAuth();
+
   const { accountId: rawAccountId } = await params;
 
   if (typeof rawAccountId !== 'string' || rawAccountId.trim().length === 0) {
@@ -16,6 +20,9 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
   }
 
   const accountId = rawAccountId.trim();
+
+  const result = await withAuthProtection(() => getAccountDetailPageData(accountId));
+  const data = await handleProtectedResult(result);
 
   return (
     <Container className="py-10">
@@ -28,7 +35,12 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
           <i className="fas fa-arrow-left" aria-hidden />
           Volver
         </AppLink>
-        <AccountDetailShell accountId={accountId} />
+        <AccountDetailShell
+          accountId={accountId}
+          initialAccount={data.account}
+          initialTransactions={data.transactions}
+          initialAccountTypes={data.accountTypes}
+        />
       </Box>
     </Container>
   );

@@ -218,13 +218,13 @@ export default function ResetPasswordForm() {
         )}
 
         <Box className="text-center pt-2">
-          <NextLink
+          <AppLink
             href="/auth"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
           >
             <i className="fas fa-arrow-left" />
             Volver al inicio de sesión
-          </NextLink>
+          </AppLink>
         </Box>
       </Box>
     </Card>

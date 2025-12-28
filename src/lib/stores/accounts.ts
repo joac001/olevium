@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 
-import { http } from '@/lib/utils/axios';
+import { api } from '@/lib/http';
 import type {
   Account,
   AccountDetail,
@@ -13,7 +13,7 @@ import type {
   ApiCurrency,
   Currency,
 } from '@/types';
-import { resolveAxiosError } from '@/lib/utils/errorHandling';
+import { resolveError } from '@/lib/utils/errorHandling';
 
 interface AccountsState {
   accounts: Account[];
@@ -78,13 +78,13 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   fetchAccounts: async () => {
     set({ loading: true });
     try {
-      const { data } = await http.get<ApiUserAccount[]>('/accounts/');
+      const { data } = await api.get<ApiUserAccount[]>('/accounts/');
       const mapped = data.map(mapAccount);
       set({ accounts: mapped, loading: false });
       return mapped;
     } catch (error) {
       set({ loading: false });
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -95,26 +95,26 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
 
     set({ loadingTypes: true });
     try {
-      const { data } = await http.get<ApiAccountType[]>('/accounts/types');
+      const { data } = await api.get<ApiAccountType[]>('/accounts/types');
       const mapped = data.map(mapAccountType);
       set({ accountTypes: mapped, loadingTypes: false });
       return mapped;
     } catch (error) {
       set({ loadingTypes: false });
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
   fetchCurrencies: async () => {
     set({ loadingCurrencies: true });
     try {
-      const { data } = await http.get<ApiCurrency[]>('/currencies/');
+      const { data } = await api.get<ApiCurrency[]>('/currencies/');
       const mapped = data.map(mapCurrency);
       set({ currencies: mapped, loadingCurrencies: false });
       return mapped;
     } catch (error) {
       set({ loadingCurrencies: false });
-      throw resolveAxiosError(error, CURRENCIES_ERROR_FALLBACK);
+      throw resolveError(error, CURRENCIES_ERROR_FALLBACK);
     }
   },
 
@@ -136,13 +136,13 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         balance: input.balance,
       };
 
-      const { data } = await http.post<ApiUserAccount>('/accounts/', payload);
+      const { data } = await api.post<ApiUserAccount>('/accounts/', payload);
       const account = mapAccount(data);
       set(prev => ({ accounts: [account, ...prev.accounts], creating: false }));
       return account;
     } catch (error) {
       set({ creating: false });
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
@@ -153,20 +153,20 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
     }
 
     try {
-      const { data } = await http.get<ApiUserAccount>(`/accounts/${accountId}`);
+      const { data } = await api.get<ApiUserAccount>(`/accounts/${accountId}`);
       const detail = mapAccountDetail(data);
       set(prev => ({
         accountDetails: { ...prev.accountDetails, [accountId]: detail },
       }));
       return detail;
     } catch (error) {
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
   updateAccount: async (accountId, payload) => {
     try {
-      const { data } = await http.put<ApiUserAccount>(`/accounts/${accountId}`, {
+      const { data } = await api.put<ApiUserAccount>(`/accounts/${accountId}`, {
         ...(payload.name ? { name: payload.name } : {}),
         ...(payload.typeId !== undefined ? { type_id: payload.typeId } : {}),
         ...(payload.currencyId !== undefined ? { currency_id: payload.currencyId } : {}),
@@ -179,13 +179,13 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
       }));
       return updated;
     } catch (error) {
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 
   deleteAccount: async accountId => {
     try {
-      await http.delete(`/accounts/${accountId}`);
+      await api.delete(`/accounts/${accountId}`);
       set(prev => {
         const restDetails = { ...prev.accountDetails };
         delete restDetails[accountId];
@@ -196,7 +196,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         };
       });
     } catch (error) {
-      throw resolveAxiosError(error, ACCOUNTS_ERROR_FALLBACK);
+      throw resolveError(error, ACCOUNTS_ERROR_FALLBACK);
     }
   },
 

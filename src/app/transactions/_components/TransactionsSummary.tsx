@@ -2,11 +2,13 @@
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import { useTransactionsPage } from './TransactionsProvider';
+import type { TransactionsSummary as TransactionsSummaryType } from './types';
 
-export default function TransactionsSummary() {
-  const { summary } = useTransactionsPage();
+interface TransactionsSummaryProps {
+  summary: TransactionsSummaryType;
+}
 
+export default function TransactionsSummary({ summary }: TransactionsSummaryProps) {
   const summaryItems = [
     {
       label: 'Ingresos filtrados',
@@ -14,7 +16,7 @@ export default function TransactionsSummary() {
       tone: 'success'
     },
     {
-      label: 'Gastos filtrados',
+      label: 'Salidas filtradas',
       value: formatCurrency(summary.expenseTotal),
       tone: 'accent'
     },

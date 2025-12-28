@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 
-import { http } from '@/lib/utils/axios';
+import { api } from '@/lib/http';
 import type {
   AccountTransaction,
   ApiTransactionCategory,
@@ -20,7 +20,7 @@ import type {
   UserTransactionUpdateInput,
 } from '@/types';
 import { useAccountsStore } from '@/lib/stores/accounts';
-import { resolveAxiosError } from '@/lib/utils/errorHandling';
+import { resolveError } from '@/lib/utils/errorHandling';
 
 const mapTransactionTypeSummary = (payload: ApiTransactionTypeSummary): TransactionTypeSummary => ({
   typeId: payload.type_id,
@@ -68,6 +68,7 @@ const mapCategory = (payload: ApiTransactionCategory): TransactionCategory => ({
   color: payload.color ?? null,
   createdAt: payload.created_at,
   isDefault: payload.is_default,
+  isActive: payload.is_active ?? true,
   transactionType: payload.transaction_type
     ? mapTransactionTypeSummary(payload.transaction_type)
     : null,
@@ -106,7 +107,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
   fetchAccountTransactions: async accountId => {
     // No usamos el flag global para no bloquear otros fetches; el estado de carga de tipos/categor��as se maneja aparte.
     try {
-      const { data } = await http.get<ApiUserTransaction[]>(
+      const { data } = await api.get<ApiUserTransaction[]>(
         `/transactions/by_account/${accountId}`
       );
       const transactions = data.map(mapTransaction);
@@ -115,41 +116,49 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       }));
       return transactions;
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
   fetchTransactionTypes: async () => {
     const { transactionTypes, transactionTypesLoading } = get();
-    if (transactionTypes.length) return transactionTypes;
-    if (transactionTypesLoading) return transactionTypes;
+    if (transactionTypes.length) {
+      return transactionTypes;
+    }
+    if (transactionTypesLoading) {
+      return transactionTypes;
+    }
 
     set({ transactionTypesLoading: true });
     try {
-      const { data } = await http.get<ApiTransactionType[]>(`/transactions/types`);
+      const { data } = await api.get<ApiTransactionType[]>(`/transactions/types`);
       const mapped = data.map(mapTransactionType);
       set({ transactionTypes: mapped, transactionTypesLoading: false });
       return mapped;
     } catch (error) {
       set({ transactionTypesLoading: false });
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
   fetchCategories: async () => {
     const { categories, categoriesLoading } = get();
-    if (categories.length) return categories;
-    if (categoriesLoading) return categories;
+    if (categories.length) {
+      return categories;
+    }
+    if (categoriesLoading) {
+      return categories;
+    }
 
     set({ categoriesLoading: true });
     try {
-      const { data } = await http.get<ApiTransactionCategory[]>(`/categories/`);
+      const { data } = await api.get<ApiTransactionCategory[]>(`/categories/`);
       const mapped = data.map(mapCategory);
       set({ categories: mapped, categoriesLoading: false });
       return mapped;
     } catch (error) {
       set({ categoriesLoading: false });
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -176,7 +185,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       if (category !== undefined) payload.category = category;
       if (description !== undefined) payload.description = description;
 
-      const { data } = await http.post<ApiUserTransaction>('/transactions/', payload);
+      const { data } = await api.post<ApiUserTransaction>('/transactions/', payload);
       const mapped = mapTransaction(data);
 
       set(prev => ({
@@ -189,7 +198,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       useAccountsStore.getState().applyBalanceDelta(accountId, delta);
       return mapped;
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -218,7 +227,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       if (payload.typeId !== undefined) body.type_id = payload.typeId;
       if (payload.description !== undefined) body.description = payload.description;
 
-      const { data } = await http.put<ApiUserTransaction>(`/transactions/${transactionId}`, body);
+      const { data } = await api.put<ApiUserTransaction>(`/transactions/${transactionId}`, body);
       const mapped = mapTransaction(data);
 
       set(prev => {
@@ -253,7 +262,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
 
       return mapped;
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -271,7 +280,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
 
     try {
-      await http.delete(`/transactions/${transactionId}`);
+      await api.delete(`/transactions/${transactionId}`);
       set(prev => {
         if (!targetAccountId) {
           return prev;
@@ -293,7 +302,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         useAccountsStore.getState().applyBalanceDelta(targetAccountId, -originalDelta);
       }
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -307,14 +316,14 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         body.color = color;
       }
 
-      const { data } = await http.post<ApiTransactionCategory>('/categories/', body);
+      const { data } = await api.post<ApiTransactionCategory>('/categories/', body);
       const mapped = mapCategory(data);
       set(prev => ({
         categories: [...prev.categories, mapped],
       }));
       return mapped;
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
@@ -327,7 +336,7 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
         user_id: userId,
       };
 
-      const { data } = await http.put<ApiTransactionCategory>(`/categories/${categoryId}`, body);
+      const { data } = await api.put<ApiTransactionCategory>(`/categories/${categoryId}`, body);
       const mapped = mapCategory(data);
       set(prev => ({
         categories: prev.categories.map(category =>
@@ -336,18 +345,18 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
       }));
       return mapped;
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 
   deleteCategory: async categoryId => {
     try {
-      await http.delete(`/categories/${categoryId}`);
+      await api.delete(`/categories/${categoryId}`);
       set(prev => ({
         categories: prev.categories.filter(category => category.categoryId !== categoryId),
       }));
     } catch (error) {
-      throw resolveAxiosError(error, TRANSACTION_ERROR_FALLBACK);
+      throw resolveError(error, TRANSACTION_ERROR_FALLBACK);
     }
   },
 

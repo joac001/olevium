@@ -1,4 +1,5 @@
-import type { Account, Category, Transaction } from '@/lib/types';
+import type { Category, Transaction } from '@/lib/types';
+import type { Account } from '@/types';
 
 export type TypeFilter = 'all' | 'income' | 'expense';
 export type DateFilter = '30d' | '90d' | 'all';

@@ -2,15 +2,16 @@
 
 import { useMemo, useState, useCallback } from 'react';
 
-import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
+import { Box, FormWrapper, Input, DropMenu, Typography, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import type { TransactionCategory, TransactionType } from '@/types';
+import type { Category, TransactionType } from '@/lib/types';
+import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 
 interface EditCategoryFormProps {
-  category: TransactionCategory;
+  category: Category;
   transactionTypes: TransactionType[];
   loadingTypes: boolean;
   onSuccess?: () => void;
@@ -25,11 +26,16 @@ export default function EditCategoryForm({
   const { showNotification, showError, showSuccess } = useNotification();
   const updateCategory = useTransactionsStore(state => state.updateCategory);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [description, setDescription] = useState(category.description);
+  const [typeId, setTypeId] = useState<string>(String(category.type_id));
+  const [selectedColor, setSelectedColor] = useState<string>(
+    category.color ?? CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff'
+  );
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
       transactionTypes.map(type => ({
-        value: type.typeId,
+        value: String(type.type_id),
         label: type.name,
       })),
     [transactionTypes]
@@ -48,8 +54,8 @@ export default function EditCategoryForm({
   );
 
   const handleSubmit = useCallback(
-    async (formData: FormData) => {
-      if (!category.userId) {
+    async () => {
+      if (!category.user_id) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -59,21 +65,7 @@ export default function EditCategoryForm({
         return;
       }
 
-      const descriptionValue = formData.get('description');
-      const typeValue = formData.get('typeId');
-      const colorValue = formData.get('color');
-
-      if (typeof descriptionValue !== 'string' || typeof typeValue !== 'string') {
-        showNotification(
-          'fa-solid fa-triangle-exclamation',
-          'danger',
-          'Formulario incompleto',
-          'Descripción y tipo son obligatorios.'
-        );
-        return;
-      }
-
-      const trimmedDescription = descriptionValue.trim();
+      const trimmedDescription = description.trim();
       if (!trimmedDescription) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
@@ -84,8 +76,8 @@ export default function EditCategoryForm({
         return;
       }
 
-      const typeId = Number(typeValue);
-      if (!Number.isFinite(typeId)) {
+      const numTypeId = Number(typeId);
+      if (!Number.isFinite(numTypeId)) {
         showNotification(
           'fa-solid fa-triangle-exclamation',
           'danger',
@@ -95,18 +87,15 @@ export default function EditCategoryForm({
         return;
       }
 
-      const color =
-        typeof colorValue === 'string' && colorValue.trim().length ? colorValue.trim() : null;
-
       setIsSubmitting(true);
 
       try {
         await updateCategory({
-          categoryId: category.categoryId,
+          categoryId: category.category_id,
           description: trimmedDescription,
-          typeId,
-          color,
-          userId: category.userId,
+          typeId: numTypeId,
+          color: selectedColor,
+          userId: category.user_id,
         });
 
         const context = createOperationContext('update', 'categoría', 'la categoría');
@@ -121,8 +110,11 @@ export default function EditCategoryForm({
       }
     },
     [
-      category.categoryId,
-      category.userId,
+      category.category_id,
+      category.user_id,
+      description,
+      typeId,
+      selectedColor,
       showNotification,
       updateCategory,
       onSuccess,
@@ -135,29 +127,43 @@ export default function EditCategoryForm({
     <FormWrapper onSubmit={handleSubmit} buttons={buttons} className="flex flex-col gap-5">
       <Box className="space-y-4">
         <Input
-          name="description"
           label="Descripción"
-          defaultValue={category.description}
+          value={description}
+          onValueChange={(value) => setDescription(String(value ?? ''))}
           required
           icon="fas fa-tag"
         />
 
         <DropMenu
-          name="typeId"
           label="Tipo"
           options={typeOptions}
+          value={typeId}
+          onValueChange={(value) => setTypeId(String(value ?? ''))}
           required
           disabled={loadingTypes || !typeOptions.length}
-          defaultValue={category.typeId}
         />
 
-        <Input
-          name="color"
-          label="Color (opcional)"
-          defaultValue={category.color ?? ''}
-          placeholder="#AABBCC"
-          icon="fas fa-palette"
-        />
+        <Box className="space-y-2">
+          <Typography variant="caption" className="uppercase tracking-wide text-[color:var(--text-muted)]">
+            Color
+          </Typography>
+          <Box className="flex flex-wrap gap-2">
+            {CATEGORY_COLOR_OPTIONS.map(option => (
+              <ButtonBase
+                key={option.value}
+                htmlType="button"
+                onClick={() => setSelectedColor(option.value)}
+                className={`!h-8 !w-8 !rounded-full !border-2 !p-0 transition ${
+                  selectedColor === option.value
+                    ? '!border-white ring-2 ring-white/60'
+                    : '!border-white/10 hover:!border-white/40'
+                }`}
+                style={{ backgroundColor: option.value }}
+                ariaLabel={`Color ${option.label}`}
+              />
+            ))}
+          </Box>
+        </Box>
       </Box>
     </FormWrapper>
   );

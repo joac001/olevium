@@ -1,12 +1,11 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { AccountTransaction } from '@/types';
 import { useTransactionsStore } from '@/lib/stores/transactions';
 import { useNotification } from '@/context/NotificationContext';
-import { useTransactionData } from '@/context/TransactionContext';
 import { useErrorHandler } from '@/lib/hooks/useErrorHandler';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import {
@@ -27,8 +26,14 @@ export default function EditTransactionFormImproved({
   onSuccess,
 }: EditTransactionFormImprovedProps) {
   const { showNotification } = useNotification();
-  const { transactionTypes, categories, transactionTypesLoading, categoriesLoading } =
-    useTransactionData();
+
+  // Usar store directamente en lugar del contexto stub
+  const transactionTypes = useTransactionsStore(state => state.transactionTypes);
+  const categories = useTransactionsStore(state => state.categories);
+  const transactionTypesLoading = useTransactionsStore(state => state.transactionTypesLoading);
+  const categoriesLoading = useTransactionsStore(state => state.categoriesLoading);
+  const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
+  const fetchCategories = useTransactionsStore(state => state.fetchCategories);
   const updateTransaction = useTransactionsStore(state => state.updateTransaction);
 
   const { handleUpdate } = useErrorHandler({
@@ -37,6 +42,7 @@ export default function EditTransactionFormImproved({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     selectedType,
     selectedCategory,
@@ -59,6 +65,16 @@ export default function EditTransactionFormImproved({
     initialTypeId: transaction.typeId ?? null,
     initialCategoryId: transaction.categoryId ?? CUSTOM_CATEGORY_VALUE,
   });
+
+  // Cargar datos si no están en cache
+  useEffect(() => {
+    if (!transactionTypes.length) {
+      fetchTransactionTypes();
+    }
+    if (!categories.length) {
+      fetchCategories();
+    }
+  }, [transactionTypes.length, categories.length, fetchTransactionTypes, fetchCategories]);
 
   const buttons = useMemo(
     () => [
