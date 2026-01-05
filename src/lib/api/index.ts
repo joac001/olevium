@@ -1,0 +1,46 @@
+// Re-export types
+export type { ApiCollectionResult } from './types';
+
+// Re-export accounts functions
+export {
+  getAccounts,
+  getAccountTypes,
+  getAccountDetail,
+  postAccount,
+  putAccount,
+  deleteAccount,
+} from './accounts';
+
+// Re-export transactions functions
+export {
+  getTransactions,
+  getTransactionsByDateRange,
+  getAccountTransactions,
+  getTransactionTypes,
+  postTransaction,
+  putTransaction,
+  deleteTransaction,
+  exportTransactionsCsv,
+  type TransactionsExportParams,
+} from './transactions';
+
+// Re-export categories functions
+export {
+  getCategories,
+  postCategory,
+  putCategory,
+  deleteCategory,
+} from './categories';
+
+// Re-export recurring transactions functions
+export {
+  getRecurringTransactions,
+} from './recurring';
+
+// Re-export user functions
+export {
+  getCurrentUser,
+  postFeedback,
+  type User,
+  type FeedbackPayload,
+} from './user';

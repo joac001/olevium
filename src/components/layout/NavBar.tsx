@@ -13,7 +13,6 @@ import { useRouter, usePathname } from 'next/navigation';
 
 import Box from '@/components/shared/ui/content/Box';
 import Typography from '@/components/shared/ui/text/Typography';
-import { withAuth } from '@/lib/hoc/withAuth';
 import { useAuthStore } from '@/lib/stores/auth';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
@@ -109,7 +108,14 @@ function NavBar({ title, links }: NavBarProps) {
 
   const isAuthRoute = useMemo(() => {
     if (!pathname) return false;
-    const publicPrefixes = ['/auth', '/verify-cta', '/verify-email'];
+
+    const publicExact = ['/'];
+    const publicPrefixes = ['/auth'];
+
+    if (publicExact.includes(pathname)) {
+      return true;
+    }
+
     return publicPrefixes.some(prefix => pathname.startsWith(prefix));
   }, [pathname]);
 
@@ -156,7 +162,13 @@ function NavBar({ title, links }: NavBarProps) {
               </div>
             </button>
 
-            <Typography variant="h1">{title}</Typography>
+            <button
+              onClick={() => router.push('/dashboard')}
+              aria-label="Ir al inicio"
+              className="focus:outline-none"
+            >
+              <Typography variant="h1">{title}</Typography>
+            </button>
           </Box>
 
           {/* Botón cerrar sesión */}
@@ -218,4 +230,4 @@ function NavBar({ title, links }: NavBarProps) {
   );
 }
 
-export default withAuth<NavBarProps>(NavBar);
+export default NavBar;

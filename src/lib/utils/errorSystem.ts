@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+
 
 // Tipos de errores categorizados
 export enum ErrorType {
@@ -101,7 +101,7 @@ export class ErrorProcessor {
     const id = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Procesar AxiosError
-    if (error instanceof AxiosError) {
+    if (false) {
       return this.processAxiosError(error, context, id, timestamp);
     }
 
@@ -115,7 +115,7 @@ export class ErrorProcessor {
   }
 
   private static processAxiosError(
-    error: AxiosError,
+    error: any,
     context?: OperationContext,
     id: string = '',
     timestamp: Date = new Date()
