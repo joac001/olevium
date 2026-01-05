@@ -4,7 +4,7 @@ import type { ApiCollectionResult } from '@/lib/api';
 import type { RecurringTransaction } from '@/lib/types';
 import type { RecurringFrequency } from '@/types/recurring';
 
-async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
+export async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
   try {
     const response = await apiRequest('/recurring-transactions/');
     if (!response.ok) {

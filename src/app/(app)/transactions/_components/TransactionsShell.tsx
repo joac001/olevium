@@ -7,7 +7,7 @@ import { Box, Typography, Container } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
 import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
-import { getTransactions, getCategories } from '@/lib/api';
+import { getTransactions, getCategories, exportTransactionsCsv } from '@/lib/api';
 import type { Category, Transaction } from '@/lib/types';
 import type { Account } from '@/types';
 import { formatAccountName } from '@/lib/format';
@@ -114,6 +114,7 @@ export default function TransactionsShell({
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<DateFilter>('90d');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   // Usar datos iniciales del servidor
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -280,9 +281,62 @@ export default function TransactionsShell({
     [accountDictionary, deleteTransactionMutation, refetchTransactions, showNotification]
   );
 
+  const handleExportCsv = useCallback(async () => {
+    try {
+      setIsExporting(true);
+
+      const now = new Date();
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      if (dateFilter === '30d' || dateFilter === '90d') {
+        const days = dateFilter === '30d' ? 30 : 90;
+        const from = new Date(now);
+        from.setDate(now.getDate() - days);
+        startDate = from.toISOString().slice(0, 10);
+        endDate = now.toISOString().slice(0, 10);
+      }
+
+      const blob = await exportTransactionsCsv({
+        startDate,
+        endDate,
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      link.href = url;
+      link.download = `olevium-transacciones-${today}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showNotification(
+        'fas fa-file-arrow-down',
+        'success',
+        'Exportación iniciada',
+        'El archivo CSV se está descargando.'
+      );
+    } catch (error) {
+      console.error('Error al exportar CSV', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo exportar las transacciones a CSV.';
+      showNotification('fas fa-triangle-exclamation', 'danger', 'Error al exportar', message);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [dateFilter, showNotification]);
+
   return (
     <Container className="gap-6">
-      <TransactionsHeader onCreateTransaction={handleCreateTransaction} />
+      <TransactionsHeader
+        onCreateTransaction={handleCreateTransaction}
+        onExportCsv={handleExportCsv}
+        isExporting={isExporting}
+      />
       <TransactionsSummary summary={summary} />
       <TransactionsFilters
         typeFilter={typeFilter}

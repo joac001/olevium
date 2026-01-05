@@ -115,3 +115,39 @@ export async function getTransactionTypes(): Promise<ApiCollectionResult<Transac
   }));
   return { data: normalized };
 }
+
+export type TransactionsExportParams = {
+  accountId?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+export async function exportTransactionsCsv(params: TransactionsExportParams): Promise<Blob> {
+  const searchParams = new URLSearchParams();
+
+  if (params.accountId) {
+    searchParams.set('account_id', params.accountId);
+  }
+  if (params.startDate) {
+    searchParams.set('start_date', params.startDate);
+  }
+  if (params.endDate) {
+    searchParams.set('end_date', params.endDate);
+  }
+
+  const query = searchParams.toString();
+  const path = `/transactions/export.csv${query ? `?${query}` : ''}`;
+
+  const response = await apiRequest(path, {
+    headers: {
+      Accept: 'text/csv',
+    },
+  });
+
+  if (!response.ok) {
+    const detail = await parseErrorMessage(response);
+    throw new Error(detail ?? `No se pudo exportar las transacciones (status ${response.status})`);
+  }
+
+  return response.blob();
+}

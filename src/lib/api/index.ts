@@ -20,6 +20,8 @@ export {
   postTransaction,
   putTransaction,
   deleteTransaction,
+  exportTransactionsCsv,
+  type TransactionsExportParams,
 } from './transactions';
 
 // Re-export categories functions
@@ -38,5 +40,7 @@ export {
 // Re-export user functions
 export {
   getCurrentUser,
+  postFeedback,
   type User,
+  type FeedbackPayload,
 } from './user';

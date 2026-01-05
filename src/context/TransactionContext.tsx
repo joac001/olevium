@@ -2,7 +2,7 @@
 
 import type { TransactionCategory, TransactionType } from '@/types';
 
-interface TransactionDataContextValue {
+export interface TransactionDataContextValue {
   transactionTypes: TransactionType[];
   transactionTypesLoading: boolean;
   categories: TransactionCategory[];

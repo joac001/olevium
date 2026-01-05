@@ -1,4 +1,5 @@
 import { NavBar, NavLink } from '@/components/layout/';
+import FeedbackWidget from '@/components/layout/FeedbackWidget';
 import { Typography } from '@/components/shared/ui';
 
 const links: NavLink[] = [
@@ -18,6 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Typography variant="caption" className="block text-center mt-8 mb-4">
         &copy; {new Date().getFullYear()} Olevium - v0.1.2
       </Typography>
+      <FeedbackWidget />
     </>
   );
 }
