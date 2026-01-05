@@ -14,11 +14,11 @@ export function DemoSection() {
     if (!isInView) return;
 
     const timers = [
-      setTimeout(() => setStep(1), 500),   // Mostrar mensaje WA
-      setTimeout(() => setStep(2), 1800),  // Check enviado
-      setTimeout(() => setStep(3), 2500),  // Doble check
-      setTimeout(() => setStep(4), 3200),  // Mostrar transacción en app
-      setTimeout(() => setStep(5), 4000),  // Actualizar gráfico
+      setTimeout(() => setStep(1), 300),   // Mostrar mensaje WA
+      setTimeout(() => setStep(2), 800),   // Check enviado
+      setTimeout(() => setStep(3), 1100),  // Doble check
+      setTimeout(() => setStep(4), 1500),  // Mostrar transacción en app
+      setTimeout(() => setStep(5), 2000),  // Actualizar gráfico
     ];
 
     return () => timers.forEach(clearTimeout);

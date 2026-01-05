@@ -3,100 +3,89 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Typography } from '@/components/shared/ui';
-import { MessageCircle, Shield, Smartphone } from 'lucide-react';
+import { X, Check } from 'lucide-react';
+
+const items = [
+  { positive: true, text: 'Carga tu información con un mensaje' },
+  { positive: false, text: 'Sin acceso a tus datos sensibles' },
+  { positive: true, text: 'Vos decidís qué registrar' },
+];
 
 export function PrivacySection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: false, amount: 0.5 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex flex-col items-center justify-center px-4 md:px-8 py-12 md:py-20 snap-start"
+      className="relative h-screen flex flex-col items-center justify-center py-16 px-6 snap-start"
     >
-      {/* Eje vertical */}
+      {/* Título */}
       <motion.div
-        className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[var(--color-primary)] to-transparent"
-        initial={{ opacity: 0.3 }}
-        animate={isInView ? { opacity: 0.5 } : { opacity: 0.3 }}
-        transition={{ duration: 0.5 }}
-      />
-
-      {/* Mensaje principal */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="text-center max-w-3xl mb-6 md:mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-10"
       >
-        <h2
-          className="text-2xl md:text-5xl font-light mb-3 md:mb-6 leading-tight"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
+        <Typography
+          variant="h2"
+          className="text-2xl md:text-4xl font-light text-[var(--color-primary-light)]"
         >
-          Todo esto sucede en tu cabeza.
-        </h2>
-
-        <Typography variant="body" className="text-sm md:text-lg opacity-70 max-w-2xl mx-auto">
-          Olevium respeta tu privacidad. No nos conectamos a tu banco ni accedemos a tus cuentas.
-          Vos registrás lo que querés, cuando querés.
+          Tus datos son tuyos. Punto.
         </Typography>
       </motion.div>
 
-      {/* Cards de features */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl w-full mt-4 md:mt-8">
-        {/* WhatsApp Bot */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          className="p-4 md:p-5 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)] text-center"
-        >
-          <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 md:mb-3 rounded-full bg-[var(--color-primary)] bg-opacity-20 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-[var(--color-primary)]" />
-          </div>
-          <h3 className="font-semibold text-sm mb-1 md:mb-2">Bot de WhatsApp</h3>
-          <p className="text-xs opacity-70">
-            Registra salidas e ingresos desde tu chat. Sin abrir la app.
-          </p>
-        </motion.div>
+      {/* Items */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-8"
+      >
+        {items.map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.3 + index * 0.15 }}
+            className="flex items-center gap-3"
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                item.positive ? 'bg-[var(--color-success)]/20' : 'bg-[var(--color-danger)]/20'
+              }`}
+            >
+              {item.positive ? (
+                <Check className="w-4 h-4 text-[var(--color-success)]" />
+              ) : (
+                <X className="w-4 h-4 text-[var(--color-danger)]" />
+              )}
+            </div>
+            <Typography
+              variant="body"
+              className={`text-base md:text-lg ${
+                item.positive
+                  ? 'text-[var(--color-success)] font-medium'
+                  : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {item.text}
+            </Typography>
+          </motion.div>
+        ))}
+      </motion.div>
 
-        {/* Privacidad */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
-          className="p-4 md:p-5 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)] text-center"
-        >
-          <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 md:mb-3 rounded-full bg-[var(--color-primary)] bg-opacity-20 flex items-center justify-center">
-            <Shield className="w-6 h-6 md:w-7 md:h-7 text-[var(--color-primary)]" />
-          </div>
-          <h3 className="font-semibold text-sm mb-1 md:mb-2">Sin conexión bancaria</h3>
-          <p className="text-xs opacity-70">
-            No accedemos a tus cuentas. Tu información es solo tuya.
-          </p>
-        </motion.div>
-
-        {/* Registro manual */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-          className="p-4 md:p-5 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)] text-center"
-        >
-          <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-2 md:mb-3 rounded-full bg-[var(--color-primary)] bg-opacity-20 flex items-center justify-center">
-            <Smartphone className="w-6 h-6 md:w-7 md:h-7 text-[var(--color-primary)]" />
-          </div>
-          <h3 className="font-semibold text-sm mb-1 md:mb-2">Control consciente</h3>
-          <p className="text-xs opacity-70">
-            Registrás solo lo que considerás relevante. Vos decidís.
-          </p>
-        </motion.div>
-      </div>
+      {/* Descripción */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        className="max-w-xl text-center"
+      >
+        <Typography variant="body" className="text-sm text-[var(--text-muted)]">
+          No otorgas acceso a tus cuentas bancarias. Vos decidís qué información registrar y seguir.
+        </Typography>
+      </motion.div>
     </section>
   );
 }

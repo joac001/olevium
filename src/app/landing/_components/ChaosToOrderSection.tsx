@@ -1,259 +1,222 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import {
-  ShoppingCart,
-  Car,
-  Home,
-  Coffee,
-  Smartphone,
-  Utensils,
-  Wifi,
-  Zap,
-  ArrowDown,
-} from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
 import { Typography } from '@/components/shared/ui';
 
 const chaosItems = [
-  { icon: ShoppingCart, label: 'Supermercado', amount: '-62.000' },
-  { icon: Car, label: 'Nafta', amount: '-15.000' },
-  { icon: Coffee, label: 'Café', amount: '-2.500' },
-  { icon: Utensils, label: 'Almuerzo', amount: '-8.500' },
-  { icon: Wifi, label: 'Internet', amount: '-22.000' },
-  { icon: Smartphone, label: 'Celular', amount: '-18.000' },
-  { icon: Zap, label: 'Luz', amount: '-35.000' },
-  { icon: Home, label: 'Alquiler', amount: '-180.000' },
+  { emoji: '🛵', label: 'PedidosYa', amount: 8500 },
+  { emoji: '🎵', label: 'Spotify', amount: 2300 },
+  { emoji: '🚗', label: 'Uber', amount: 4200 },
+  { emoji: '🛒', label: 'Supermercado', amount: 45000 },
+  { emoji: '🍺', label: 'Bar con amigos', amount: 12000 },
+  { emoji: '📺', label: 'Netflix', amount: 4500 },
+  { emoji: '☕', label: 'Café', amount: 2800 },
+  { emoji: '⛽', label: 'Nafta', amount: 25000 },
+  { emoji: '💡', label: 'Luz', amount: 18000 },
+  { emoji: '📱', label: 'Celular', amount: 8000 },
+  { emoji: '🏠', label: 'Alquiler', amount: 180000 },
+  { emoji: '🍕', label: 'Delivery pizza', amount: 9500 },
 ];
 
 const organizedData = [
-  { category: 'Hogar', amount: '-297.000', items: ['Alquiler', 'Luz', 'Internet'] },
-  { category: 'Transporte', amount: '-52.000', items: ['Nafta', 'Uber'] },
-  { category: 'Alimentación', amount: '-73.000', items: ['Supermercado', 'Almuerzo', 'Café'] },
-  { category: 'Servicios', amount: '-18.000', items: ['Celular', 'Streaming'] },
+  { category: 'Hogar', emoji: '🏠', amount: 198000, color: 'var(--color-primary-light)' },
+  { category: 'Delivery', emoji: '🛵', amount: 18000, color: 'var(--color-info-soft)' },
+  { category: 'Transporte', emoji: '🚗', amount: 29200, color: 'var(--color-info-light)' },
+  { category: 'Streaming', emoji: '📺', amount: 6800, color: 'var(--color-warning-light)' },
+  { category: 'Salidas', emoji: '🍺', amount: 14800, color: 'var(--color-accent)' },
+  { category: 'Servicios', emoji: '📱', amount: 26000, color: 'var(--color-warning)' },
 ];
+
+function formatAmount(amount: number): string {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function AnimatedCounter({ value, isInView }: { value: number; isInView: boolean }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    const duration = 1200;
+    const steps = 30;
+    const increment = value / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [value, isInView]);
+
+  return <span>{formatAmount(count)}</span>;
+}
 
 export function ChaosToOrderSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: false, amount: 0.5 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const [showOrder, setShowOrder] = useState(false);
+
+  useEffect(() => {
+    if (isInView) {
+      const timer = setTimeout(() => setShowOrder(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isInView]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex flex-col items-center justify-center py-12 md:py-20 px-4 snap-start overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-16 px-4 snap-start overflow-hidden"
     >
-      {/* Texto explicativo */}
+      {/* Título */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="text-center max-w-2xl mb-8 md:mb-16"
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-8 md:mb-12"
       >
         <Typography
           variant="h2"
-          className="text-2xl md:text-3xl font-light mb-3 md:mb-4 text-[var(--color-primary-light)]"
+          className="text-2xl md:text-4xl font-light text-[var(--color-primary-light)] mb-2"
         >
-          Del desorden a la claridad
+          Del caos de gastos al orden por categorías
         </Typography>
-        <Typography variant="body" className="text-sm md:text-base opacity-80">
-          Comprende el caos de tus salidas.
+        <Typography variant="body" className="text-[var(--text-muted)]">
+          Tu mes entero, organizado automáticamente
         </Typography>
       </motion.div>
 
-      {/* Layout mobile: Vertical */}
-      <div className="md:hidden w-full max-w-sm space-y-6">
+      {/* Container principal */}
+      <div className="relative w-full max-w-5xl">
         {/* Caos */}
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="relative"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: showOrder ? 0.15 : 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative h-[350px] md:h-[400px]"
         >
-          <Typography variant="body" className="text-xs opacity-50 text-center mb-6">
-            Salidas desordenadas
-          </Typography>
-          <div className="relative h-64 w-full">
-            {chaosItems.slice(0, 6).map((item, index) => {
-              const rotations = [-8, 5, -12, 7, -5, 10];
-              const positions = [
-                { top: '0%', left: '5%' },
-                { top: '15%', right: '8%' },
-                { top: '25%', left: '10%' },
-                { top: '40%', right: '5%' },
-                { top: '55%', left: '15%' },
-                { top: '70%', right: '10%' },
-              ];
-              return (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, scale: 0.9, rotate: 0 }}
-                  animate={isInView ? { opacity: 1, scale: 1, rotate: rotations[index] } : { opacity: 0, scale: 0.9, rotate: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05, ease: 'easeOut' }}
-                  style={positions[index]}
-                  className="absolute flex items-center gap-2 px-2 py-2 rounded bg-[var(--surface-base)] border border-[var(--border-strong)] shadow-md"
-                >
-                  <item.icon className="text-[var(--color-primary)] w-4 h-4 flex-shrink-0" />
-                  <div className="text-[10px] leading-tight">
-                    <div className="opacity-70 truncate">{item.label}</div>
-                    <div className={`font-semibold whitespace-nowrap ${item.amount.startsWith('-') ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
-                      {item.amount}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Flecha */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex justify-center"
-        >
-          <ArrowDown className="w-8 h-8 text-[var(--color-primary)]" />
-        </motion.div>
-
-        {/* Orden */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-          className="space-y-2"
-        >
-          <Typography variant="body" className="text-xs opacity-50 text-center mb-3">
-            Organizados por categoría
-          </Typography>
-          {organizedData.map((category, index) => (
-            <motion.div
-              key={category.category}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: 'easeOut' }}
-              className="p-3 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)]"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <div className="font-semibold text-xs text-[var(--color-primary)]">
-                  {category.category}
-                </div>
-                <div className={`font-bold text-xs ${category.amount.startsWith('-') ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
-                  {category.amount}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {category.items.map(item => (
-                  <span
-                    key={item}
-                    className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--surface-muted)] opacity-70"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Layout desktop: Horizontal (original) */}
-      <div className="hidden md:block relative w-full max-w-7xl h-[500px]">
-        {/* Lado izquierdo: Caos total */}
-        <div className="absolute left-4 top-0 bottom-0 w-64">
           {chaosItems.map((item, index) => {
-            const rotations = [-12, 8, -5, 10, -8, 6, -10, 4];
-            const positions = [
-              { top: '5%', left: '0px', zIndex: 8 },
-              { top: '12%', left: '30px', zIndex: 7 },
-              { top: '28%', left: '10px', zIndex: 6 },
-              { top: '38%', left: '40px', zIndex: 5 },
-              { top: '52%', left: '5px', zIndex: 4 },
-              { top: '60%', left: '35px', zIndex: 3 },
-              { top: '75%', left: '15px', zIndex: 2 },
-              { top: '85%', left: '25px', zIndex: 1 },
-            ];
+            const angle = (index / chaosItems.length) * Math.PI * 2;
+            const radius = 120 + Math.random() * 60;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius * 0.6;
+            const rotation = (Math.random() - 0.5) * 30;
+
             return (
               <motion.div
                 key={item.label}
-                initial={{ opacity: 0, x: -80, rotate: 0 }}
-                animate={isInView ? { opacity: 1, x: 0, rotate: rotations[index] } : { opacity: 0, x: -80, rotate: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.05, ease: 'easeOut' }}
-                style={{
-                  ...positions[index],
+                initial={{
+                  opacity: 0,
+                  scale: 0,
+                  x: 0,
+                  y: 0,
+                  rotate: 0,
                 }}
-                className="absolute flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)] shadow-lg"
+                animate={
+                  isInView
+                    ? {
+                        opacity: 1,
+                        scale: 1,
+                        x: `calc(50% + ${x}px - 50%)`,
+                        y: `calc(50% + ${y}px - 50%)`,
+                        rotate: rotation,
+                      }
+                    : {}
+                }
+                transition={{
+                  duration: 0.6,
+                  delay: index * 0.05,
+                  ease: 'easeOut',
+                }}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               >
-                <item.icon className="text-[var(--color-primary)] w-5 h-5 flex-shrink-0" />
-                <div className="text-xs">
-                  <div className="opacity-70">{item.label}</div>
-                  <div className={`font-semibold whitespace-nowrap ${item.amount.startsWith('-') ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
-                    {item.amount}
+                <motion.div
+                  animate={
+                    !showOrder
+                      ? {
+                          y: [0, -3, 0, 3, 0],
+                          rotate: [rotation, rotation + 2, rotation, rotation - 2, rotation],
+                        }
+                      : {}
+                  }
+                  transition={{
+                    duration: 2 + Math.random(),
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface-base)] border border-[var(--border-strong)] shadow-lg whitespace-nowrap"
+                >
+                  <span className="text-lg">{item.emoji}</span>
+                  <div className="text-xs">
+                    <div className="text-[var(--text-muted)]">{item.label}</div>
+                    <div className="text-[var(--color-danger)] font-medium">
+                      -{formatAmount(item.amount)}
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* Líneas conectoras */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-          <motion.line
-            x1="25%"
-            y1="50%"
-            x2="50%"
-            y2="50%"
-            stroke="var(--color-primary)"
-            strokeWidth="2"
-            strokeDasharray="5,5"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={isInView ? { pathLength: 1, opacity: 0.5 } : { pathLength: 0, opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          />
-          <motion.line
-            x1="50%"
-            y1="50%"
-            x2="75%"
-            y2="50%"
-            stroke="var(--color-primary)"
-            strokeWidth="2"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={isInView ? { pathLength: 1, opacity: 0.7 } : { pathLength: 0, opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          />
-        </svg>
-
-        {/* Lado derecho: Todo organizado */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-72 space-y-3">
-          {organizedData.map((category, index) => (
-            <motion.div
-              key={category.category}
-              initial={{ opacity: 0, x: 80 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 80 }}
-              transition={{ duration: 0.6, delay: index * 0.1 + 0.3, ease: 'easeOut' }}
-              className="p-4 rounded-lg bg-[var(--surface-base)] backdrop-blur-md border border-[var(--border-strong)] shadow-xl"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="font-semibold text-sm text-[var(--color-primary)]">
-                  {category.category}
-                </div>
-                <div className={`font-bold text-sm ${category.amount.startsWith('-') ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
-                  {category.amount}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {category.items.map(item => (
-                  <span
-                    key={item}
-                    className="text-[10px] px-2 py-1 rounded bg-[var(--surface-muted)] opacity-70"
-                  >
-                    {item}
+        {/* Orden - superpuesto */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={showOrder ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="absolute inset-0 flex items-center justify-center"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full max-w-2xl px-4">
+            {organizedData.map((category, index) => (
+              <motion.div
+                key={category.category}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={showOrder ? { opacity: 1, y: 0, scale: 1 } : {}}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.1,
+                  ease: 'easeOut',
+                }}
+                whileHover={{ scale: 1.03, y: -2 }}
+                className="p-4 rounded-xl bg-[var(--surface-base)] border border-[var(--border-strong)] shadow-xl backdrop-blur-sm"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{category.emoji}</span>
+                  <span className="text-sm font-medium" style={{ color: category.color }}>
+                    {category.category}
                   </span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                </div>
+                <div className="text-lg md:text-xl font-bold text-[var(--color-danger)]">
+                  -<AnimatedCounter value={category.amount} isInView={showOrder} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
+
+      {/* Indicador de transición */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView && !showOrder ? { opacity: 1 } : { opacity: 0 }}
+        className="absolute bottom-8 text-center"
+      >
+        <Typography variant="body" className="text-sm text-[var(--text-muted)]">
+          Mirá la magia...
+        </Typography>
+      </motion.div>
     </section>
   );
 }

@@ -18,7 +18,7 @@ const frustrations = [
   },
   {
     icon: Building2,
-    text: 'Tu banco te muestra todo mezclado e incomprensible',
+    text: 'Perdes el rastro entre tantos bancos y billeteras virtuales',
     color: 'var(--color-info)',
   },
 ];
@@ -50,10 +50,7 @@ export function FrustrationsSection() {
               className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: `${item.color}20` }}
             >
-              <item.icon
-                className="w-6 h-6 md:w-8 md:h-8"
-                style={{ color: item.color }}
-              />
+              <item.icon className="w-6 h-6 md:w-8 md:h-8" style={{ color: item.color }} />
             </motion.div>
 
             {/* Texto */}
