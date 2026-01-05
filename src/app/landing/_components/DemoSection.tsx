@@ -14,11 +14,11 @@ export function DemoSection() {
     if (!isInView) return;
 
     const timers = [
-      setTimeout(() => setStep(1), 300),   // Mostrar mensaje WA
-      setTimeout(() => setStep(2), 800),   // Check enviado
-      setTimeout(() => setStep(3), 1100),  // Doble check
-      setTimeout(() => setStep(4), 1500),  // Mostrar transacción en app
-      setTimeout(() => setStep(5), 2000),  // Actualizar gráfico
+      setTimeout(() => setStep(1), 200),   // Mostrar mensaje WA
+      setTimeout(() => setStep(2), 500),   // Check enviado
+      setTimeout(() => setStep(3), 700),   // Doble check
+      setTimeout(() => setStep(4), 1000),  // Mostrar transacción en app
+      setTimeout(() => setStep(5), 1400),  // Actualizar gráfico
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -33,7 +33,7 @@ export function DemoSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.4 }}
         className="text-center mb-12"
       >
         <Typography
@@ -53,7 +53,7 @@ export function DemoSection() {
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
           className="relative w-72 md:w-80"
         >
           {/* Phone frame */}
@@ -156,7 +156,7 @@ export function DemoSection() {
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={step >= 4 ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.4 }}
           className="relative w-72 md:w-80"
         >
           {/* Phone frame */}
@@ -221,7 +221,7 @@ export function DemoSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={step >= 5 ? { opacity: 1 } : {}}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
               className="mt-4 p-3 rounded-lg bg-[var(--surface-highlight)]"
             >
               <div className="text-xs text-[var(--text-muted)] mb-2">Gastos del mes</div>
@@ -231,7 +231,7 @@ export function DemoSection() {
                     key={i}
                     initial={{ height: 0 }}
                     animate={step >= 5 ? { height: `${h}%` } : {}}
-                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    transition={{ duration: 0.3, delay: i * 0.03 }}
                     className={`flex-1 rounded-sm ${i === 6 ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-primary)]/30'}`}
                   />
                 ))}
@@ -240,6 +240,7 @@ export function DemoSection() {
           </div>
         </motion.div>
       </div>
+
     </section>
   );
 }

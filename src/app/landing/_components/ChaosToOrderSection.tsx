@@ -42,8 +42,8 @@ function AnimatedCounter({ value, isInView }: { value: number; isInView: boolean
   useEffect(() => {
     if (!isInView) return;
 
-    const duration = 1200;
-    const steps = 30;
+    const duration = 800;
+    const steps = 20;
     const increment = value / steps;
     let current = 0;
 
@@ -70,7 +70,7 @@ export function ChaosToOrderSection() {
 
   useEffect(() => {
     if (isInView) {
-      const timer = setTimeout(() => setShowOrder(true), 1500);
+      const timer = setTimeout(() => setShowOrder(true), 1000);
       return () => clearTimeout(timer);
     }
   }, [isInView]);
@@ -84,7 +84,7 @@ export function ChaosToOrderSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.4 }}
         className="text-center mb-8 md:mb-12"
       >
         <Typography
@@ -175,7 +175,7 @@ export function ChaosToOrderSection() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={showOrder ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
           className="absolute inset-0 flex items-center justify-center"
         >
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full max-w-2xl px-4">
@@ -185,8 +185,8 @@ export function ChaosToOrderSection() {
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={showOrder ? { opacity: 1, y: 0, scale: 1 } : {}}
                 transition={{
-                  duration: 0.5,
-                  delay: index * 0.1,
+                  duration: 0.35,
+                  delay: index * 0.06,
                   ease: 'easeOut',
                 }}
                 whileHover={{ scale: 1.03, y: -2 }}

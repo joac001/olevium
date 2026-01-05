@@ -42,14 +42,14 @@ export function HeroSection() {
       if (currentIndex < questions.length) {
         setVisibleQuestions((prev) => [...prev, currentIndex]);
         currentIndex++;
-        setTimeout(showNextQuestion, 350);
+        setTimeout(showNextQuestion, 200);
       } else {
-        setTimeout(() => setShowBrand(true), 400);
+        setTimeout(() => setShowBrand(true), 250);
       }
     };
 
     // Iniciar casi inmediatamente
-    setTimeout(showNextQuestion, 200);
+    setTimeout(showNextQuestion, 150);
   }, []);
 
   return (
@@ -68,7 +68,7 @@ export function HeroSection() {
               scale: isVisible ? 1 : 0.8,
             }}
             transition={{
-              duration: 0.8,
+              duration: 0.5,
               ease: 'easeOut',
             }}
             style={{
@@ -92,13 +92,13 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 20 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         className="text-center z-10"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 10 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
         >
           <Typography
             variant="body"
@@ -111,7 +111,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 20 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
         >
           <Typography
             variant="h1"
@@ -125,7 +125,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: showBrand ? 1 : 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
           className="mt-6"
         >
           <Typography
@@ -156,7 +156,7 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: showBrand ? 0.5 : 0 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
+        transition={{ delay: 0.6, duration: 0.5 }}
         className="absolute bottom-8"
       >
         <motion.div

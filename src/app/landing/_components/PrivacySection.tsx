@@ -24,7 +24,7 @@ export function PrivacySection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.4 }}
         className="text-center mb-10"
       >
         <Typography
@@ -39,7 +39,7 @@ export function PrivacySection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
         className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-8"
       >
         {items.map((item, index) => (
@@ -47,7 +47,7 @@ export function PrivacySection() {
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.3 + index * 0.15 }}
+            transition={{ duration: 0.35, delay: 0.15 + index * 0.1 }}
             className="flex items-center gap-3"
           >
             <div
@@ -79,7 +79,7 @@ export function PrivacySection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.8 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
         className="max-w-xl text-center"
       >
         <Typography variant="body" className="text-sm text-[var(--text-muted)]">

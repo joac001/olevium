@@ -23,7 +23,7 @@ export function CTASection() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.5 }}
         className="relative z-10 text-center max-w-2xl"
       >
         {/* Título */}
@@ -38,7 +38,7 @@ export function CTASection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
           className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-8"
         >
           {[
@@ -60,7 +60,7 @@ export function CTASection() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.5, type: 'spring' }}
+          transition={{ duration: 0.4, delay: 0.3, type: 'spring' }}
           className="mb-6"
         >
           <Button
@@ -75,7 +75,7 @@ export function CTASection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ duration: 0.4, delay: 0.45 }}
         >
           <button
             onClick={() => router.push('/auth')}
@@ -90,7 +90,7 @@ export function CTASection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.5, delay: 1 }}
+        transition={{ duration: 0.4, delay: 0.6 }}
         className="absolute bottom-6 text-center"
       >
         <Typography variant="body" className="text-xs text-[var(--text-muted)] opacity-50">

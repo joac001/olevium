@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { Box, ButtonBase, Card } from '@/components/shared/ui';
 import type { ColorKey } from '@/types/ColorKey';
@@ -30,8 +31,15 @@ const VIEW_COPY: Record<AuthView, ViewConfig> = {
 
 const TAB_ORDER: AuthView[] = ['login', 'signup'];
 
+function getInitialView(mode: string | null): AuthView {
+  if (mode === 'register' || mode === 'signup') return 'signup';
+  return 'login';
+}
+
 export default function AuthSwitcher() {
-  const [activeView, setActiveView] = useState<AuthView>('login');
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get('mode');
+  const [activeView, setActiveView] = useState<AuthView>(() => getInitialView(initialMode));
 
   const copy = useMemo(() => VIEW_COPY[activeView], [activeView]);
 
