@@ -13,7 +13,7 @@ const frustrations = [
   },
   {
     icon: FileSpreadsheet,
-    text: 'Las planillas son un embole y las dejás de usar',
+    text: 'Las planillas son incómodas y las dejás de usar',
     color: 'var(--color-warning)',
   },
   {
@@ -85,9 +85,7 @@ export function FrustrationsSection() {
           className="text-xl md:text-2xl font-light text-[var(--text-primary)]"
         >
           Olevium resuelve esto{' '}
-          <span className="text-[var(--color-primary)] font-medium">
-            sin que tengas que ser contador
-          </span>
+          <span className="text-[var(--color-primary)] font-medium">potenciado por IA</span>
         </Typography>
       </motion.div>
     </section>

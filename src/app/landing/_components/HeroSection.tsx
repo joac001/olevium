@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Typography } from '@/components/shared/ui';
+import Image from 'next/image';
 
 const questions = [
   '¿A dónde se fue la plata este mes?',
@@ -17,13 +18,13 @@ const questions = [
 
 // Posiciones finales para cada pregunta (dispersas alrededor)
 const questionPositions = [
-  { top: '6%', left: '5%', rotate: -2 },       // Arriba izquierda
-  { top: '8%', right: '6%', rotate: 2 },       // Arriba derecha
-  { top: '22%', left: '2%', rotate: -1 },      // Medio-arriba izquierda
-  { top: '20%', right: '3%', rotate: 1 },      // Medio-arriba derecha
-  { bottom: '22%', left: '4%', rotate: -2 },   // Medio-abajo izquierda
-  { bottom: '18%', right: '2%', rotate: 2 },   // Medio-abajo derecha
-  { bottom: '8%', left: '8%', rotate: 1 },     // Abajo izquierda
+  { top: '6%', left: '5%', rotate: -2 }, // Arriba izquierda
+  { top: '8%', right: '6%', rotate: 2 }, // Arriba derecha
+  { top: '22%', left: '2%', rotate: -1 }, // Medio-arriba izquierda
+  { top: '20%', right: '3%', rotate: 1 }, // Medio-arriba derecha
+  { bottom: '22%', left: '4%', rotate: -2 }, // Medio-abajo izquierda
+  { bottom: '18%', right: '2%', rotate: 2 }, // Medio-abajo derecha
+  { bottom: '8%', left: '8%', rotate: 1 }, // Abajo izquierda
 ];
 
 export function HeroSection() {
@@ -40,7 +41,7 @@ export function HeroSection() {
 
     const showNextQuestion = () => {
       if (currentIndex < questions.length) {
-        setVisibleQuestions((prev) => [...prev, currentIndex]);
+        setVisibleQuestions(prev => [...prev, currentIndex]);
         currentIndex++;
         setTimeout(showNextQuestion, 200);
       } else {
@@ -92,20 +93,15 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 20 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="text-center z-10"
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="flex flex-col items-center justify-center text-center z-10"
       >
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 10 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: showBrand ? 1 : 0, y: showBrand ? 0 : 20 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <Typography
-            variant="body"
-            className="text-lg md:text-xl text-[var(--color-primary)] font-medium mb-2"
-          >
-            Dejá de adivinar.
-          </Typography>
+          <Image src="/logo-no-bg.svg" alt="Olevium Logo" width={100} height={100} />
         </motion.div>
 
         <motion.div

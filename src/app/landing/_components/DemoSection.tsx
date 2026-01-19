@@ -4,6 +4,7 @@ import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { Typography } from '@/components/shared/ui';
 import { Check, CheckCheck } from 'lucide-react';
+import Image from 'next/image';
 
 export function DemoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -14,11 +15,11 @@ export function DemoSection() {
     if (!isInView) return;
 
     const timers = [
-      setTimeout(() => setStep(1), 200),   // Mostrar mensaje WA
-      setTimeout(() => setStep(2), 500),   // Check enviado
-      setTimeout(() => setStep(3), 700),   // Doble check
-      setTimeout(() => setStep(4), 1000),  // Mostrar transacción en app
-      setTimeout(() => setStep(5), 1400),  // Actualizar gráfico
+      setTimeout(() => setStep(1), 200), // Mostrar mensaje WA
+      setTimeout(() => setStep(2), 500), // Check enviado
+      setTimeout(() => setStep(3), 700), // Doble check
+      setTimeout(() => setStep(4), 1000), // Mostrar transacción en app
+      setTimeout(() => setStep(5), 1400), // Actualizar gráfico
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -60,11 +61,11 @@ export function DemoSection() {
           <div className="bg-[#0b141a] rounded-3xl p-3 shadow-2xl border border-[var(--border-strong)]">
             {/* Header WA */}
             <div className="bg-[#202c33] rounded-t-2xl px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
-                <span className="text-white font-bold text-sm">O</span>
+              <div className="rounded-full flex items-center justify-center">
+                <Image src="/logo.png" alt="Olevium Logo" width={34} height={34} />
               </div>
               <div>
-                <div className="text-white text-sm font-medium">Olevium Bot</div>
+                <div className="text-white text-sm font-medium">Oli</div>
                 <div className="text-[#8696a0] text-xs">en línea</div>
               </div>
             </div>
@@ -90,12 +91,8 @@ export function DemoSection() {
                   <p className="text-white text-sm">Supermercado 45000</p>
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className="text-[10px] text-[#8696a0]">14:32</span>
-                    {step >= 2 && step < 3 && (
-                      <Check className="w-4 h-4 text-[#8696a0]" />
-                    )}
-                    {step >= 3 && (
-                      <CheckCheck className="w-4 h-4 text-[#53bdeb]" />
-                    )}
+                    {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" />}
+                    {step >= 3 && <CheckCheck className="w-4 h-4 text-[#53bdeb]" />}
                   </div>
                 </div>
               </motion.div>
@@ -111,9 +108,7 @@ export function DemoSection() {
                   <p className="text-white text-sm">
                     Registrado en <span className="text-[var(--color-primary)]">Alimentación</span>
                   </p>
-                  <p className="text-[#8696a0] text-xs mt-1">
-                    -$45.000 desde Efectivo
-                  </p>
+                  <p className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</p>
                   <span className="text-[10px] text-[#8696a0] float-right mt-1">14:32</span>
                 </div>
               </motion.div>
@@ -183,13 +178,13 @@ export function DemoSection() {
                       <span className="text-sm">🛒</span>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-[var(--text-primary)]">Supermercado</div>
+                      <div className="text-sm font-medium text-[var(--text-primary)]">
+                        Supermercado
+                      </div>
                       <div className="text-xs text-[var(--text-muted)]">Alimentación</div>
                     </div>
                   </div>
-                  <div className="text-sm font-semibold text-[var(--color-danger)]">
-                    -$45.000
-                  </div>
+                  <div className="text-sm font-semibold text-[var(--color-danger)]">-$45.000</div>
                 </div>
               </div>
             </motion.div>
@@ -240,7 +235,6 @@ export function DemoSection() {
           </div>
         </motion.div>
       </div>
-
     </section>
   );
 }
