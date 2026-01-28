@@ -1,0 +1,14 @@
+name: User Login Flow Test
+page: login
+page_path: /login
+task: Test the complete user login authentication flow
+steps:
+- Navigate to the login page
+- Enter valid username in the username field
+- Enter valid password in the password field
+- Click the 'Login' or 'Sign In' button
+- Verify successful authentication
+- Verify redirect to the main application dashboard or home page
+- Verify user session is established
+expected_result: User should be able to successfully log in with valid credentials
+  and be redirected to the main application
