@@ -28,6 +28,7 @@ export function isAuthExpiredError(error: unknown): error is AuthExpiredError {
 
 type ApiRequestInit = RequestInit & {
   skipAuth?: boolean;
+  skipAuthRefresh?: boolean;
   isRetry?: boolean; // Flag para evitar loops infinitos de refresh
 };
 
@@ -223,9 +224,13 @@ async function request<T>(
   config: ApiConfig = {},
   isRetry = false
 ): Promise<{ data: T }> {
+  const skipAuth = Boolean(config.skipAuth);
+  const skipAuthRefresh = Boolean(config.skipAuthRefresh);
+
   const init: ApiRequestInit = {
     method,
-    skipAuth: config.skipAuth || config.skipAuthRefresh,
+    skipAuth,
+    skipAuthRefresh,
     headers: config.headers,
     isRetry,
   };
@@ -257,7 +262,7 @@ async function request<T>(
     // - El request tiene skipAuth (no necesita auth)
     // - Es el endpoint de refresh mismo
     const isRefreshEndpoint = path.includes('/auth/refresh');
-    const shouldTryRefresh = !isRetry && !init.skipAuth && !isRefreshEndpoint;
+    const shouldTryRefresh = !isRetry && !skipAuthRefresh && !init.skipAuth && !isRefreshEndpoint;
 
     if (shouldTryRefresh) {
       // Intentar refrescar el token

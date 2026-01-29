@@ -72,7 +72,7 @@ export default function ForgotPasswordForm() {
               <Box as="span" className="font-medium text-[var(--text-primary)]">
                 {submittedEmail}
               </Box>
-              recibirás un email con instrucciones para restablecer tu contraseña.
+              {' '}recibirás un email con instrucciones para restablecer tu contraseña.
             </Typography>
           </Box>
 
