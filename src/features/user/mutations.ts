@@ -31,6 +31,12 @@ async function putPassword(payload: ChangePasswordPayload): Promise<void> {
   });
   if (!response.ok) {
     const detail = await parseErrorMessage(response);
+    if (response.status === 400 && detail?.toLowerCase().includes('current password')) {
+      throw new Error('La contraseña actual no es correcta.');
+    }
+    if (response.status === 400 && detail?.toLowerCase().includes('too weak')) {
+      throw new Error('La nueva contraseña no cumple los requisitos mínimos.');
+    }
     throw new Error(detail ?? `No se pudo cambiar la contraseña (status ${response.status})`);
   }
 }
