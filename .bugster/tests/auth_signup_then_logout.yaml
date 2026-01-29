@@ -1,0 +1,15 @@
+name: Auth Signup Then Logout
+page: auth
+page_path: /auth
+task: Verify a new user can sign up and then log out to stay on /auth
+steps:
+  - Navigate to /auth
+  - Select the signup tab ("Crear cuenta") if not already active
+  - Enter full name (e.g., "Test User")
+  - Enter a unique email (e.g., test+<timestamp>@example.com)
+  - Enter a valid password
+  - Click the "Crear cuenta" button
+  - Verify success feedback or verification CTA is shown
+  - Use the logout control in navigation
+  - Verify redirect to /auth and that dashboard content is not visible
+expected_result: Signup completes, and after logout the user remains on /auth with no dashboard navigation displayed

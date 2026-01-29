@@ -1,0 +1,11 @@
+name: Logout Redirects To Auth
+page: dashboard
+page_path: /dashboard
+task: Ensure logout ends the session and keeps user on /auth
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /dashboard
+  - Click the logout button in the navigation bar
+  - Verify redirect to /auth
+  - Refresh the page and confirm it stays on /auth (no dashboard navigation visible)
+expected_result: Session is cleared; user remains on /auth even after refresh and dashboard UI is not accessible
