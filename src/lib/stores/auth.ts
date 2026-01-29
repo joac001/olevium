@@ -346,6 +346,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       tokenStorage.clear();
       useUserStore.getState().reset();
+
+      // Forzar limpieza de cookies en el lado del servidor (Next route handler)
+      if (typeof window !== 'undefined') {
+        void fetch('/api/auth/clear-session', { method: 'GET', cache: 'no-store' }).catch(() => {});
+      }
     }
   },
 }));
