@@ -126,6 +126,7 @@ export default function ForgotPasswordForm() {
             placeholder="tu-correo@ejemplo.com"
             required
             icon="fas fa-envelope"
+            autoComplete="email"
           />
         </FormWrapper>
 

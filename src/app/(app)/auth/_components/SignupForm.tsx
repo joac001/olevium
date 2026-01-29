@@ -85,6 +85,7 @@ export default function SignupForm() {
           placeholder="Juan Pérez"
           required
           icon="fas fa-user"
+          autoComplete="name"
         />
 
         <Input
@@ -94,6 +95,7 @@ export default function SignupForm() {
           placeholder="tu-correo@ejemplo.com"
           required
           icon="fas fa-envelope"
+          autoComplete="email"
         />
 
         <Input
@@ -103,6 +105,7 @@ export default function SignupForm() {
           placeholder="Crea una contraseña segura"
           required
           icon="fas fa-lock"
+          autoComplete="new-password"
         />
       </Box>
     </FormWrapper>
