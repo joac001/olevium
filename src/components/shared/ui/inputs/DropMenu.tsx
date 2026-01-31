@@ -393,7 +393,11 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
                           role="option"
                           aria-selected={selected}
                           className={classes}
-                          onClick={() => handleSelectOption(option)}
+                          // Usar onMouseDown para evitar que el blur cierre el menú antes de seleccionar (doble click)
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectOption(option);
+                          }}
                         >
                           {option.label || option.value}
                         </div>

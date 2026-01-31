@@ -4,7 +4,7 @@ import type { ApiCollectionResult } from '@/lib/api';
 import type { RecurringTransaction } from '@/lib/types';
 import type { RecurringFrequency } from '@/types/recurring';
 
-async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
+export async function getRecurringTransactions(): Promise<ApiCollectionResult<RecurringTransaction[]>> {
   try {
     const response = await apiRequest('/recurring-transactions/');
     if (!response.ok) {
@@ -48,10 +48,10 @@ async function getRecurringTransactions(): Promise<ApiCollectionResult<Recurring
           is_active: Boolean(item.is_active ?? true),
         };
       });
-    return { data: normalized, isMock: false };
+    return { data: normalized };
   } catch (error) {
-    console.warn('[olevium] usando transacciones recurrentes de ejemplo', error);
-    return { data: [], isMock: true };
+    console.warn('[olevium] error al obtener transacciones recurrentes', error);
+    return { data: [] };
   }
 }
 

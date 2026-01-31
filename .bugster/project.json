@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "timestamp": 1768856533079,
+    "git": {
+      "branch": "test/e2e-bugster",
+      "commit": "5ae756eb7f2caa4bbcafcc014edfb440bfd26aaa"
+    }
+  },
+  "data": {
+    "frameworks": [
+      {
+        "id": "next",
+        "name": "Next.js",
+        "dir_path": "C:\\Users\\joaco\\Desktop\\Projects\\Olevium\\olevium\\"
+      }
+    ],
+    "commands": {
+      "test": {
+        "firstExecuted": true
+      }
+    }
+  }
+}

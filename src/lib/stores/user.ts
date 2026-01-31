@@ -1,9 +1,9 @@
 'use client';
 
-import { AxiosError } from 'axios';
 import { create } from 'zustand';
 
-import { http } from '@/lib/utils/axios';
+import { api } from '@/lib/http';
+import { resolveError } from '@/lib/utils/errorHandling';
 
 export interface UserProfile {
   user_id: number;
@@ -21,23 +21,8 @@ interface UserState {
   reset: () => void;
 }
 
-const normalizeUserError = (error: unknown): Error => {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as
-      | { detail?: string; message?: string; error?: string }
-      | undefined;
-    const detail = payload?.detail ?? payload?.message ?? payload?.error;
-    if (detail) {
-      return new Error(detail);
-    }
-  }
-
-  if (error instanceof Error) {
-    return error;
-  }
-
-  return new Error('No se pudo obtener la información del usuario.');
-};
+const normalizeUserError = (error: unknown): Error =>
+  resolveError(error, 'No se pudo obtener la información del usuario.');
 
 export const useUserStore = create<UserState>((set, get) => ({
   user: null,
@@ -52,7 +37,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ loading: true });
 
     try {
-      const { data } = await http.get<UserProfile>('/users/me/');
+      const { data } = await api.get<UserProfile>('/users/me/');
       set({
         user: data,
         loading: false,

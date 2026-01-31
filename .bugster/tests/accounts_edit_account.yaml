@@ -1,0 +1,14 @@
+name: Accounts Edit Account
+page: accounts
+page_path: /accounts
+task: Edit an existing account's type or currency
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - If no account exists, create one via the "+" button first
+  - Open an account from the list to go to its detail page
+  - Click "Editar" to open the edit form
+  - Change the "Tipo de cuenta" or "Moneda" dropdown selection
+  - Save the changes
+  - Verify the account detail reflects the updated type/currency
+expected_result: Account updates are saved and visible with the new type or currency

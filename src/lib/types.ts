@@ -18,6 +18,7 @@ export type Category = {
   icon?: string | null;
   created_at?: string;
   is_default?: boolean;
+  is_active?: boolean;
 };
 
 export type Transaction = ApiUserTransaction & {
@@ -25,6 +26,12 @@ export type Transaction = ApiUserTransaction & {
   transaction_type?: unknown;
 };
 export type RecurringTransaction = RootRecurringTransaction;
+
+export type TransactionType = {
+  type_id: number;
+  name: string;
+  created_at: string;
+};
 
 export type CreateAccountPayload = {
   name: string;
@@ -63,7 +70,13 @@ export type UpdateTransactionPayload = Partial<CreateTransactionPayload>;
 
 export type CreateRecurringTransactionPayload = {
   account_id: string;
-  category_id: string;
+  category_id?: string;
+  category?: {
+    description: string;
+    type_id: number;
+    color?: string | null;
+    icon?: string | null;
+  };
   type_id: number;
   amount: number;
   description?: string;
@@ -81,3 +94,10 @@ export type UpdateRecurringTransactionPayload = Partial<CreateRecurringTransacti
 };
 
 export type Currency = ApiCurrency;
+
+export type FeedbackPayload = {
+  type: 'bug' | 'feature' | 'other';
+  message: string;
+  page_path?: string;
+  metadata?: Record<string, unknown>;
+};

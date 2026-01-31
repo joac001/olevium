@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+test-results/
 
 # next.js
 /.next/
@@ -41,3 +42,18 @@ yarn-error.log*
 next-env.d.ts
 
 zbasura/*
+.claude
+
+# Bugster
+.bugster/results/
+.bugster/screenshots/
+.bugster/videos/
+.bugster/logs/
+.bugster/reports/
+.bugster/.env
+*.bugster.log
+.bugster/paths.json
+.bugster/ui_config_cache.json
+.bugster/files/
+.bugster/*/import_tree.json
+.bugster/.sessions/
