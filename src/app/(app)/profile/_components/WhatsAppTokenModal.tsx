@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Box, Card, Typography, Input } from '@/components/shared/ui';
 import { ActionButton } from '@/components/shared/ui';
-import { useCreateChatTokenMutation, useRegenerateChatTokenMutation } from '@/features/user/mutations';
+import {
+  useCreateChatTokenMutation,
+  useRegenerateChatTokenMutation,
+} from '@/features/user/mutations';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
 
@@ -40,20 +44,32 @@ export default function WhatsAppTokenModal() {
     try {
       const result = await createTokenMutation.mutateAsync();
       saveToken(result.chat_token);
-      showNotification('fas fa-circle-check', 'success', 'Token creado', 'Tu token de WhatsApp fue creado exitosamente.');
+      showNotification(
+        'fas fa-circle-check',
+        'success',
+        'Token creado',
+        'Tu token de WhatsApp fue creado exitosamente.'
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '';
       // Si el token ya existe (409 o mensaje específico), regenerarlo automáticamente
-      const isConflictError = errorMessage.includes('409') || errorMessage.toLowerCase().includes('ya existe');
-      
+      const isConflictError =
+        errorMessage.includes('409') || errorMessage.toLowerCase().includes('ya existe');
+
       if (isConflictError) {
         try {
           const result = await regenerateTokenMutation.mutateAsync();
           saveToken(result.chat_token);
-          showNotification('fas fa-circle-check', 'success', 'Token regenerado', 'Ya tenías un token activo. Se generó uno nuevo.');
+          showNotification(
+            'fas fa-circle-check',
+            'success',
+            'Token regenerado',
+            'Ya tenías un token activo. Se generó uno nuevo.'
+          );
           return;
         } catch (regenError) {
-          const message = regenError instanceof Error ? regenError.message : 'No se pudo regenerar el token';
+          const message =
+            regenError instanceof Error ? regenError.message : 'No se pudo regenerar el token';
           showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
           return;
         }
@@ -67,7 +83,12 @@ export default function WhatsAppTokenModal() {
     try {
       const result = await regenerateTokenMutation.mutateAsync();
       saveToken(result.chat_token);
-      showNotification('fas fa-circle-check', 'success', 'Token regenerado', 'Tu token de WhatsApp fue regenerado. El anterior ya no funcionará.');
+      showNotification(
+        'fas fa-circle-check',
+        'success',
+        'Token regenerado',
+        'Tu token de WhatsApp fue regenerado. El anterior ya no funcionará.'
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo regenerar el token';
       showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
@@ -91,19 +112,26 @@ export default function WhatsAppTokenModal() {
           <Typography variant="h2">Instrucciones</Typography>
           <Box className="rounded-lg bg-neutral-100 p-3 dark:bg-neutral-800">
             <Typography variant="body" className="text-neutral-600 dark:text-neutral-400">
-              <strong>1.</strong> Generá tu token usando el botón de abajo.<br />
-              <strong>2.</strong> Copiá el token y envialo por WhatsApp al {hasToken && formattedToken ? (
-                <Link 
-                  href={`https://wa.me/5491170602206?text=${encodeURIComponent(`Hola mi token es ${formattedToken}`)}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-green-600 underline hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                >
-                  +54 9 11 7060 2206
-                </Link>
-              ) : (
-                <span className="text-neutral-400 dark:text-neutral-500">+54 9 11 7060 2206</span>
-              )}.<br />
+              <strong>1.</strong> Generá tu token usando el botón de abajo.
+              <br />
+              <span className="flex gap-2">
+                <strong>2.</strong> Envialo por WhatsApp{' '}
+                {hasToken && formattedToken ? (
+                  <Link
+                    href={`https://wa.me/5491173630703?text=${encodeURIComponent(`Hola mi token es ${formattedToken}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex text-green-600 underline hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                  >
+                    <ExternalLink />
+                    +54 9 11 73630703
+                  </Link>
+                ) : (
+                  <span className="text-neutral-400 dark:text-neutral-500">+54 9 11 73630703</span>
+                )}
+                .
+              </span>
+              <br />
               <strong>3.</strong> ¡Listo! Ya podés gestionar tus finanzas desde WhatsApp.
             </Typography>
           </Box>
@@ -114,10 +142,7 @@ export default function WhatsAppTokenModal() {
           <Typography variant="h2">Tu Chat Token</Typography>
           {hasToken && formattedToken ? (
             <Box className="flex items-center gap-2">
-              <Input
-                value={formattedToken}
-                disabled
-              />
+              <Input value={formattedToken} disabled />
               <ActionButton
                 icon="fas fa-copy"
                 type="accent"
