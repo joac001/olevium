@@ -1,0 +1,12 @@
+name: Recurring Transaction Delete
+page: recurring-transactions
+page_path: /recurring-transactions
+task: Delete an existing recurring transaction
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /recurring-transactions
+  - Ensure at least one recurring transaction exists (create one first if needed)
+  - Open actions for a recurring transaction and choose delete/remove
+  - Confirm deletion
+  - Verify the transaction is removed from the table and no 401/token errors appear
+expected_result: Recurring transaction is deleted successfully and no longer appears in the list

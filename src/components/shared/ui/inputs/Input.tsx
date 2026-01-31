@@ -74,6 +74,7 @@ interface InputProps {
   disabled?: boolean;
   required?: boolean;
   icon?: string;
+  autoComplete?: string;
   rows?: number;
   step?: number | string;
 }
@@ -91,6 +92,7 @@ const Input = forwardRef<InputRef, InputProps>(
       value,
       defaultValue,
       name,
+      autoComplete,
       type = 'text',
       onValueChange,
       onValidationChange,
@@ -269,6 +271,7 @@ const Input = forwardRef<InputRef, InputProps>(
                 value={String(inputValue)}
                 onChange={handleChange}
                 placeholder={placeholder}
+                autoComplete={autoComplete}
                 disabled={disabled}
                 required={required}
                 className={controlClassName}
@@ -284,6 +287,7 @@ const Input = forwardRef<InputRef, InputProps>(
                 value={String(inputValue)}
                 onChange={handleChange}
                 placeholder={resolvedPlaceholder}
+                autoComplete={autoComplete}
                 disabled={disabled}
                 required={required}
                 step={step}

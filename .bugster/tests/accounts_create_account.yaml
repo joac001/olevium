@@ -1,0 +1,14 @@
+name: Accounts Create Account
+page: accounts
+page_path: /accounts
+task: Create a new account with required dropdown selections
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Click the "+" add button in any account type card to open "Registrar nueva cuenta"
+  - Select a type from the "Tipo de cuenta" dropdown
+  - Select a currency from the "Moneda" dropdown
+  - Enter a name and balance
+  - Submit the form (button text "Registrar cuenta" or similar)
+  - Verify the new account appears in the list with the chosen currency
+expected_result: New account is created and listed under its type with the selected currency and balance

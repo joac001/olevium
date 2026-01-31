@@ -71,6 +71,7 @@ export default function LoginForm() {
           placeholder="tu-correo@ejemplo.com"
           required
           icon="fas fa-envelope"
+          autoComplete="email"
         />
 
         <Input
@@ -80,6 +81,7 @@ export default function LoginForm() {
           placeholder="••••••••"
           required
           icon="fas fa-lock"
+          autoComplete="current-password"
         />
 
         <Box className="flex justify-end">

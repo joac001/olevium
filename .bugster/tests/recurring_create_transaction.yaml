@@ -1,0 +1,14 @@
+name: Recurring Transaction Create
+page: recurring-transactions
+page_path: /recurring-transactions
+task: Create a recurring transaction without auth errors
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /recurring-transactions
+  - Click "Crear transacción recurrente" (or add button) to open the form
+  - Select an account from the "Cuenta" dropdown (create an account first if none exist)
+  - Select a category from the "Categoría" dropdown
+  - Enter amount, description, type, frequency, and start date
+  - Submit the form (button text "Crear" or similar)
+  - Verify the new recurring transaction appears in the table with the chosen amount and frequency
+expected_result: Recurring transaction is created successfully and listed without 401/token errors
