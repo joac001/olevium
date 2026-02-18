@@ -1,0 +1,16 @@
+name: Dashboard - Category Chart Does Not Show USD Amount As ARS
+page: dashboard
+page_path: /dashboard
+task: Verify that USD transaction amounts in the category charts are NOT incorrectly displayed as ARS (pesos), confirming the currency mismatch bug is fixed
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open a USD account and register a Salida of exactly 300 in any category (e.g., "Servicios")
+  - Navigate to /dashboard
+  - Set the period filter to "Último año"
+  - Locate the "Salidas por categoría" chart
+  - Find the legend entry for the category used in the USD transaction
+  - Verify the amount shown is NOT "$ 300,00" (which would indicate ARS formatting for a USD amount)
+  - Verify the amount IS shown as "US$ 300,00" or similar USD format
+  - Confirm the "Flujo de ingresos y salidas" line chart y-axis labels do NOT treat the 300 USD as if it were 300 ARS (verify the scale makes sense given the other ARS transactions)
+expected_result: No USD transaction amount is shown with the "$" (peso) symbol. All USD amounts are correctly prefixed with "US$". The line chart does not mix USD and ARS values as if they were the same unit.

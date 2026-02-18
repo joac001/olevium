@@ -1,0 +1,16 @@
+name: Dashboard - Category Chart Shows USD Amounts With Correct Currency
+page: dashboard
+page_path: /dashboard
+task: Verify that the "Salidas por categoría" and "Ingresos por categoría" charts display USD transaction amounts formatted as USD (US$), not as ARS ($)
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Ensure a USD account exists with at least one Salida (expense) transaction (e.g., 300 USD in category "Otros" or any category)
+  - Navigate to /dashboard
+  - Set the period filter to cover the date of the USD transaction (e.g., "Último año")
+  - Locate the "Salidas por categoría" chart section
+  - Find the legend entry corresponding to the category used for the USD transaction
+  - Verify the amount shown in the legend for that category uses USD formatting (e.g., "US$ 300,00")
+  - Verify it does NOT show ARS formatting (e.g., "$ 300,00") for that USD transaction
+  - Hover over the corresponding doughnut segment and verify the tooltip also shows USD formatting
+expected_result: The category breakdown chart correctly displays USD transaction amounts with "US$" prefix in both the legend and tooltip. A 300 USD expense is shown as "US$ 300,00", not "$300,00" (ARS format).

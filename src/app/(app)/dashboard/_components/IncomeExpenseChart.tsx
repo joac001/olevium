@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
   LineElement,
@@ -26,13 +26,34 @@ interface IncomeExpenseChartProps {
   transactions: Transaction[];
   grouping: 'daily' | 'monthly';
   period: '10d' | '30d' | '365d' | 'month' | 'day';
+  selectedMonth?: string;
+  selectedYear?: string;
+  selectedDay?: string;
+  accountCurrencyMap?: Record<string, string>;
 }
 
 export default function IncomeExpenseChart({
   transactions,
   grouping,
   period,
+  selectedMonth,
+  selectedYear,
+  selectedDay,
 }: IncomeExpenseChartProps) {
+  const chartRef = useRef<ChartJS<'line'>>(null);
+  const [ingresoVisible, setIngresoVisible] = useState(true);
+  const [salidaVisible, setSalidaVisible] = useState(true);
+
+  const toggleDataset = (index: number) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const newVisible = !chart.isDatasetVisible(index);
+    chart.setDatasetVisibility(index, newVisible);
+    chart.update();
+    if (index === 0) setIngresoVisible(newVisible);
+    else setSalidaVisible(newVisible);
+  };
+
   const { labels, incomeDataset, expenseDataset } = useMemo(() => {
     const chartLabels: string[] = [];
     const incomePoints: number[] = [];
@@ -58,18 +79,32 @@ export default function IncomeExpenseChart({
         expensePoints.push(bucket.expense);
       });
     } else {
-      const range = period === '10d' ? 10 : period === '30d' ? 30 : 365;
-      const today = new Date();
-      const start = new Date();
-      start.setDate(today.getDate() - (range - 1));
-      start.setHours(0, 0, 0, 0);
-
       const dailyMap = new Map<string, { income: number; expense: number }>();
-      for (let i = 0; i < range; i += 1) {
-        const date = new Date(start);
-        date.setDate(start.getDate() + i);
-        const key = date.toISOString().slice(0, 10);
-        dailyMap.set(key, { income: 0, expense: 0 });
+
+      if (period === 'month' && selectedMonth && selectedYear) {
+        // Generar slots solo para el mes seleccionado
+        const year = Number(selectedYear);
+        const month = Number(selectedMonth);
+        const daysInMonth = new Date(year, month, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          dailyMap.set(key, { income: 0, expense: 0 });
+        }
+      } else if (period === 'day' && selectedDay) {
+        // Un solo slot para el día seleccionado
+        dailyMap.set(selectedDay, { income: 0, expense: 0 });
+      } else {
+        const range = period === '10d' ? 10 : period === '30d' ? 30 : 365;
+        const today = new Date();
+        const start = new Date();
+        start.setDate(today.getDate() - (range - 1));
+        start.setHours(0, 0, 0, 0);
+        for (let i = 0; i < range; i += 1) {
+          const date = new Date(start);
+          date.setDate(start.getDate() + i);
+          const key = date.toISOString().slice(0, 10);
+          dailyMap.set(key, { income: 0, expense: 0 });
+        }
       }
 
       transactions.forEach(tx => {
@@ -91,7 +126,7 @@ export default function IncomeExpenseChart({
     }
 
     return { labels: chartLabels, incomeDataset: incomePoints, expenseDataset: expensePoints };
-  }, [transactions, grouping, period]);
+  }, [transactions, grouping, period, selectedMonth, selectedYear, selectedDay]);
 
   const lineData = useMemo(
     () => ({
@@ -125,13 +160,7 @@ export default function IncomeExpenseChart({
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          labels: {
-            color: '#cbd5f5',
-            usePointStyle: true,
-            pointStyle: 'circle',
-          },
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: (tooltipItem: TooltipItem<'line'>) => {
@@ -158,6 +187,7 @@ export default function IncomeExpenseChart({
           },
         },
         y: {
+          beginAtZero: true,
           ticks: {
             color: '#94a3b8',
             callback: (value: string | number) => formatCurrency(Number(value)),
@@ -174,15 +204,36 @@ export default function IncomeExpenseChart({
   return (
     <Card className="xl:col-span-2">
       <Box className="flex items-center justify-between gap-4 pb-4">
-        <Box>
-          <Typography variant="h2">Flujo de ingresos y salidas</Typography>
-          {/* <Typography variant="body" className="text-[color:var(--text-muted)]">
-            Seguimiento visual del flujo financiero en el período seleccionado.
-          </Typography> */}
+        <Typography variant="h2">Flujo de ingresos y salidas</Typography>
+        <Box className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleDataset(0)}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/10"
+            style={{ color: ingresoVisible ? '#22c55e' : '#64748b' }}
+          >
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: ingresoVisible ? '#22c55e' : '#475569' }}
+            />
+            {ingresoVisible ? 'Ocultar ingresos' : 'Mostrar ingresos'}
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleDataset(1)}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/10"
+            style={{ color: salidaVisible ? '#ef4444' : '#64748b' }}
+          >
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: salidaVisible ? '#ef4444' : '#475569' }}
+            />
+            {salidaVisible ? 'Ocultar salidas' : 'Mostrar salidas'}
+          </button>
         </Box>
       </Box>
-      <Box className="h-72 md:h-80">
-        <Line data={lineData} options={lineOptions} />
+      <Box className="h-72 md:h-80" style={{ minHeight: '18rem' }}>
+        <Line ref={chartRef} data={lineData} options={lineOptions} />
       </Box>
     </Card>
   );

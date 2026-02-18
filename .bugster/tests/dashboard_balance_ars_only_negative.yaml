@@ -1,0 +1,14 @@
+name: Dashboard - Consolidated Balance Does Not Ignore Non-ARS Accounts
+page: dashboard
+page_path: /dashboard
+task: Verify that the "Saldo consolidado" card does NOT silently omit USD or other non-ARS account balances, showing only ARS
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Create a USD account with balance 500 if one does not already exist (select "USD" in the Moneda dropdown)
+  - Navigate to /dashboard
+  - Locate the "Saldo consolidado" card
+  - Verify the card does NOT show only a single ARS value while a USD account with balance 500 exists
+  - Verify that a USD balance line (e.g., "US$ 500,00") is visible in the card
+  - Verify the card title no longer says "(ARS)" as a suffix since it is now multi-currency
+expected_result: The "Saldo consolidado" card must not hide the USD balance. Both the ARS and USD balances appear. The card does not show just ARS and silently zero-out or omit the USD account.

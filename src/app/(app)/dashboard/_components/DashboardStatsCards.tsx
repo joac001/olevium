@@ -8,45 +8,54 @@ import { Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface DashboardStatsCardsProps {
-  totalBalanceARS: number;
-  incomesPeriod: number;
-  expensesPeriod: number;
+  balances: Record<string, number>;
+  incomesByCurrency: Record<string, number>;
+  expensesByCurrency: Record<string, number>;
   transactionsCount: number;
 }
 
+function currencyLines(map: Record<string, number>): string[] {
+  const entries = Object.entries(map);
+  if (entries.length === 0) return [`ARS ${formatCurrency(0)}`];
+  return entries.map(([currency, amount]) => {
+    const formatted = formatCurrency(amount, currency);
+    return currency === 'ARS' ? `ARS ${formatted}` : formatted;
+  });
+}
+
 export default function DashboardStatsCards({
-  totalBalanceARS,
-  incomesPeriod,
-  expensesPeriod,
+  balances,
+  incomesByCurrency,
+  expensesByCurrency,
   transactionsCount,
 }: DashboardStatsCardsProps) {
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <DashboardCard
-        title="Saldo consolidado (ARS)"
+        title="Saldo consolidado"
         subtitle="Saldo real según tus cuentas"
-        value={formatCurrency(totalBalanceARS)}
+        values={currencyLines(balances)}
         accent="from-emerald-500/40 via-emerald-400/20 to-emerald-500/10"
         icon={<Wallet className="h-5 w-5" />}
       />
       <DashboardCard
         title="Ingresos del período"
         subtitle="Entradas registradas en el rango seleccionado"
-        value={formatCurrency(incomesPeriod)}
+        values={currencyLines(incomesByCurrency)}
         accent="from-sky-500/40 via-sky-400/20 to-sky-500/10"
         icon={<TrendingUp className="h-5 w-5" />}
       />
       <DashboardCard
         title="Salidas del período"
         subtitle="Egresos registrados en el rango seleccionado"
-        value={formatCurrency(expensesPeriod)}
+        values={currencyLines(expensesByCurrency)}
         accent="from-rose-500/40 via-rose-400/20 to-rose-500/10"
         icon={<TrendingDown className="h-5 w-5" />}
       />
       <DashboardCard
         title="Movimientos registrados"
         subtitle="Cantidad de transacciones en el rango"
-        value={transactionsCount.toString()}
+        values={[transactionsCount.toString()]}
         accent="from-violet-500/40 via-violet-400/20 to-violet-500/10"
         icon={<Database className="h-5 w-5" />}
       />
@@ -57,13 +66,13 @@ export default function DashboardStatsCards({
 function DashboardCard({
   title,
   subtitle,
-  value,
+  values,
   icon,
   accent,
 }: {
   title: string;
   subtitle: string;
-  value: string;
+  values: string[];
   icon: ReactNode;
   accent: string;
 }) {
@@ -87,9 +96,13 @@ function DashboardCard({
         </Box>
         <Box className="rounded-xl bg-white/10 p-3 text-white shadow-inset">{icon}</Box>
       </Box>
-      <Typography variant="h2" className="relative mt-4 text-2xl font-semibold text-slate-50">
-        {value}
-      </Typography>
+      <Box className="relative mt-4 flex flex-col gap-0.5">
+        {values.map((v, i) => (
+          <Typography key={i} variant="h2" className="text-2xl font-semibold text-slate-50">
+            {v}
+          </Typography>
+        ))}
+      </Box>
     </Box>
   );
 }
