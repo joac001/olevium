@@ -1,0 +1,17 @@
+name: Transaction Edit - Description Change Reflects Without Reload
+page: accounts
+page_path: /accounts
+task: Verify that editing a transaction description is immediately reflected in the transactions table without requiring a page reload
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account that has at least one transaction
+  - Note the current description (Concepto) of the first transaction in the table (it may show "-" if empty)
+  - Click the edit (pen) icon on that transaction
+  - 'Clear the "Descripcion" field and enter a unique new description: "Test descripcion editada"'
+  - Click "Guardar cambios" to submit the edit
+  - Verify the edit modal closes
+  - Verify the transactions table now shows "Test descripcion editada" in the Concepto column for that row
+  - Verify the old description text is no longer shown in that row
+  - Do NOT reload the page before verifying
+expected_result: The new description "Test descripcion editada" appears immediately in the Concepto column after saving, without a page reload. The previous description text is gone.

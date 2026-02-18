@@ -97,7 +97,7 @@ export default function TransactionsTable({
                         isIncome ? 'text-[color:var(--color-success)]' : 'text-[color:var(--color-danger)]'
                       }`}
                     >
-                      {formatCurrency(signedAmount, currency)}
+                      {formatCurrency(Math.abs(signedAmount), currency)}
                     </td>
                     <td className="px-4 py-3">
                       <Box className="flex justify-end gap-2">

@@ -1,0 +1,18 @@
+name: Transaction Edit - Type Change Reflects Without Reload
+page: accounts
+page_path: /accounts
+task: Verify that editing the type of a transaction (e.g., from Salida to Ingreso) is immediately reflected in the transactions table without requiring a page reload
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account that has at least one transaction
+  - Note the type (Salida or Ingreso) of the first transaction visible in the table
+  - Click the edit (pen) icon on that transaction to open the edit form
+  - Change the "Tipo" dropdown to the opposite type (if it was "Salida" set it to "Ingreso", or vice versa)
+  - Select a compatible category for the new type if the current category is cleared
+  - Click "Guardar cambios" to submit the edit
+  - Verify the edit modal closes
+  - 'Verify the transactions table now shows the updated type for that transaction (color of the amount should have changed: green for Ingreso, red for Salida)'
+  - Verify the old type color/label is no longer shown for that row
+  - Do NOT reload the page before verifying the changes
+expected_result: After saving the edit, the transaction table immediately reflects the new type without a page reload. The amount color changes accordingly (green for Ingreso, red for Salida), and the old type display is no longer visible for that transaction row.

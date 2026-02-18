@@ -36,7 +36,7 @@ export default function RecurringTransactionsTable() {
                     {transaction.description}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${isIncome ? 'text-[color:var(--color-success)]' : 'text-[color:var(--color-danger)]'}`}>
-                    {formatCurrency(signedAmount)}
+                    {formatCurrency(Math.abs(signedAmount))}
                   </td>
                   <td className="px-4 py-3">{transaction.frequency}</td>
                   <td className="px-4 py-3">{transaction.next_run_date ? formatDate(transaction.next_run_date) : '-'}</td>

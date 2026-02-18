@@ -1,0 +1,16 @@
+name: Transaction Edit - Stale Account Balance Not Shown After Edit
+page: accounts
+page_path: /accounts
+task: Verify the account header does NOT continue showing the outdated balance after a transaction amount is edited
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account with at least one transaction
+  - Read and memorize the current "Saldo actual" value from the account header (e.g., "$ 5.000,00")
+  - Click edit on any transaction and change its amount to a significantly different value (e.g., add 10000 to the current amount)
+  - Click "Guardar cambios"
+  - Verify the modal closes
+  - Verify the "Saldo actual" in the header does NOT still show the previous memorized value
+  - Verify the "Saldo actual" now shows a different (updated) value consistent with the change made
+  - Do NOT reload the page
+expected_result: The old "Saldo actual" value is replaced by the updated balance immediately after editing the transaction. The header does not show stale/cached data from the initial page load.

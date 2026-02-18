@@ -3,15 +3,16 @@
 import { useMemo } from 'react';
 
 import { Card, Box, Typography, AppLink } from '@/components/shared/ui';
-import { formatCurrency, formatDateWithTime, formatSignedCurrency } from '@/lib/format';
+import { formatCurrency, formatDateWithTime } from '@/lib/format';
 import type { Transaction } from '@/lib/types';
 import { toSignedAmount } from '@/lib/utils/transactions';
 
 interface RecentTransactionsListProps {
   transactions: Transaction[];
+  accountCurrencyMap: Record<string, string>;
 }
 
-export default function RecentTransactionsList({ transactions }: RecentTransactionsListProps) {
+export default function RecentTransactionsList({ transactions, accountCurrencyMap }: RecentTransactionsListProps) {
   const recentTransactions = useMemo(
     () =>
       [...transactions]
@@ -51,7 +52,7 @@ export default function RecentTransactionsList({ transactions }: RecentTransacti
                 <Typography variant="body" as="p" className="text-sm font-medium text-white">
                   {tx.description ?? category ?? 'Movimiento'}
                 </Typography>
-                <Typography variant="body" as="p" className="text-xs text-muted">
+                <Typography variant="body" as="p" className="text-xs text-muted" suppressHydrationWarning>
                   {formatDateWithTime(tx.date)}
                 </Typography>
               </Box>
@@ -65,7 +66,7 @@ export default function RecentTransactionsList({ transactions }: RecentTransacti
                       : 'text-rose-400 font-semibold'
                   }
                 >
-                  {formatSignedCurrency(signedAmount)}
+                  {formatCurrency(Math.abs(signedAmount), accountCurrencyMap[tx.account_id] ?? 'ARS')}
                 </Typography>
                 <Typography variant="body" as="p" className="text-xs text-slate-500">
                   {category}

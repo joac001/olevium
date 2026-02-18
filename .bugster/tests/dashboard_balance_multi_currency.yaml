@@ -1,0 +1,14 @@
+name: Dashboard - Consolidated Balance Shows Multiple Currencies
+page: dashboard
+page_path: /dashboard
+task: Verify that the "Saldo consolidado" card displays balances for each currency separately when the user has accounts in more than one currency (e.g., ARS and USD)
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Ensure at least one ARS account and one USD account exist (create them if needed using the "+" button, selecting the respective currency from the Moneda dropdown)
+  - Navigate to /dashboard
+  - Locate the "Saldo consolidado" card in the stats section
+  - Verify the card shows a balance amount formatted in ARS (e.g., "$ 758.047,00")
+  - Verify the card also shows a separate balance amount formatted in USD (e.g., "US$ 1.200,00")
+  - Verify both currency lines are visible within the same card
+expected_result: The "Saldo consolidado" card displays one balance line per currency. If the user has ARS and USD accounts, both are shown separately with correct currency formatting ($ for ARS, US$ for USD), not a single merged ARS-only value.

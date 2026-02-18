@@ -7,6 +7,7 @@ import { Box, Card, Typography } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
+import { getAccountDetail, getAccountTransactions } from '@/lib/api';
 import type { Account, AccountType, AccountTransaction } from '@/types';
 import type { Transaction } from '@/lib/types';
 import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
@@ -67,7 +68,7 @@ export default function AccountDetailShell({
   const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
 
-  const [account] = useState<Account>(initialAccount);
+  const [account, setAccount] = useState<Account>(initialAccount);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [accountTypes] = useState<AccountType[]>(initialAccountTypes);
   const [accountDeleted, setAccountDeleted] = useState(false);
@@ -83,14 +84,22 @@ export default function AccountDetailShell({
     [transactions]
   );
 
-  const reloadTransactions = useCallback(() => {
+  const reloadTransactions = useCallback(async () => {
     if (accountDeleted) return;
-    // In SSR mode, we would need to call a mutation or refetch here
-    // For now, this is a placeholder that could invalidate React Query cache
     setLoadingTransactions(true);
-    // TODO: Implement refetch logic if needed
-    setTimeout(() => setLoadingTransactions(false), 500);
-  }, [accountDeleted]);
+    try {
+      const [{ data: txs }, { data: updatedAccount }] = await Promise.all([
+        getAccountTransactions(accountId),
+        getAccountDetail(accountId),
+      ]);
+      setTransactions(txs);
+      setAccount(updatedAccount);
+    } catch {
+      // silencioso — la tabla mantiene los datos anteriores
+    } finally {
+      setLoadingTransactions(false);
+    }
+  }, [accountDeleted, accountId]);
 
   const handleOpenEdit = useCallback(() => {
     if (!account) return;

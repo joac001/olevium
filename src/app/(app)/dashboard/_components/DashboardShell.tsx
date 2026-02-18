@@ -114,35 +114,52 @@ export default function DashboardShell({
     });
   }, [transactions, period, selectedMonth, selectedYear, selectedDay]);
 
-  const { totalBalanceARS, incomesPeriod, expensesPeriod, transactionsCountPeriod } =
+  // Mapa accountId → currency label (para gráficos)
+  const accountCurrencyMap = useMemo<Record<string, string>>(() => {
+    return accounts.reduce<Record<string, string>>((acc, account) => {
+      const currency =
+        typeof account.currency === 'string'
+          ? account.currency
+          : ((account.currency as any)?.label ?? 'ARS');
+      acc[String(account.accountId)] = currency;
+      return acc;
+    }, {});
+  }, [accounts]);
+
+  const { balances, incomesByCurrency, expensesByCurrency, transactionsCountPeriod } =
     useMemo(() => {
-      let incomes = 0;
-      let expenses = 0;
-
-      filteredTransactions.forEach(tx => {
-        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
-        const amount = Math.abs(signedAmount);
-        if (signedAmount >= 0) incomes += amount;
-        else expenses += amount;
-      });
-
-      const balances = accounts.reduce<Record<string, number>>((acc, account) => {
+      // Saldos consolidados por moneda (desde cuentas)
+      const balancesMap = accounts.reduce<Record<string, number>>((acc, account) => {
         const currency =
           typeof account.currency === 'string'
             ? account.currency
             : ((account.currency as any)?.label ?? 'ARS');
-        const current = acc[currency] ?? 0;
-        acc[currency] = current + Number(account.balance ?? 0);
+        acc[currency] = (acc[currency] ?? 0) + Number(account.balance ?? 0);
         return acc;
       }, {});
 
+      // Ingresos y salidas del período, agrupados por moneda
+      const incomesMap: Record<string, number> = {};
+      const expensesMap: Record<string, number> = {};
+
+      filteredTransactions.forEach(tx => {
+        const currency = accountCurrencyMap[tx.account_id] ?? 'ARS';
+        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
+        const amount = Math.abs(signedAmount);
+        if (signedAmount >= 0) {
+          incomesMap[currency] = (incomesMap[currency] ?? 0) + amount;
+        } else {
+          expensesMap[currency] = (expensesMap[currency] ?? 0) + amount;
+        }
+      });
+
       return {
-        totalBalanceARS: balances['ARS'] ?? 0,
-        incomesPeriod: incomes,
-        expensesPeriod: expenses,
+        balances: balancesMap,
+        incomesByCurrency: incomesMap,
+        expensesByCurrency: expensesMap,
         transactionsCountPeriod: filteredTransactions.length,
       };
-    }, [accounts, filteredTransactions]);
+    }, [accounts, filteredTransactions, accountCurrencyMap]);
 
   return (
     <Container className="py-8 space-y-8">
@@ -205,23 +222,39 @@ export default function DashboardShell({
       </header>
 
       <DashboardStatsCards
-        totalBalanceARS={totalBalanceARS}
-        incomesPeriod={incomesPeriod}
-        expensesPeriod={expensesPeriod}
+        balances={balances}
+        incomesByCurrency={incomesByCurrency}
+        expensesByCurrency={expensesByCurrency}
         transactionsCount={transactionsCountPeriod}
       />
 
       <section className="space-y-6">
-        <IncomeExpenseChart transactions={filteredTransactions} grouping={grouping} period={period} />
+        <IncomeExpenseChart
+          transactions={filteredTransactions}
+          grouping={grouping}
+          period={period}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          selectedDay={selectedDay}
+          accountCurrencyMap={accountCurrencyMap}
+        />
         <Box className="grid gap-6 lg:grid-cols-2">
-          <IncomeCategoryBreakdownChart transactions={filteredTransactions} totalIncome={incomesPeriod} />
-          <CategoryBreakdownChart transactions={filteredTransactions} totalExpenses={expensesPeriod} />
+          <IncomeCategoryBreakdownChart
+            transactions={filteredTransactions}
+            incomesByCurrency={incomesByCurrency}
+            accountCurrencyMap={accountCurrencyMap}
+          />
+          <CategoryBreakdownChart
+            transactions={filteredTransactions}
+            expensesByCurrency={expensesByCurrency}
+            accountCurrencyMap={accountCurrencyMap}
+          />
         </Box>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <AccountsBalanceList accounts={accounts} />
-        <RecentTransactionsList transactions={filteredTransactions} />
+        <RecentTransactionsList transactions={filteredTransactions} accountCurrencyMap={accountCurrencyMap} />
       </section>
     </Container>
   );

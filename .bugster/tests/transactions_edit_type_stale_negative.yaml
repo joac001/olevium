@@ -1,0 +1,18 @@
+name: Transaction Edit - Type Change Does Not Show Stale Data
+page: accounts
+page_path: /accounts
+task: Verify that after editing a transaction type, the old type is no longer visible in the table without needing to reload the page
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account that has at least one transaction with type "Salida" (negative amount in red)
+  - Click the edit (pen) icon on that "Salida" transaction
+  - Change the "Tipo" dropdown from "Salida" to "Ingreso"
+  - Select a compatible income category from the "Categoria" dropdown
+  - Click "Guardar cambios"
+  - Verify the modal closes successfully
+  - Verify the transaction row now shows the amount in green (indicating Ingreso)
+  - Verify the transaction row does NOT still show the amount in red (old Salida styling)
+  - Verify no loading spinner or stale overlay is visible on the table
+  - Do NOT reload the page at any point after saving
+expected_result: The stale Salida type is gone from the UI immediately after saving. The row shows Ingreso styling (green amount). No page reload is needed to see the change.

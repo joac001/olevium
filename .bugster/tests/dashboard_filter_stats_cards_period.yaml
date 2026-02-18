@@ -1,0 +1,14 @@
+name: Dashboard Filter - Stats Cards Reflect Selected Period
+page: dashboard
+page_path: /dashboard
+task: Verify that the "Ingresos del período", "Salidas del período" and "Movimientos registrados" cards all update correctly when the period filter is changed
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /dashboard
+  - Set "Período" to "Últimos 10 días" and note the values of "Ingresos del período", "Salidas del período" and "Movimientos registrados"
+  - Set "Período" to "Último año" and verify the three cards show different (likely larger) values since more transactions are included
+  - Set "Período" to "Mes específico", select a month and year with known transactions (e.g., the current month)
+  - Verify the "Movimientos registrados" badge at the top right and the card both reflect only the transactions in that month
+  - Set "Período" to a month with no transactions (e.g., a past month with no data)
+  - Verify "Ingresos del período" shows "$0,00", "Salidas del período" shows "$0,00" and "Movimientos registrados" shows "0"
+expected_result: All four stats cards respond correctly to period filter changes. When an empty period is selected, income, expenses show $0 and transaction count shows 0. When a broader period is selected, values increase appropriately.

@@ -124,7 +124,7 @@ export default function AccountTransactionsTable({
                   </Typography>
                 </Box>
                 <Typography variant="body" className={`text-sm font-semibold ${amountClass}`}>
-                  {formatAmount(signedAmount, currency)}
+                  {formatAmount(Math.abs(signedAmount), currency)}
                 </Typography>
               </Box>
 
@@ -181,7 +181,7 @@ export default function AccountTransactionsTable({
                 {formattedDate}
               </Typography>
               <Typography variant="body" className={`text-base font-semibold ${amountClass}`}>
-                {formatAmount(signedAmount, currency)}
+                {formatAmount(Math.abs(signedAmount), currency)}
               </Typography>
               <Box className="flex items-center justify-end gap-2">
                 <ActionButton

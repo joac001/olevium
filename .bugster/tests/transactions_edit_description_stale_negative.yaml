@@ -1,0 +1,17 @@
+name: Transaction Edit - Old Description Not Shown After Edit
+page: accounts
+page_path: /accounts
+task: Verify that the old description is no longer visible after editing a transaction, confirming no stale data is shown
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account with a transaction that has a non-empty description
+  - Note the exact description text shown in the Concepto column
+  - Click the edit (pen) icon on that transaction
+  - 'Replace the existing description with a new unique text: "Descripcion actualizada 2026"'
+  - Click "Guardar cambios"
+  - Verify the modal closes
+  - Verify the Concepto column for that transaction shows "Descripcion actualizada 2026"
+  - Verify the old description text is NOT visible anywhere in that transaction row
+  - Do NOT reload the page before checking
+expected_result: The old description text is completely gone from the table row. Only the new "Descripcion actualizada 2026" text appears in the Concepto column, confirming no stale data is displayed.

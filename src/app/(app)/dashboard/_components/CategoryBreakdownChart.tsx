@@ -25,18 +25,29 @@ const categoryPalette = [
 
 interface CategoryBreakdownChartProps {
   transactions: Transaction[];
-  totalExpenses: number;
+  expensesByCurrency: Record<string, number>;
+  accountCurrencyMap: Record<string, string>;
+}
+
+interface CategorySlice {
+  name: string;
+  amount: number;
+  currency: string;
 }
 
 export default function CategoryBreakdownChart({
   transactions,
-  totalExpenses,
+  expensesByCurrency,
+  accountCurrencyMap,
 }: CategoryBreakdownChartProps) {
-  const categorySlices = useMemo(() => {
-    const totals = new Map<string, number>();
+  const totalExpenses = Object.values(expensesByCurrency).reduce((a, b) => a + b, 0);
+
+  const categorySlices = useMemo<CategorySlice[]>(() => {
+    const totals = new Map<string, { name: string; amount: number; currency: string }>();
     transactions.forEach(tx => {
       const signedAmount = toSignedAmount(tx.amount, tx.type_id);
       if (signedAmount >= 0) return;
+      const currency = accountCurrencyMap?.[tx.account_id] ?? 'ARS';
       const categoryValue = tx.category;
       const name =
         typeof categoryValue === 'string'
@@ -44,18 +55,19 @@ export default function CategoryBreakdownChart({
           : categoryValue && typeof categoryValue === 'object'
             ? ((categoryValue as any).description ?? 'Sin categoría')
             : 'Sin categoría';
-      const current = totals.get(name) ?? 0;
-      totals.set(name, current + Math.abs(signedAmount));
+      const key = `${name}::${currency}`;
+      if (!totals.has(key)) totals.set(key, { name, amount: 0, currency });
+      totals.get(key)!.amount += Math.abs(signedAmount);
     });
 
-    return Array.from(totals.entries())
-      .sort((a, b) => b[1] - a[1])
+    return Array.from(totals.values())
+      .sort((a, b) => b.amount - a.amount)
       .slice(0, 6);
-  }, [transactions]);
+  }, [transactions, accountCurrencyMap]);
 
   const doughnutData = useMemo(() => {
-    const labels = categorySlices.map(([label]) => label);
-    const data = categorySlices.map(([, value]) => value);
+    const labels = categorySlices.map(s => s.name);
+    const data = categorySlices.map(s => s.amount);
     const backgroundColor = labels.map(
       (_, index) => categoryPalette[index % categoryPalette.length]
     );
@@ -101,7 +113,8 @@ export default function CategoryBreakdownChart({
                       label: tooltipItem => {
                         const label = doughnutData.labels?.[tooltipItem.dataIndex] ?? '';
                         const value = doughnutData.datasets[0]?.data?.[tooltipItem.dataIndex] ?? 0;
-                        return `${label}: ${formatCurrency(Number(value))}`;
+                        const currency = categorySlices[tooltipItem.dataIndex]?.currency ?? 'ARS';
+                        return `${label}: ${formatCurrency(Number(value), currency)}`;
                       },
                     },
                   },
@@ -111,22 +124,23 @@ export default function CategoryBreakdownChart({
             />
           </Box>
           <Box className="space-y-3">
-            {categorySlices.map(([name, value], index) => {
+            {categorySlices.map((slice, index) => {
               const color = categoryPalette[index % categoryPalette.length];
-              const percentage = totalExpenses > 0 ? Math.round((value / totalExpenses) * 100) : 0;
+              const currencyTotal = expensesByCurrency[slice.currency] ?? 0;
+              const percentage = currencyTotal > 0 ? Math.round((slice.amount / currencyTotal) * 100) : 0;
               return (
                 <Box
-                  key={name}
+                  key={`${slice.name}::${slice.currency}`}
                   className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2"
                 >
                   <Box className="flex items-center gap-3">
                     <Box className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
                     <Typography variant="body" as="span" className="text-sm text-slate-200">
-                      {name}
+                      {slice.name}
                     </Typography>
                   </Box>
                   <Typography variant="body" as="span" className="text-xs text-slate-400">
-                    {percentage}% · {formatCurrency(value)}
+                    {percentage}% · {formatCurrency(slice.amount, slice.currency)}
                   </Typography>
                 </Box>
               );

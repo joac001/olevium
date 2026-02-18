@@ -1,0 +1,17 @@
+name: Transaction Edit - Account Balance Header Updates After Edit
+page: accounts
+page_path: /accounts
+task: Verify that the account balance shown in the header updates immediately after editing a transaction amount, without requiring a page reload
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Open any account that has at least one Ingreso (income) transaction
+  - 'Note the exact "Saldo actual" value shown in the account header card (e.g., "Saldo actual: $ 758.047,00")'
+  - Click the edit (pen) icon on an Ingreso transaction
+  - Change the "Monto" field to a different value (e.g., if it was 1000, change it to 2000)
+  - Keep all other fields the same and click "Guardar cambios"
+  - Verify the modal closes
+  - Verify the "Saldo actual" value in the account header has changed to reflect the new amount
+  - Verify the old saldo value is no longer shown in the header
+  - Do NOT reload the page before verifying
+expected_result: The "Saldo actual" in the account header immediately reflects the updated transaction amount. The difference between old and new transaction amount is applied to the displayed balance, all without a page reload.

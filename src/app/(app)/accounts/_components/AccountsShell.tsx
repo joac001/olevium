@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { Box, Card, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { formatAmount } from '@/lib/utils/parser';
+import { useAccountsStore } from '@/lib/stores/accounts';
 import type { Account, AccountType } from '@/types';
 import AccountsTable from './AccountsTable';
 import CreateAccountForm from './CreateAccountForm';
@@ -16,8 +17,15 @@ interface AccountsShellProps {
 
 export default function AccountsShell({ initialAccounts, initialAccountTypes }: AccountsShellProps) {
   const { showModal, hideModal } = useModal();
-  const accounts = initialAccounts;
+  const storeAccounts = useAccountsStore(state => state.accounts);
+  const fetchAccounts = useAccountsStore(state => state.fetchAccounts);
   const accountTypes = initialAccountTypes;
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  const accounts = storeAccounts.length > 0 ? storeAccounts : initialAccounts;
 
   const balancesByCurrency = useMemo(() => {
     return accounts.reduce<Record<string, number>>((accumulator, account) => {
