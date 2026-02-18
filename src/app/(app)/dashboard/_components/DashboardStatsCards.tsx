@@ -52,13 +52,6 @@ export default function DashboardStatsCards({
         accent="from-rose-500/40 via-rose-400/20 to-rose-500/10"
         icon={<TrendingDown className="h-5 w-5" />}
       />
-      <DashboardCard
-        title="Movimientos registrados"
-        subtitle="Cantidad de transacciones en el rango"
-        values={[transactionsCount.toString()]}
-        accent="from-violet-500/40 via-violet-400/20 to-violet-500/10"
-        icon={<Database className="h-5 w-5" />}
-      />
     </section>
   );
 }

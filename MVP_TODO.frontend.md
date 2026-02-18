@@ -24,13 +24,6 @@ Este archivo agrupa las tareas del MVP para la app web (Next.js). La idea es ir 
 - [ ] **Indicadores visuales:** Diferenciar suscripciones semanales/mensuales/anuales con iconos o chips.
 - [ ] **Integración con transacciones:** Desde el detalle de una suscripción, mostrar las últimas transacciones generadas por esa recurrencia.
 
-## 4. Export CSV
-
-- [ ] **Botón de exportar:** En la vista principal de transacciones, agregar botón “Exportar CSV”.
-- [ ] **Filtros de exportación:** Respetar los mismos filtros que la tabla (fecha, cuenta, categoría) y enviarlos al endpoint de export.
-- [ ] **Descarga de archivo:** Implementar descarga real (`Content-Disposition: attachment`) usando el endpoint backend.
-- [ ] **Feedback de carga:** Mostrar spinner o estado “Generando CSV…” mientras se espera la respuesta.
-
 ## 5. Ruedita de configuraciones
 
 - [ ] **Icono de settings:** Agregar rueda de configuraciones en el header (desktop y mobile).
@@ -44,12 +37,3 @@ Este archivo agrupa las tareas del MVP para la app web (Next.js). La idea es ir 
 - [ ] **Formulario de presupuesto:** Form para crear/editar presupuesto por categoría (monto, mes, moneda).
 - [ ] **Indicadores de progreso:** Barra o chip que muestre % utilizado y resalte cuando se supera el límite.
 - [ ] **Integración con dashboard:** Mostrar un resumen rápido de “categorías al límite” en el home.
-
-## 7. Feedback in-app (bugs & ideas)
-
-- [ ] **Botón/entry point:** Agregar un botón fijo o item de menú “Enviar feedback / Reportar problema”.
-- [ ] **Modal de feedback:** Form simple con tipo (`Bug`, `Idea`, `Otro`) y textarea para el mensaje.
-- [ ] **Contexto automático:** Incluir automáticamente `page_path` y algunos metadatos (navegador, idioma) al llamar al backend.
-- [ ] **Flujo de éxito:** Mostrar mensaje de agradecimiento y limpiar el form cuando el envío fue exitoso.
-- [ ] **Manejo de errores:** Si el endpoint falla, mostrar un mensaje claro y permitir reintentar.
-
