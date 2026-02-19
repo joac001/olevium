@@ -28,10 +28,10 @@ export default function RecurringTransactionsTable() {
           <tbody className="divide-y divide-white/5 text-[color:var(--text-secondary)]">
             {recurringTransactions.length ? (
               recurringTransactions.map((transaction) => {
-                const signedAmount = toSignedAmount(transaction.amount, transaction.type_id);
+                const signedAmount = toSignedAmount(transaction.amount, transaction.typeId);
                 const isIncome = signedAmount >= 0;
                 return (
-                <tr key={transaction.recurring_transaction_id} className="transition hover:bg-white/5">
+                <tr key={transaction.recurringTransactionId} className="transition hover:bg-white/5">
                   <td className="px-4 py-3 font-medium text-[color:var(--text-primary)]">
                     {transaction.description}
                   </td>
@@ -39,7 +39,7 @@ export default function RecurringTransactionsTable() {
                     {formatCurrency(Math.abs(signedAmount))}
                   </td>
                   <td className="px-4 py-3">{transaction.frequency}</td>
-                  <td className="px-4 py-3">{transaction.next_run_date ? formatDate(transaction.next_run_date) : '-'}</td>
+                  <td className="px-4 py-3">{transaction.nextRunDate ? formatDate(transaction.nextRunDate) : '-'}</td>
                   <td className="px-4 py-3">
                     <Box className="flex justify-end gap-2">
                       <ActionButton

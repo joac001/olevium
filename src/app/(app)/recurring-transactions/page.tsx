@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Container } from '@/components/shared/ui';
 import {
   requireAuth,
@@ -8,6 +9,7 @@ import { getRecurringTransactionsPageData } from './_api';
 import RecurringTransactionsShell from './_components/RecurringTransactionsShell';
 import RecurringTransactionsHeader from './_components/RecurringTransactionsHeader';
 import RecurringTransactionsTable from './_components/RecurringTransactionsTable';
+import RecurringTransactionsSkeleton from './_skeletons/RecurringTransactionsSkeleton';
 
 export default async function RecurringTransactionsPage() {
   await requireAuth();
@@ -16,15 +18,17 @@ export default async function RecurringTransactionsPage() {
   const data = await handleProtectedResult(result);
 
   return (
-    <RecurringTransactionsShell
-      initialRecurringTransactions={data.recurringTransactions}
-      initialAccounts={data.accounts}
-      initialCategories={data.categories}
-    >
-      <Container className="gap-6">
-        <RecurringTransactionsHeader />
-        <RecurringTransactionsTable />
-      </Container>
-    </RecurringTransactionsShell>
+    <Suspense fallback={<RecurringTransactionsSkeleton />}>
+      <RecurringTransactionsShell
+        initialRecurringTransactions={data.recurringTransactions}
+        initialAccounts={data.accounts}
+        initialCategories={data.categories}
+      >
+        <Container className="gap-6">
+          <RecurringTransactionsHeader />
+          <RecurringTransactionsTable />
+        </Container>
+      </RecurringTransactionsShell>
+    </Suspense>
   );
 }

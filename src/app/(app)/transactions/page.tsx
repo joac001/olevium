@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   requireAuth,
   withAuthProtection,
@@ -5,6 +6,7 @@ import {
 } from '@/lib/server-auth';
 import { getTransactionsPageData } from './_api';
 import TransactionsShell from './_components/TransactionsShell';
+import TransactionsSkeleton from './_skeletons/TransactionsSkeleton';
 
 export default async function TransactionsPage() {
   await requireAuth();
@@ -13,10 +15,12 @@ export default async function TransactionsPage() {
   const data = await handleProtectedResult(result);
 
   return (
-    <TransactionsShell
-      initialTransactions={data.transactions}
-      initialAccounts={data.accounts}
-      initialCategories={data.categories}
-    />
+    <Suspense fallback={<TransactionsSkeleton />}>
+      <TransactionsShell
+        initialTransactions={data.transactions}
+        initialAccounts={data.accounts}
+        initialCategories={data.categories}
+      />
+    </Suspense>
   );
 }

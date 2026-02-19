@@ -1,6 +1,11 @@
+import type { Metadata } from 'next';
 import { NavBar, NavLink } from '@/components/layout/';
 import FeedbackWidget from '@/components/layout/FeedbackWidget';
 import { Typography } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 const links: NavLink[] = [
   { icon: 'fas fa-home', label: 'Inicio', href: '/dashboard' },

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Container } from '@/components/shared/ui';
 import {
   requireAuth,
@@ -6,6 +7,7 @@ import {
 } from '@/lib/server-auth';
 import { getAccountsPageData } from './_api';
 import AccountsShell from './_components/AccountsShell';
+import AccountsSkeleton from './_skeletons/AccountsSkeleton';
 
 export default async function AccountsPage() {
   await requireAuth();
@@ -14,11 +16,13 @@ export default async function AccountsPage() {
   const data = await handleProtectedResult(result);
 
   return (
-    <Container className="py-10">
-      <AccountsShell
-        initialAccounts={data.accounts as any}
-        initialAccountTypes={data.accountTypes as any}
-      />
-    </Container>
+    <Suspense fallback={<AccountsSkeleton />}>
+      <Container className="py-10">
+        <AccountsShell
+          initialAccounts={data.accounts as any}
+          initialAccountTypes={data.accountTypes as any}
+        />
+      </Container>
+    </Suspense>
   );
 }

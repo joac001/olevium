@@ -134,10 +134,10 @@ export default function RecurringTransactionsShell({
       if (!confirmed) return;
 
       try {
-        await deleteMutation.mutateAsync(transaction.recurring_transaction_id);
+        await deleteMutation.mutateAsync(transaction.recurringTransactionId);
         // Update local state
         setRecurringTransactions(prev =>
-          prev.filter(t => t.recurring_transaction_id !== transaction.recurring_transaction_id)
+          prev.filter(t => t.recurringTransactionId !== transaction.recurringTransactionId)
         );
         showNotification(
           'fas fa-trash-check',

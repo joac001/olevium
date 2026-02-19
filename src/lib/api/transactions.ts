@@ -1,14 +1,18 @@
 import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type {
   Transaction,
-  TransactionType,
+  ApiUserTransaction,
+  ApiTransactionType,
   CreateTransactionPayload,
   UpdateTransactionPayload,
-} from '@/lib/types';
+} from '@/types';
 import type { ApiCollectionResult } from './types';
 
-const normalizeTransaction = (raw: any): Transaction => {
-  const typeId = Number(raw.type_id ?? raw.transaction_type_id ?? 0);
+// TransactionType is the raw API shape (snake_case), re-exported from @/lib/types
+type TransactionType = ApiTransactionType;
+
+const normalizeTransaction = (raw: ApiUserTransaction): Transaction => {
+  const typeId = Number(raw.type_id ?? 0);
   const amount = Number(raw.amount ?? 0);
 
   return {
@@ -32,7 +36,7 @@ export async function getTransactions(): Promise<ApiCollectionResult<Transaction
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as ApiUserTransaction[];
   return { data: raw.map(normalizeTransaction) };
 }
 
@@ -45,7 +49,7 @@ export async function getTransactionsByDateRange(
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as ApiUserTransaction[];
   return { data: raw.map(normalizeTransaction) };
 }
 
@@ -63,7 +67,7 @@ export async function postTransaction(payload: CreateTransactionPayload): Promis
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo crear la transacción (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as ApiUserTransaction;
   return normalizeTransaction(raw);
 }
 
@@ -81,7 +85,7 @@ export async function putTransaction(transactionId: string, payload: UpdateTrans
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo actualizar la transacción (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as ApiUserTransaction;
   return normalizeTransaction(raw);
 }
 
@@ -98,7 +102,7 @@ export async function getAccountTransactions(accountId: string): Promise<ApiColl
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as ApiUserTransaction[];
   return { data: raw.map(normalizeTransaction) };
 }
 
@@ -107,11 +111,11 @@ export async function getTransactionTypes(): Promise<ApiCollectionResult<Transac
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as any[];
+  const raw = (await response.json()) as ApiTransactionType[];
   const normalized = raw.map(item => ({
-    type_id: Number(item.type_id ?? item.transaction_type_id ?? 0),
+    type_id: Number(item.type_id ?? 0),
     name: String(item.name ?? 'Desconocido'),
-    created_at: String(item.created_at ?? item.createdAt ?? new Date().toISOString()),
+    created_at: String(item.created_at ?? new Date().toISOString()),
   }));
   return { data: normalized };
 }

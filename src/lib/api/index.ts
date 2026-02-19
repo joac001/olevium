@@ -35,6 +35,7 @@ export {
 // Re-export recurring transactions functions
 export {
   getRecurringTransactions,
+  normalizeRecurringTransaction,
 } from './recurring';
 
 // Re-export user functions

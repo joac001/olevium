@@ -17,15 +17,15 @@ import CreateTransactionForm from '../../_components/CreateTransactionForm';
 
 function normalizeTransaction(tx: Transaction): AccountTransaction {
   const categoryRaw = tx.category;
-  const category = categoryRaw && typeof categoryRaw === 'object'
+  const category = categoryRaw
     ? {
-        categoryId: (categoryRaw as any).category_id ?? '',
-        description: (categoryRaw as any).description ?? '',
-        color: (categoryRaw as any).color ?? null,
-        transactionType: (categoryRaw as any).transaction_type
+        categoryId: categoryRaw.category_id ?? '',
+        description: categoryRaw.description ?? '',
+        color: categoryRaw.color ?? null,
+        transactionType: categoryRaw.transaction_type
           ? {
-              typeId: (categoryRaw as any).transaction_type.type_id,
-              name: (categoryRaw as any).transaction_type.name,
+              typeId: categoryRaw.transaction_type.type_id,
+              name: categoryRaw.transaction_type.name,
             }
           : null,
       }
@@ -42,8 +42,8 @@ function normalizeTransaction(tx: Transaction): AccountTransaction {
     category,
     transactionType: tx.transaction_type
       ? {
-          typeId: (tx.transaction_type as any).type_id,
-          name: (tx.transaction_type as any).name,
+          typeId: tx.transaction_type.type_id,
+          name: tx.transaction_type.name,
         }
       : null,
     typeName: tx.type_name ?? null,
@@ -106,8 +106,8 @@ export default function AccountDetailShell({
     showModal(
       <Card tone="accent" title="Editar cuenta">
         <EditAccountForm
-          account={account as any}
-          accountTypes={accountTypes as any}
+          account={account}
+          accountTypes={accountTypes}
           loadingTypes={false}
           onSuccess={() => {
             hideModal();
@@ -156,9 +156,7 @@ export default function AccountDetailShell({
     );
   }
 
-  const currencyLabel = typeof account.currency === 'string'
-    ? account.currency
-    : (account.currency as any)?.label ?? 'Sin moneda';
+  const currencyLabel = account.currency ?? 'Sin moneda';
 
   return (
     <Box className="flex w-full max-w-6xl flex-col gap-6">
