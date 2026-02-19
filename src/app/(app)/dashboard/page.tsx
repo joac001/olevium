@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 
 import DashboardShell from './_components/DashboardShell';
 import DashboardSkeleton from './_skeletons/DashboardSkeleton';
-import { getAccounts, getTransactions } from '@/lib/api';
+import { getDashboardPageData } from './_api';
 import {
   requireAuth,
   withAuthProtection,
@@ -12,14 +12,7 @@ import {
 export default async function DashboardPage() {
   await requireAuth();
 
-  const result = await withAuthProtection(async () => {
-    const [accountsResult, transactionsResult] = await Promise.all([
-      getAccounts(),
-      getTransactions(),
-    ]);
-    return { accounts: accountsResult.data, transactions: transactionsResult.data };
-  });
-
+  const result = await withAuthProtection(() => getDashboardPageData());
   const { accounts, transactions } = await handleProtectedResult(result);
 
   return (
