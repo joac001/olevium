@@ -288,7 +288,12 @@ export default function IncomeExpenseChart({
         </Box>
       </Box>
       <Box className="h-72 md:h-80" style={{ minHeight: '18rem' }}>
-        <Line ref={chartRef} data={lineData} options={lineOptions} />
+        <Line
+          key={`${period}-${grouping}-${selectedMonth ?? ''}-${selectedYear ?? ''}-${selectedDay ?? ''}`}
+          ref={chartRef}
+          data={lineData}
+          options={lineOptions}
+        />
       </Box>
     </Card>
   );
