@@ -25,10 +25,9 @@ ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip,
 interface IncomeExpenseChartProps {
   transactions: Transaction[];
   grouping: 'daily' | 'monthly';
-  period: '10d' | '30d' | '365d' | 'month' | 'day';
+  period: '10d' | '30d' | '365d' | 'month';
   selectedMonth?: string;
   selectedYear?: string;
-  selectedDay?: string;
   accountCurrencyMap?: Record<string, string>;
 }
 
@@ -38,7 +37,6 @@ export default function IncomeExpenseChart({
   period,
   selectedMonth,
   selectedYear,
-  selectedDay,
   accountCurrencyMap,
 }: IncomeExpenseChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
@@ -108,8 +106,6 @@ export default function IncomeExpenseChart({
           const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           dailyMap.set(key, { income: 0, expense: 0 });
         }
-      } else if (period === 'day' && selectedDay) {
-        dailyMap.set(selectedDay, { income: 0, expense: 0 });
       } else {
         const range = period === '10d' ? 10 : period === '30d' ? 30 : 365;
         const today = new Date();
@@ -143,7 +139,7 @@ export default function IncomeExpenseChart({
     }
 
     return { labels: chartLabels, incomeDataset: incomePoints, expenseDataset: expensePoints };
-  }, [currencyTransactions, grouping, period, selectedMonth, selectedYear, selectedDay]);
+  }, [currencyTransactions, grouping, period, selectedMonth, selectedYear]);
 
   const lineData = useMemo(
     () => ({
@@ -289,7 +285,7 @@ export default function IncomeExpenseChart({
       </Box>
       <Box className="h-72 md:h-80" style={{ minHeight: '18rem' }}>
         <Line
-          key={`${period}-${grouping}-${selectedMonth ?? ''}-${selectedYear ?? ''}-${selectedDay ?? ''}`}
+          key={`${period}-${grouping}-${selectedMonth ?? ''}-${selectedYear ?? ''}`}
           ref={chartRef}
           data={lineData}
           options={lineOptions}

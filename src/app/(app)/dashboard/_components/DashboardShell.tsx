@@ -7,7 +7,6 @@ import {
   Box,
   Typography,
   DropMenu,
-  DateInput,
 } from '@/components/shared/ui';
 import type { Transaction } from '@/lib/types';
 import type { Account } from '@/types';
@@ -26,7 +25,6 @@ const PERIOD_OPTIONS: DropMenuOption[] = [
   { value: '30d', label: 'Últimos 30 días' },
   { value: '365d', label: 'Último año' },
   { value: 'month', label: 'Mes específico' },
-  { value: 'day', label: 'Día específico' },
 ];
 
 const GROUPING_OPTIONS: DropMenuOption[] = [
@@ -71,12 +69,15 @@ export default function DashboardShell({
 }: DashboardShellProps) {
   const [accounts] = useState<Account[]>(initialAccounts);
   const [transactions] = useState<Transaction[]>(initialTransactions);
-  const [period, setPeriod] = useState<'10d' | '30d' | '365d' | 'month' | 'day'>('365d');
+  const [period, setPeriod] = useState<'10d' | '30d' | '365d' | 'month'>('365d');
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<string>(String(now.getMonth() + 1));
   const [selectedYear, setSelectedYear] = useState<string>(String(now.getFullYear()));
-  const [selectedDay, setSelectedDay] = useState<string>('');
   const [grouping, setGrouping] = useState<'daily' | 'monthly'>('daily');
+
+  // Monthly grouping only makes sense for multi-month views (i.e. '365d')
+  const groupingAllowed = period === '365d';
+  const effectiveGrouping = groupingAllowed ? grouping : 'daily';
 
   const filteredTransactions = useMemo(() => {
     const now = new Date();
@@ -97,22 +98,12 @@ export default function DashboardShell({
       });
     }
 
-    if (period === 'day' && selectedDay) {
-      const dayStart = new Date(selectedDay);
-      const dayEnd = new Date(selectedDay);
-      dayEnd.setHours(23, 59, 59, 999);
-      return transactions.filter(tx => {
-        const txDate = new Date(tx.date);
-        return txDate >= dayStart && txDate <= dayEnd;
-      });
-    }
-
     start.setHours(0, 0, 0, 0);
     return transactions.filter(tx => {
       const txDate = new Date(tx.date);
       return txDate >= start && txDate <= now;
     });
-  }, [transactions, period, selectedMonth, selectedYear, selectedDay]);
+  }, [transactions, period, selectedMonth, selectedYear]);
 
   // Mapa accountId → currency label (para gráficos)
   const accountCurrencyMap = useMemo<Record<string, string>>(() => {
@@ -198,16 +189,12 @@ export default function DashboardShell({
               </Box>
             </>
           )}
-          {period === 'day' && (
-            <Box className="w-44">
-              <DateInput label="Día" value={selectedDay} onValueChange={setSelectedDay} />
-            </Box>
-          )}
           <Box className="w-44">
             <DropMenu
               label="Agrupar"
               options={GROUPING_OPTIONS}
-              value={grouping}
+              value={effectiveGrouping}
+              disabled={!groupingAllowed}
               onValueChange={value => setGrouping((value as typeof grouping) ?? 'daily')}
             />
           </Box>
@@ -231,11 +218,10 @@ export default function DashboardShell({
       <section className="space-y-6">
         <IncomeExpenseChart
           transactions={filteredTransactions}
-          grouping={grouping}
+          grouping={effectiveGrouping}
           period={period}
           selectedMonth={selectedMonth}
           selectedYear={selectedYear}
-          selectedDay={selectedDay}
           accountCurrencyMap={accountCurrencyMap}
         />
         <Box className="grid gap-6 lg:grid-cols-2">

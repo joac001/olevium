@@ -7,7 +7,7 @@ steps:
   - Navigate to /dashboard
   - Set the "Período" filter to "Mes específico"
   - Set the "Mes" to "Enero" and "Año" to "2026"
-  - Set "Agrupar" to "Diario"
+  - Verify that the "Agrupar" filter is disabled and automatically locked to "Diario" (monthly grouping is not available for "Mes específico")
   - Look at the "Flujo de ingresos y salidas" chart X-axis
   - Verify the leftmost X-axis label is NOT from January 2025 (a year before the selected month)
   - Verify the leftmost X-axis label starts from "2026-01-01" or similar (first day of January 2026)
