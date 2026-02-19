@@ -3,7 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Typography, Button } from '@/components/shared/ui';
+import { Typography, Button, AppLink } from '@/components/shared/ui';
 import { Clock, CreditCard, FileText } from 'lucide-react';
 
 export function CTASection() {
@@ -77,12 +77,13 @@ export function CTASection() {
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.4, delay: 0.45 }}
         >
-          <button
-            onClick={() => router.push('/auth')}
+          <AppLink
+            href="/auth"
+            variant="unstyled"
             className="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors underline-offset-4 hover:underline"
           >
             ¿Ya tenés cuenta? Iniciá sesión
-          </button>
+          </AppLink>
         </motion.div>
       </motion.div>
 

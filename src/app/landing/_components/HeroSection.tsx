@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Typography } from '@/components/shared/ui';
+import { Button, Typography, AppLink } from '@/components/shared/ui';
 import Image from 'next/image';
 
 const questions = [
@@ -78,6 +78,7 @@ export function HeroSection() {
               transform: `rotate(${position.rotate}deg)`,
             }}
             className="max-w-xs md:max-w-sm pointer-events-none"
+            aria-hidden="true"
           >
             <Typography
               variant="body"
@@ -138,12 +139,13 @@ export function HeroSection() {
               onClick={() => router.push('/auth?mode=register')}
               className="px-8 py-3 text-lg w-full sm:w-auto"
             />
-            <button
-              onClick={() => router.push('/auth')}
+            <AppLink
+              href="/auth"
+              variant="unstyled"
               className="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors underline-offset-4 hover:underline"
             >
               Ya tengo cuenta
-            </button>
+            </AppLink>
           </div>
         </motion.div>
       </motion.div>
@@ -154,6 +156,7 @@ export function HeroSection() {
         animate={{ opacity: showBrand ? 0.5 : 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
         className="absolute bottom-8"
+        aria-hidden="true"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

@@ -14,7 +14,7 @@ const SCROLL_THRESHOLD = 50; // minimum accumulated delta to trigger scroll
 const DELTA_RESET_TIMEOUT = 150; // ms of inactivity before resetting accumulated delta
 
 export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const lastScrollTime = useRef(0);
   const isScrolling = useRef(false);
@@ -125,7 +125,7 @@ export default function LandingPage() {
   }, [currentSection, scrollToSection]);
 
   return (
-    <div ref={containerRef} className="relative h-screen overflow-hidden">
+    <main ref={containerRef} className="relative h-screen overflow-hidden">
       <div className="relative z-0 h-full">
         <HeroSection />
         <DemoSection />
@@ -134,6 +134,6 @@ export default function LandingPage() {
         <PrivacySection />
         <CTASection />
       </div>
-    </div>
+    </main>
   );
 }

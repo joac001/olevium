@@ -88,7 +88,7 @@ export function DemoSection() {
                 className="flex justify-end relative z-10"
               >
                 <div className="bg-[#005c4b] rounded-lg rounded-tr-none px-3 py-2 max-w-[80%] shadow">
-                  <p className="text-white text-sm">Supermercado 45000</p>
+                  <Typography variant="body" className="text-white text-sm">Supermercado 45000</Typography>
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className="text-[10px] text-[#8696a0]">14:32</span>
                     {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" />}
@@ -105,9 +105,9 @@ export function DemoSection() {
                 className="flex justify-start relative z-10"
               >
                 <div className="bg-[#202c33] rounded-lg rounded-tl-none px-3 py-2 max-w-[85%] shadow">
-                  <p className="text-white text-sm">
+                  <Typography variant="body" className="text-white text-sm">
                     Registrado en <span className="text-[var(--color-primary)]">Alimentación</span>
-                  </p>
+                  </Typography>
                   <p className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</p>
                   <span className="text-[10px] text-[#8696a0] float-right mt-1">14:32</span>
                 </div>

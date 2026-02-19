@@ -198,9 +198,9 @@ export function ChaosToOrderSection() {
                     {category.category}
                   </span>
                 </div>
-                <div className="text-lg md:text-xl font-bold text-[var(--color-danger)]">
+                <Typography variant="body" className="text-lg md:text-xl font-bold text-[var(--color-danger)]">
                   -<AnimatedCounter value={category.amount} isInView={showOrder} />
-                </div>
+                </Typography>
               </motion.div>
             ))}
           </div>
