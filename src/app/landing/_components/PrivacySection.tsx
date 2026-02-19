@@ -56,9 +56,9 @@ export function PrivacySection() {
               }`}
             >
               {item.positive ? (
-                <Check className="w-4 h-4 text-[var(--color-success)]" />
+                <Check className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
               ) : (
-                <X className="w-4 h-4 text-[var(--color-danger)]" />
+                <X className="w-4 h-4 text-[var(--color-danger)]" aria-hidden="true" />
               )}
             </div>
             <Typography

@@ -91,8 +91,8 @@ export function DemoSection() {
                   <Typography variant="body" className="text-white text-sm">Supermercado 45000</Typography>
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className="text-[10px] text-[#8696a0]">14:32</span>
-                    {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" />}
-                    {step >= 3 && <CheckCheck className="w-4 h-4 text-[#53bdeb]" />}
+                    {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" aria-hidden="true" />}
+                    {step >= 3 && <CheckCheck className="w-4 h-4 text-[#53bdeb]" aria-hidden="true" />}
                   </div>
                 </div>
               </motion.div>

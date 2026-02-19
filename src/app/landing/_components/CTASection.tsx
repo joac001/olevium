@@ -50,7 +50,7 @@ export function CTASection() {
               key={index}
               className="flex items-center gap-2 text-[var(--text-muted)]"
             >
-              <item.icon className="w-4 h-4" />
+              <item.icon className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm">{item.text}</span>
             </div>
           ))}
