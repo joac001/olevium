@@ -108,7 +108,7 @@ export function DemoSection() {
                   <Typography variant="body" className="text-white text-sm">
                     Registrado en <span className="text-[var(--color-primary)]">Alimentación</span>
                   </Typography>
-                  <p className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</p>
+                  <Typography variant="body" className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</Typography>
                   <span className="text-[10px] text-[#8696a0] float-right mt-1">14:32</span>
                 </div>
               </motion.div>
