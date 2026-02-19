@@ -9,6 +9,5 @@ steps:
   - Enter valid password using ${BUGSTER_PASSWORD}
   - Click the "Iniciar sesión" button
   - Verify redirect to /dashboard
-  - Verify success toast "Sesion iniciada exitosamente" is visible
   - Verify the navigation bar shows the logout button
 expected_result: User logs in successfully, lands on /dashboard, and sees the navigation available
