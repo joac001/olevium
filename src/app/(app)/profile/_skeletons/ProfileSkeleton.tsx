@@ -1,5 +1,3 @@
-'use client';
-
 import { Container, Card, Box, Skeleton } from '@/components/shared/ui';
 
 export default function ProfileSkeleton() {

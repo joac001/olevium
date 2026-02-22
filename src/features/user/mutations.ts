@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type { StoredProfile } from '@/lib/auth';
+import { userKeys } from './queries';
 
 type UpdateProfilePayload = {
   name?: string;
@@ -46,7 +47,7 @@ export const useUpdateProfileMutation = () => {
   return useMutation({
     mutationFn: putProfile,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: userKeys.me });
     },
   });
 };

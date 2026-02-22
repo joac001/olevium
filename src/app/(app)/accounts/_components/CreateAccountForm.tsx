@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import type { AccountType } from '@/types';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import { useCurrenciesQuery, useCreateAccountMutation } from '@/features/accounts/queries';
 import { useNotification } from '@/context/NotificationContext';
 import {
   buildAccountTypeOptions,
@@ -27,12 +27,10 @@ export default function CreateAccountForm({
   defaultTypeId,
 }: CreateAccountFormProps) {
   const { showNotification } = useNotification();
-  const createAccount = useAccountsStore(state => state.createAccount);
-  const getCurrencies = useAccountsStore(state => state.getCurrencies);
-  const currencies = useAccountsStore(state => state.currencies);
-  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
+  const { data: currencies = [], isLoading: loadingCurrencies } = useCurrenciesQuery();
+  const createAccountMutation = useCreateAccountMutation();
+  const isSubmitting = createAccountMutation.isPending;
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const initialTypeId = defaultTypeId ?? accountTypes[0]?.typeId ?? null;
 
   const typeOptions: DropMenuOption[] = useMemo(
@@ -44,10 +42,6 @@ export default function CreateAccountForm({
     () => buildCurrencyOptions(currencies),
     [currencies]
   );
-
-  useEffect(() => {
-    getCurrencies();
-  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -69,12 +63,11 @@ export default function CreateAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
-        await createAccount({
+        await createAccountMutation.mutateAsync({
           name: normalized.name,
-          typeId: normalized.typeId,
-          currencyId: normalized.currencyId,
+          type_id: normalized.typeId,
+          currency_id: normalized.currencyId,
           balance: normalized.balance,
         });
 
@@ -126,11 +119,9 @@ export default function CreateAccountForm({
           'Error al crear cuenta',
           message
         );
-      } finally {
-        setIsSubmitting(false);
       }
     },
-    [createAccount, onSuccess, showNotification]
+    [createAccountMutation, onSuccess, showNotification]
   );
 
   return (

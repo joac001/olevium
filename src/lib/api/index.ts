@@ -6,6 +6,7 @@ export {
   getAccounts,
   getAccountTypes,
   getAccountDetail,
+  getCurrencies,
   postAccount,
   putAccount,
   deleteAccount,
@@ -30,6 +31,8 @@ export {
   postCategory,
   putCategory,
   deleteCategory,
+  deactivateCategory,
+  reactivateCategory,
 } from './categories';
 
 // Re-export recurring transactions functions

@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu, Typography, Button, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useCreateCategoryMutation } from '@/features/categories/queries';
+import { useTransactionTypesQuery } from '@/features/transactions/queries';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import type { TransactionCategoryCreateInput } from '@/types';
 import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 
 interface CreateCategoryFormProps {
@@ -16,58 +16,25 @@ interface CreateCategoryFormProps {
 
 export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const createCategory = useTransactionsStore(state => state.createCategory);
-  const fetchTransactionTypes = useTransactionsStore(state => state.fetchTransactionTypes);
-  const transactionTypes = useTransactionsStore(state => state.transactionTypes);
-  const transactionTypesLoading = useTransactionsStore(state => state.transactionTypesLoading);
-  const [typesError, setTypesError] = useState<string | null>(null);
-  const [isRequestingTypes, setIsRequestingTypes] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    data: transactionTypes = [],
+    isLoading: transactionTypesLoading,
+    refetch: refetchTypes,
+  } = useTransactionTypesQuery();
+  const createCategoryMutation = useCreateCategoryMutation();
   const [selectedColor, setSelectedColor] = useState<string>(CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff');
   const [selectedTypeId, setSelectedTypeId] = useState<string>('');
-
-  const ensureTransactionTypes = useCallback(async () => {
-    if (transactionTypesLoading || isRequestingTypes) return;
-    if (transactionTypes.length) {
-      setTypesError(null);
-      return;
-    }
-
-    setIsRequestingTypes(true);
-    try {
-      await fetchTransactionTypes();
-      setTypesError(null);
-    } catch (error) {
-      const context = createOperationContext(
-        'fetch',
-        'tipos de transaccion',
-        'los tipos de transaccion'
-      );
-      showError(error, context);
-      setTypesError('No pudimos cargar los tipos de transaccion. Reintenta nuevamente.');
-    } finally {
-      setIsRequestingTypes(false);
-    }
-  }, [
-    fetchTransactionTypes,
-    isRequestingTypes,
-    showError,
-    transactionTypes.length,
-    transactionTypesLoading,
-  ]);
-
-  useEffect(() => {
-    void ensureTransactionTypes();
-  }, [ensureTransactionTypes]);
 
   const typeOptions: DropMenuOption[] = useMemo(
     () =>
       transactionTypes.map(type => ({
-        value: String(type.typeId),
+        value: String(type.type_id),
         label: type.name,
       })),
     [transactionTypes]
   );
+
+  const isSubmitting = createCategoryMutation.isPending;
 
   const buttons = useMemo(
     () => [
@@ -117,16 +84,12 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         return;
       }
 
-      const payload: TransactionCategoryCreateInput = {
-        description: trimmedDescription,
-        typeId,
-        color: selectedColor,
-      };
-
-      setIsSubmitting(true);
-
       try {
-        await createCategory(payload);
+        await createCategoryMutation.mutateAsync({
+          description: trimmedDescription,
+          type_id: typeId,
+          color: selectedColor,
+        });
 
         const context = createOperationContext('create', 'categoria', 'la categoria');
         showSuccess('Categoria creada exitosamente. Esta lista para usarse.', context);
@@ -135,14 +98,12 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       } catch (error) {
         const context = createOperationContext('create', 'categoria', 'la categoria');
         showError(error, context);
-      } finally {
-        setIsSubmitting(false);
       }
     },
-    [createCategory, onSuccess, selectedColor, selectedTypeId, showNotification, showError, showSuccess]
+    [createCategoryMutation, onSuccess, selectedColor, selectedTypeId, showNotification, showError, showSuccess]
   );
 
-  const isLoadingTypes = transactionTypesLoading || isRequestingTypes;
+  const isLoadingTypes = transactionTypesLoading;
   const hasOptions = typeOptions.length > 0;
 
   return (
@@ -182,13 +143,12 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
         {!isLoadingTypes && !hasOptions && (
           <Box className="flex flex-col gap-2">
             <Typography variant="body" className="text-xs text-[color:var(--text-muted)]">
-              {typesError ??
-                'No hay tipos de transaccion disponibles. Reintenta cargar antes de registrar una categoria.'}
+              No hay tipos de transaccion disponibles. Reintenta cargar antes de registrar una categoria.
             </Typography>
             <Button
               type="secondary"
               text="Reintentar"
-              onClick={ensureTransactionTypes}
+              onClick={() => void refetchTypes()}
               disabled={isLoadingTypes}
               className="w-fit px-3 py-1 text-xs"
             />

@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Box, Typography, Container } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
-import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
-import { getTransactions, getCategories, exportTransactionsCsv } from '@/lib/api';
+import { useDeleteTransactionMutation, useTransactionsQuery } from '@/features/transactions/queries';
+import { useAccountsQuery } from '@/features/accounts/queries';
+import { useCategoriesQuery } from '@/features/categories/queries';
+import { exportTransactionsCsv } from '@/lib/api';
 import type { Category, Transaction } from '@/lib/types';
 import type { Account } from '@/types';
 import { formatAccountName } from '@/lib/format';
@@ -106,7 +107,6 @@ export default function TransactionsShell({
   initialAccounts,
   initialCategories,
 }: TransactionsShellProps) {
-  const queryClient = useQueryClient();
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
 
@@ -116,10 +116,9 @@ export default function TransactionsShell({
   const [searchTerm, setSearchTerm] = useState('');
   const [isExporting, setIsExporting] = useState(false);
 
-  // Usar datos iniciales del servidor
-  const [transactions, setTransactions] = useState(initialTransactions);
-  const [accounts, setAccounts] = useState(initialAccounts);
-  const [categories, setCategories] = useState(initialCategories);
+  const { data: transactions = initialTransactions } = useTransactionsQuery({ initialData: initialTransactions });
+  const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
+  const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
 
@@ -177,18 +176,6 @@ export default function TransactionsShell({
     setSearchTerm('');
   }, []);
 
-  const refetchTransactions = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    const { data } = await getTransactions();
-    setTransactions(data);
-  }, [queryClient]);
-
-  const refetchCategories = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['categories'] });
-    const { data } = await getCategories();
-    setCategories(data);
-  }, [queryClient]);
-
   const handleCreateTransaction = useCallback(() => {
     showModal(
       <TransactionFormModal
@@ -196,9 +183,8 @@ export default function TransactionsShell({
         accounts={accounts}
         categories={categories}
         onCancel={hideModal}
-        onCompleted={async () => {
+        onCompleted={() => {
           hideModal();
-          await Promise.all([refetchTransactions(), refetchCategories()]);
           showNotification(
             'fas fa-circle-check',
             'success',
@@ -208,15 +194,7 @@ export default function TransactionsShell({
         }}
       />
     );
-  }, [
-    accounts,
-    categories,
-    hideModal,
-    refetchCategories,
-    refetchTransactions,
-    showModal,
-    showNotification
-  ]);
+  }, [accounts, categories, hideModal, showModal, showNotification]);
 
   const handleEditTransaction = useCallback(
     (transaction: Transaction) => {
@@ -227,9 +205,8 @@ export default function TransactionsShell({
           accounts={accounts}
           categories={categories}
           onCancel={hideModal}
-          onCompleted={async () => {
+          onCompleted={() => {
             hideModal();
-            await Promise.all([refetchTransactions(), refetchCategories()]);
             showNotification(
               'fas fa-pen-to-square',
               'success',
@@ -240,15 +217,7 @@ export default function TransactionsShell({
         />
       );
     },
-    [
-      accounts,
-      categories,
-      hideModal,
-      refetchCategories,
-      refetchTransactions,
-      showModal,
-      showNotification
-    ]
+    [accounts, categories, hideModal, showModal, showNotification]
   );
 
   const handleDeleteTransaction = useCallback(
@@ -265,8 +234,10 @@ export default function TransactionsShell({
       if (!confirmed) return;
 
       try {
-        await deleteTransactionMutation.mutateAsync(transaction.transaction_id);
-        await refetchTransactions();
+        await deleteTransactionMutation.mutateAsync({
+          transactionId: transaction.transaction_id,
+          accountId: transaction.account_id,
+        });
         showNotification(
           'fas fa-trash-check',
           'accent',
@@ -278,7 +249,7 @@ export default function TransactionsShell({
         showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
       }
     },
-    [accountDictionary, deleteTransactionMutation, refetchTransactions, showNotification]
+    [accountDictionary, deleteTransactionMutation, showNotification]
   );
 
   const handleExportCsv = useCallback(async () => {

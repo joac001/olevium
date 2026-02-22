@@ -2,13 +2,12 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useMemo,
-  useState,
   type ReactNode
 } from 'react';
 import type { User } from '@/lib/api';
+import { useProfileQuery } from '@/features/user/queries';
 
 type ProfileContextValue = {
   user: User;
@@ -31,17 +30,15 @@ interface ProfileShellProps {
 }
 
 export default function ProfileShell({ initialUser, children }: ProfileShellProps) {
-  const [user] = useState<User>(initialUser);
+  const { data: user = initialUser } = useProfileQuery({ initialData: initialUser });
 
-  const handleRefresh = useCallback(async () => {
-    // In SSR mode, refresh would invalidate React Query cache or trigger a router refresh
-    // For now, this is a placeholder
-  }, []);
+  // handleRefresh is kept for API compatibility — mutations auto-invalidate userKeys.me
+  const handleRefresh = async () => {};
 
   const value: ProfileContextValue = useMemo(() => ({
     user,
     handleRefresh,
-  }), [user, handleRefresh]);
+  }), [user]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

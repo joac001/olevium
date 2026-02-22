@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import type { AccountDetail, AccountType, Currency } from '@/types';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import type { AccountDetail, AccountType } from '@/types';
+import { useCurrenciesQuery, useUpdateAccountMutation } from '@/features/accounts/queries';
 import { useNotification } from '@/context/NotificationContext';
 import {
   buildAccountTypeOptions,
@@ -27,12 +27,9 @@ export default function EditAccountForm({
   onSuccess,
 }: EditAccountFormProps) {
   const { showNotification } = useNotification();
-  const updateAccount = useAccountsStore(state => state.updateAccount);
-  const getCurrencies = useAccountsStore(state => state.getCurrencies);
-  const currencies = useAccountsStore(state => state.currencies);
-  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: currencies = [], isLoading: loadingCurrencies } = useCurrenciesQuery();
+  const updateAccountMutation = useUpdateAccountMutation(account.accountId);
+  const isSubmitting = updateAccountMutation.isPending;
 
   const typeOptions: DropMenuOption[] = useMemo(
     () => buildAccountTypeOptions(accountTypes),
@@ -43,10 +40,6 @@ export default function EditAccountForm({
     () => buildCurrencyOptions(currencies),
     [currencies]
   );
-
-  useEffect(() => {
-    getCurrencies();
-  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -68,12 +61,11 @@ export default function EditAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
-        await updateAccount(account.accountId, {
+        await updateAccountMutation.mutateAsync({
           name: normalized.name,
-          typeId: normalized.typeId,
-          currencyId: normalized.currencyId,
+          type_id: normalized.typeId,
+          currency_id: normalized.currencyId,
           balance: normalized.balance,
         });
 
@@ -124,11 +116,9 @@ export default function EditAccountForm({
           'Error al actualizar',
           message
         );
-      } finally {
-        setIsSubmitting(false);
       }
     },
-    [account.accountId, showNotification, updateAccount, onSuccess]
+    [updateAccountMutation, showNotification, onSuccess]
   );
 
   return (

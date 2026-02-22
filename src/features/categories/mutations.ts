@@ -1,5 +1,7 @@
 export {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
-  useDeleteCategoryMutation
+  useDeleteCategoryMutation,
+  useDeactivateCategoryMutation,
+  useReactivateCategoryMutation,
 } from './queries';

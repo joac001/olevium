@@ -4,6 +4,8 @@ import type {
   AccountType,
   ApiUserAccount,
   ApiAccountType,
+  ApiCurrency,
+  Currency,
   CreateAccountPayload,
   UpdateAccountPayload,
 } from '@/types';
@@ -77,6 +79,19 @@ export async function deleteAccount(accountId: string): Promise<void> {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo eliminar la cuenta (status ${response.status})`);
   }
+}
+
+export async function getCurrencies(): Promise<Currency[]> {
+  const response = await apiRequest('/currencies/');
+  if (!response.ok) {
+    return [];
+  }
+  const raw = (await response.json()) as ApiCurrency[];
+  return raw.map(item => ({
+    currencyId: item.currency_id,
+    label: item.label,
+    name: item.name,
+  }));
 }
 
 export async function getAccountDetail(accountId: string): Promise<ApiCollectionResult<Account>> {

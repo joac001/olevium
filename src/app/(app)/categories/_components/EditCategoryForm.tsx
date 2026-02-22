@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from 'react';
 
 import { Box, FormWrapper, Input, DropMenu, Typography, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useUpdateCategoryMutation } from '@/features/categories/queries';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { Category, TransactionType } from '@/lib/types';
@@ -24,8 +24,7 @@ export default function EditCategoryForm({
   onSuccess,
 }: EditCategoryFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const updateCategory = useTransactionsStore(state => state.updateCategory);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateCategoryMutation = useUpdateCategoryMutation(category.category_id);
   const [description, setDescription] = useState(category.description);
   const [typeId, setTypeId] = useState<string>(String(category.type_id));
   const [selectedColor, setSelectedColor] = useState<string>(
@@ -40,6 +39,8 @@ export default function EditCategoryForm({
       })),
     [transactionTypes]
   );
+
+  const isSubmitting = updateCategoryMutation.isPending;
 
   const buttons = useMemo(
     () => [
@@ -87,15 +88,11 @@ export default function EditCategoryForm({
         return;
       }
 
-      setIsSubmitting(true);
-
       try {
-        await updateCategory({
-          categoryId: category.category_id,
+        await updateCategoryMutation.mutateAsync({
           description: trimmedDescription,
-          typeId: numTypeId,
+          type_id: numTypeId,
           color: selectedColor,
-          userId: category.user_id,
         });
 
         const context = createOperationContext('update', 'categoría', 'la categoría');
@@ -105,18 +102,15 @@ export default function EditCategoryForm({
       } catch (error) {
         const context = createOperationContext('update', 'categoría', 'la categoría');
         showError(error, context);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
-      category.category_id,
       category.user_id,
       description,
       typeId,
       selectedColor,
       showNotification,
-      updateCategory,
+      updateCategoryMutation,
       onSuccess,
       showError,
       showSuccess,

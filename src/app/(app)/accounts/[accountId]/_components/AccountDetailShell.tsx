@@ -1,13 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
 
 import { Box, Card, Typography } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
-import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
-import { getAccountDetail, getAccountTransactions } from '@/lib/api';
+import { useAccountDetailQuery } from '@/features/accounts/queries';
+import { useAccountTransactionsQuery } from '@/features/transactions/queries';
 import type { Account, AccountType, AccountTransaction } from '@/types';
 import type { Transaction } from '@/lib/types';
 import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
@@ -64,15 +63,12 @@ export default function AccountDetailShell({
   initialTransactions,
   initialAccountTypes,
 }: AccountDetailShellProps) {
-  const router = useRouter();
-  const { showNotification, showError } = useNotification();
   const { showModal, hideModal } = useModal();
 
-  const [account, setAccount] = useState<Account>(initialAccount);
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [accountTypes] = useState<AccountType[]>(initialAccountTypes);
-  const [accountDeleted, setAccountDeleted] = useState(false);
-  const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const { data: account = initialAccount } = useAccountDetailQuery(accountId, { initialData: initialAccount });
+  const { data: transactions = initialTransactions, isFetching: loadingTransactions } =
+    useAccountTransactionsQuery(accountId, { initialData: initialTransactions });
+  const accountTypes = initialAccountTypes;
 
   const typeLabel = useMemo(() => {
     const type = accountTypes.find(item => item.typeId === account?.typeId);
@@ -83,23 +79,6 @@ export default function AccountDetailShell({
     () => transactions.map(normalizeTransaction),
     [transactions]
   );
-
-  const reloadTransactions = useCallback(async () => {
-    if (accountDeleted) return;
-    setLoadingTransactions(true);
-    try {
-      const [{ data: txs }, { data: updatedAccount }] = await Promise.all([
-        getAccountTransactions(accountId),
-        getAccountDetail(accountId),
-      ]);
-      setTransactions(txs);
-      setAccount(updatedAccount);
-    } catch {
-      // silencioso — la tabla mantiene los datos anteriores
-    } finally {
-      setLoadingTransactions(false);
-    }
-  }, [accountDeleted, accountId]);
 
   const handleOpenEdit = useCallback(() => {
     if (!account) return;
@@ -125,7 +104,6 @@ export default function AccountDetailShell({
           accountId={account.accountId}
           accountName={account.name}
           onSuccess={() => {
-            setAccountDeleted(true);
             hideModal();
           }}
         />
@@ -141,12 +119,11 @@ export default function AccountDetailShell({
           accountId={account.accountId}
           onSuccess={() => {
             hideModal();
-            reloadTransactions();
           }}
         />
       </Card>
     );
-  }, [account, hideModal, reloadTransactions, showModal]);
+  }, [account, hideModal, showModal]);
 
   if (!account) {
     return (
@@ -215,7 +192,6 @@ export default function AccountDetailShell({
           transactions={normalizedTransactions}
           loading={loadingTransactions}
           currency={currencyLabel}
-          onRefresh={reloadTransactions}
         />
       </Card>
     </Box>

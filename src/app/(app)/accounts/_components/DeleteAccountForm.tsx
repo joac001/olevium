@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Box, FormWrapper, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import { useDeleteAccountMutation } from '@/features/accounts/queries';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
 interface DeleteAccountFormProps {
@@ -20,8 +20,8 @@ export default function DeleteAccountForm({
   onSuccess,
 }: DeleteAccountFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const deleteAccount = useAccountsStore(state => state.deleteAccount);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const deleteAccountMutation = useDeleteAccountMutation();
+  const isSubmitting = deleteAccountMutation.isPending;
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
 
@@ -50,13 +50,12 @@ export default function DeleteAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
         // Primero cerrar modal para evitar que el componente padre intente actualizar
         onSuccess?.();
 
         // Eliminar cuenta
-        await deleteAccount(accountId);
+        await deleteAccountMutation.mutateAsync(accountId);
 
         // Navegar inmediatamente
         router.replace('/accounts');
@@ -69,14 +68,12 @@ export default function DeleteAccountForm({
       } catch (error) {
         const context = createOperationContext('delete', 'cuenta', 'la cuenta');
         showError(error);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
       accountId,
       accountName,
-      deleteAccount,
+      deleteAccountMutation,
       onSuccess,
       router,
       showNotification,

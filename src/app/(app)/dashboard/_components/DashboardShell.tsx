@@ -10,6 +10,8 @@ import {
 } from '@/components/shared/ui';
 import type { Transaction } from '@/lib/types';
 import type { Account } from '@/types';
+import { useAccountsQuery } from '@/features/accounts/queries';
+import { useTransactionsQuery } from '@/features/transactions/queries';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import { toSignedAmount } from '@/lib/utils/transactions';
 
@@ -67,8 +69,8 @@ export default function DashboardShell({
   initialAccounts,
   initialTransactions,
 }: DashboardShellProps) {
-  const [accounts] = useState<Account[]>(initialAccounts);
-  const [transactions] = useState<Transaction[]>(initialTransactions);
+  const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
+  const { data: transactions = initialTransactions } = useTransactionsQuery({ initialData: initialTransactions });
   const [period, setPeriod] = useState<'10d' | '30d' | '365d' | 'month'>('365d');
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<string>(String(now.getMonth() + 1));

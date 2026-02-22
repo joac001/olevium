@@ -4,7 +4,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Box, Card, Typography, ActionButton } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
-import { getCategories, deactivateCategory, reactivateCategory } from '@/lib/api/categories';
+import {
+  useCategoriesQuery,
+  useDeactivateCategoryMutation,
+  useReactivateCategoryMutation,
+} from '@/features/categories/queries';
 import type { Category, TransactionType } from '@/lib/types';
 import type { User } from '@/lib/api';
 import EditCategoryForm from './EditCategoryForm';
@@ -25,22 +29,15 @@ export default function CategoriesShell({
 }: CategoriesShellProps) {
   const { showModal, hideModal } = useModal();
 
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
+  const deactivateMutation = useDeactivateCategoryMutation();
+  const reactivateMutation = useReactivateCategoryMutation();
   const [transactionTypes] = useState<TransactionType[]>(initialTransactionTypes);
   const [user] = useState<User>(initialUser);
 
   const userId = user ? String(user.user_id) : null;
 
   const categoriesList = categories;
-
-  const refreshCategories = useCallback(async () => {
-    try {
-      const { data } = await getCategories();
-      setCategories(data);
-    } catch (error) {
-      // Silently fail - the user will see stale data
-    }
-  }, []);
 
   const typeLabelById = useMemo(() => {
     const record = new Map<number, string>();
@@ -74,15 +71,12 @@ export default function CategoriesShell({
             category={target}
             transactionTypes={transactionTypes}
             loadingTypes={false}
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal, transactionTypes]
+    [categoriesList, hideModal, showModal, transactionTypes]
   );
 
   const openDeleteModal = useCallback(
@@ -96,15 +90,12 @@ export default function CategoriesShell({
         <Card tone="danger" title="Eliminar categoría">
           <DeleteCategoryForm
             category={target}
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, hideModal, showModal]
   );
 
   const openDeactivateModal = useCallback(
@@ -121,17 +112,14 @@ export default function CategoriesShell({
             description="La categoría no aparecerá en los selects de nuevas transacciones, pero se mantendrá en las transacciones existentes."
             confirmLabel="Desactivar categoría"
             confirmVariant="accent"
-            onConfirm={() => deactivateCategory(categoryId)}
+            onConfirm={() => deactivateMutation.mutateAsync(categoryId)}
             successMessage="Categoría desactivada. Ya no aparecerá en nuevas transacciones."
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, deactivateMutation, hideModal, showModal]
   );
 
   const openActivateModal = useCallback(
@@ -148,31 +136,25 @@ export default function CategoriesShell({
             description="La categoría volverá a aparecer en los selects de nuevas transacciones."
             confirmLabel="Activar categoría"
             confirmVariant="accent"
-            onConfirm={() => reactivateCategory(categoryId)}
+            onConfirm={() => reactivateMutation.mutateAsync(categoryId)}
             successMessage="Categoría activada. Ya está disponible para nuevas transacciones."
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, reactivateMutation, hideModal, showModal]
   );
 
   const openCreateModal = useCallback(() => {
     showModal(
       <Card tone="accent" title="Crear categoría">
         <CreateCategoryForm
-          onSuccess={async () => {
-            hideModal();
-            await refreshCategories();
-          }}
+          onSuccess={() => hideModal()}
         />
       </Card>
     );
-  }, [hideModal, refreshCategories, showModal]);
+  }, [hideModal, showModal]);
 
   return (
     <Box className="flex flex-col gap-6">

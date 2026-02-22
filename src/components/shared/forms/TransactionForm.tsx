@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Card,
@@ -14,7 +14,7 @@ import {
 } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useCategoriesQuery } from '@/features/categories/queries';
 import {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
@@ -57,7 +57,7 @@ export interface TransactionFormProps {
   fixedAccountId?: string;
   /** Lista de cuentas (cuando se permite seleccionar cuenta) */
   accounts?: Account[];
-  /** Lista de categorias (si no se provee, se cargan del store) */
+  /** Lista de categorias (si no se provee, se cargan via React Query) */
   categories?: Category[];
   /** Incluir Card wrapper con titulo */
   withCard?: boolean;
@@ -137,33 +137,12 @@ export default function TransactionForm({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Store para categorias (si no se proveen externamente)
-  const storeCategories = useTransactionsStore(state => state.categories);
-  const categoriesLoading = useTransactionsStore(state => state.categoriesLoading);
-  const fetchCategories = useTransactionsStore(state => state.fetchCategories);
-
-  // Normalizar storeCategories (TransactionCategory) a ApiCategory para unificar tipos
-  const storeCategoriesNormalized: Category[] = useMemo(
-    () => storeCategories.map(cat => ({
-      category_id: cat.categoryId,
-      user_id: cat.userId,
-      type_id: cat.typeId,
-      description: cat.description,
-      color: cat.color,
-      is_active: cat.isActive,
-      is_default: cat.isDefault,
-    })),
-    [storeCategories]
-  );
-
-  const categories = externalCategories ?? storeCategoriesNormalized;
-
-  // Cargar categorias si no estan en cache
-  useEffect(() => {
-    if (!externalCategories && !storeCategories.length && !categoriesLoading) {
-      fetchCategories();
-    }
-  }, [externalCategories, storeCategories.length, categoriesLoading, fetchCategories]);
+  // Cargar categorias via React Query si no se proveen externamente
+  const { data: queriedCategories = [], isLoading: queriedCategoriesLoading } = useCategoriesQuery({
+    enabled: !externalCategories,
+  });
+  const categories = externalCategories ?? queriedCategories;
+  const categoriesLoading = !externalCategories && queriedCategoriesLoading;
 
   // Mutations
   const transactionId = transaction

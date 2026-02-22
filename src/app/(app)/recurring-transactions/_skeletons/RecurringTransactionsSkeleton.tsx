@@ -1,5 +1,3 @@
-'use client';
-
 import { Container, Card, Box, Skeleton } from '@/components/shared/ui';
 
 export default function RecurringTransactionsSkeleton() {
@@ -21,7 +19,7 @@ export default function RecurringTransactionsSkeleton() {
           <Skeleton width="15%" height="13px" />
         </Box>
         {/* Table rows */}
-        <Box className="divide-y divide-[var(--border-soft)]">
+        <Box className="divide-y divide-(--border-soft)">
           {Array.from({ length: 5 }).map((_, i) => (
             <Box key={i} className="flex items-center gap-4 px-4 py-3">
               <Box className="flex w-[25%] items-center gap-2">

@@ -1,5 +1,7 @@
 export {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
-  useDeleteTransactionMutation
+  useDeleteTransactionMutation,
+  useAccountTransactionsQuery,
+  useTransactionTypesQuery,
 } from './queries';
