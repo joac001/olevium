@@ -5,7 +5,6 @@ import { create } from 'zustand';
 
 import { api } from '@/lib/http';
 import { useUserStore } from '@/lib/stores/user';
-import { useTransactionsStore } from '@/lib/stores/transactions';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
 import { resolveError } from '@/lib/utils/errorHandling';
 
@@ -132,13 +131,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }));
       tokenStorage.save(tokens);
       useUserStore.getState().reset();
-      const transactionsStore = useTransactionsStore.getState();
-      void transactionsStore.fetchTransactionTypes().catch(error => {
-        console.warn('Failed to prefetch transaction types:', error);
-      });
-      void transactionsStore.fetchCategories().catch(error => {
-        console.warn('Failed to prefetch transaction categories:', error);
-      });
     } catch (error) {
       set({ loading: false });
       throw normalizeAuthError(error);
