@@ -18,7 +18,7 @@ import { useCategoriesQuery } from '@/features/categories/queries';
 import {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
-} from '@/features/transactions/mutations';
+} from '@/features/transactions/queries';
 import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 import { formatAccountName } from '@/lib/format';
 import type { Category, CreateTransactionPayload } from '@/lib/types';
