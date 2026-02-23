@@ -1,18 +1,16 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 
-import { Box, Card, Typography } from '@/components/shared/ui';
-import { formatAmount, formatDate } from '@/lib/utils/parser';
+import { Card } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useAccountDetailQuery } from '@/features/accounts/queries';
 import { useAccountTransactionsQuery } from '@/features/transactions/queries';
 import type { Account, AccountType, AccountTransaction } from '@/types';
 import type { Transaction } from '@/lib/types';
-import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
-import EditAccountForm from '../../_components/EditAccountForm';
-import DeleteAccountForm from '../../_components/DeleteAccountForm';
-import CreateTransactionForm from '../../_components/CreateTransactionForm';
+import EditAccountForm from '../_components/EditAccountForm';
+import DeleteAccountForm from '../_components/DeleteAccountForm';
+import CreateTransactionForm from '../_components/CreateTransactionForm';
 
 function normalizeTransaction(tx: Transaction): AccountTransaction {
   const categoryRaw = tx.category;
@@ -50,19 +48,42 @@ function normalizeTransaction(tx: Transaction): AccountTransaction {
   };
 }
 
-interface AccountDetailShellProps {
+type AccountDetailContextValue = {
+  account: Account | undefined;
+  accountTypes: AccountType[];
+  normalizedTransactions: AccountTransaction[];
+  loadingTransactions: boolean;
+  typeLabel: string;
+  handleOpenEdit: () => void;
+  handleOpenDelete: () => void;
+  handleOpenCreateTransaction: () => void;
+};
+
+const AccountDetailContext = createContext<AccountDetailContextValue | null>(null);
+
+export function useAccountDetail() {
+  const context = useContext(AccountDetailContext);
+  if (!context) {
+    throw new Error('useAccountDetail debe usarse dentro de AccountDetailProvider');
+  }
+  return context;
+}
+
+interface AccountDetailProviderProps {
   accountId: string;
   initialAccount: Account;
   initialTransactions: Transaction[];
   initialAccountTypes: AccountType[];
+  children: ReactNode;
 }
 
-export default function AccountDetailShell({
+export default function AccountDetailProvider({
   accountId,
   initialAccount,
   initialTransactions,
   initialAccountTypes,
-}: AccountDetailShellProps) {
+  children,
+}: AccountDetailProviderProps) {
   const { showModal, hideModal } = useModal();
 
   const { data: account = initialAccount } = useAccountDetailQuery(accountId, { initialData: initialAccount });
@@ -88,9 +109,7 @@ export default function AccountDetailShell({
           account={account}
           accountTypes={accountTypes}
           loadingTypes={false}
-          onSuccess={() => {
-            hideModal();
-          }}
+          onSuccess={() => hideModal()}
         />
       </Card>
     );
@@ -103,9 +122,7 @@ export default function AccountDetailShell({
         <DeleteAccountForm
           accountId={account.accountId}
           accountName={account.name}
-          onSuccess={() => {
-            hideModal();
-          }}
+          onSuccess={() => hideModal()}
         />
       </Card>
     );
@@ -117,83 +134,26 @@ export default function AccountDetailShell({
       <Card tone="accent" title="Registrar transacción">
         <CreateTransactionForm
           accountId={account.accountId}
-          onSuccess={() => {
-            hideModal();
-          }}
+          onSuccess={() => hideModal()}
         />
       </Card>
     );
   }, [account, hideModal, showModal]);
 
-  if (!account) {
-    return (
-      <Card tone="neutral" title="Cuenta no disponible">
-        <Typography variant="body">No pudimos encontrar los datos de esta cuenta.</Typography>
-      </Card>
-    );
-  }
-
-  const currencyLabel = account.currency ?? 'Sin moneda';
-
   return (
-    <Box className="flex w-full max-w-6xl flex-col gap-6">
-      <Card
-        tone="neutral"
-        title={account.name}
-        subtitle={`Saldo actual: ${formatAmount(account.balance, currencyLabel)}`}
-        actions={[
-          {
-            icon: 'fas fa-pen',
-            text: 'Editar',
-            type: 'primary',
-            onClick: handleOpenEdit,
-          },
-          {
-            icon: 'fas fa-trash',
-            text: 'Eliminar',
-            type: 'danger',
-            onClick: handleOpenDelete,
-          },
-        ]}
-      >
-        <Box className="space-y-3">
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Tipo de cuenta:{' '}
-            <Box as="span" className="font-semibold text-[color:var(--text-primary)]">
-              {typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}
-            </Box>
-          </Typography>
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Moneda:{' '}
-            <Box as="span" className="font-semibold text-[color:var(--text-primary)]">
-              {currencyLabel}
-            </Box>
-          </Typography>
-          <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-            Creada el {formatDate(account.createdAt, 'dd/mm/aaaa')}
-          </Typography>
-        </Box>
-      </Card>
-
-      <Card
-        tone="neutral"
-        title="Transacciones"
-        subtitle="Movimientos asociados a esta cuenta"
-        actions={[
-          {
-            icon: 'fas fa-plus',
-            tooltip: 'Agregar transacción',
-            type: 'primary',
-            onClick: handleOpenCreateTransaction,
-          },
-        ]}
-      >
-        <AccountTransactionsTable
-          transactions={normalizedTransactions}
-          loading={loadingTransactions}
-          currency={currencyLabel}
-        />
-      </Card>
-    </Box>
+    <AccountDetailContext.Provider
+      value={{
+        account,
+        accountTypes,
+        normalizedTransactions,
+        loadingTransactions,
+        typeLabel,
+        handleOpenEdit,
+        handleOpenDelete,
+        handleOpenCreateTransaction,
+      }}
+    >
+      {children}
+    </AccountDetailContext.Provider>
   );
 }

@@ -3,7 +3,7 @@
 import { Box, DropMenu, Input, ActionButton } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { DateFilter, TypeFilter } from './types';
-import type { Category } from '@/lib/types';
+import { useTransactionsPage } from '../_context/TransactionsContext';
 
 const TYPE_OPTIONS: DropMenuOption[] = [
   { value: 'all', label: 'Todos' },
@@ -17,31 +17,19 @@ const DATE_OPTIONS: DropMenuOption[] = [
   { value: 'all', label: 'Todo el historial' }
 ];
 
-interface TransactionsFiltersProps {
-  typeFilter: TypeFilter;
-  categoryFilter: string;
-  dateFilter: DateFilter;
-  searchTerm: string;
-  categories: Category[];
-  onTypeFilterChange: (value: TypeFilter) => void;
-  onCategoryFilterChange: (value: string) => void;
-  onDateFilterChange: (value: DateFilter) => void;
-  onSearchTermChange: (value: string) => void;
-  onClearFilters: () => void;
-}
-
-export default function TransactionsFilters({
-  typeFilter,
-  categoryFilter,
-  dateFilter,
-  searchTerm,
-  categories,
-  onTypeFilterChange,
-  onCategoryFilterChange,
-  onDateFilterChange,
-  onSearchTermChange,
-  onClearFilters,
-}: TransactionsFiltersProps) {
+export default function TransactionsFilters() {
+  const {
+    typeFilter,
+    categoryFilter,
+    dateFilter,
+    searchTerm,
+    categoryOptions: categories,
+    setTypeFilter: onTypeFilterChange,
+    setCategoryFilter: onCategoryFilterChange,
+    setDateFilter: onDateFilterChange,
+    setSearchTerm: onSearchTermChange,
+    clearFilters: onClearFilters,
+  } = useTransactionsPage();
   const categoryOptionsWithAll: DropMenuOption[] = [
     { value: 'all', label: 'Todas' },
     ...categories.map((category) => ({

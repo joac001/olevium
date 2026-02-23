@@ -4,15 +4,11 @@ import { useMemo } from 'react';
 
 import { Card, Box, Typography, AppLink } from '@/components/shared/ui';
 import { formatCurrency, formatDateWithTime } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
 import { toSignedAmount } from '@/lib/utils/transactions';
+import { useDashboard } from '../_context/DashboardContext';
 
-interface RecentTransactionsListProps {
-  transactions: Transaction[];
-  accountCurrencyMap: Record<string, string>;
-}
-
-export default function RecentTransactionsList({ transactions, accountCurrencyMap }: RecentTransactionsListProps) {
+export default function RecentTransactionsList() {
+  const { filteredTransactions: transactions, accountCurrencyMap } = useDashboard();
   const recentTransactions = useMemo(
     () =>
       [...transactions]

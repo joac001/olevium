@@ -6,8 +6,9 @@ import {
   handleProtectedResult,
 } from '@/lib/server-auth';
 import { getAccountsPageData } from './_api';
-import AccountsShell from './_components/AccountsShell';
 import AccountsSkeleton from './_skeletons/AccountsSkeleton';
+import AccountsProvider from './_context/AccountsContext';
+import AccountsView from './_components/AccountsView';
 
 export default async function AccountsPage() {
   await requireAuth();
@@ -17,12 +18,11 @@ export default async function AccountsPage() {
 
   return (
     <Suspense fallback={<AccountsSkeleton />}>
-      <Container className="py-10">
-        <AccountsShell
-          initialAccounts={data.accounts as any}
-          initialAccountTypes={data.accountTypes as any}
-        />
-      </Container>
+      <AccountsProvider initialAccounts={data.accounts} initialAccountTypes={data.accountTypes}>
+        <Container className="py-10">
+          <AccountsView />
+        </Container>
+      </AccountsProvider>
     </Suspense>
   );
 }

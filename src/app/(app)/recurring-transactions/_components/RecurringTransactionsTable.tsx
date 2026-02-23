@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Box, ActionButton } from '@/components/shared/ui';
-import { useRecurringTransactionsPage } from './RecurringTransactionsShell';
+import { useRecurringTransactionsPage } from '../_context/RecurringTransactionsContext';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
 

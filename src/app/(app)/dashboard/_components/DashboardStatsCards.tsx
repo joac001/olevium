@@ -6,13 +6,7 @@ import { Wallet, TrendingUp, TrendingDown, Database } from 'lucide-react';
 
 import { Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-
-interface DashboardStatsCardsProps {
-  balances: Record<string, number>;
-  incomesByCurrency: Record<string, number>;
-  expensesByCurrency: Record<string, number>;
-  transactionsCount: number;
-}
+import { useDashboard } from '../_context/DashboardContext';
 
 function currencyLines(map: Record<string, number>): string[] {
   const entries = Object.entries(map);
@@ -23,12 +17,8 @@ function currencyLines(map: Record<string, number>): string[] {
   });
 }
 
-export default function DashboardStatsCards({
-  balances,
-  incomesByCurrency,
-  expensesByCurrency,
-  transactionsCount,
-}: DashboardStatsCardsProps) {
+export default function DashboardStatsCards() {
+  const { balances, incomesByCurrency, expensesByCurrency } = useDashboard();
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <DashboardCard

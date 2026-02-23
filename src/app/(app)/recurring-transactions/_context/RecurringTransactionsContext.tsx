@@ -17,7 +17,7 @@ import type { RecurringTransaction, Category } from '@/lib/types';
 import type { Account } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 
-const RecurringTransactionFormModal = dynamic(() => import('./RecurringTransactionFormModal'), {
+const RecurringTransactionFormModal = dynamic(() => import('../_components/RecurringTransactionFormModal'), {
   ssr: false,
   loading: () => (
     <Box className="w-full max-w-xl space-y-4 p-4">
@@ -42,24 +42,24 @@ const RecurringTransactionsContext = createContext<RecurringTransactionsContextV
 export function useRecurringTransactionsPage() {
   const context = useContext(RecurringTransactionsContext);
   if (!context) {
-    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsShell');
+    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsProvider');
   }
   return context;
 }
 
-interface RecurringTransactionsShellProps {
+interface RecurringTransactionsProviderProps {
   initialRecurringTransactions: RecurringTransaction[];
   initialAccounts: Account[];
   initialCategories: Category[];
   children: ReactNode;
 }
 
-export default function RecurringTransactionsShell({
+export default function RecurringTransactionsProvider({
   initialRecurringTransactions,
   initialAccounts,
   initialCategories,
   children
-}: RecurringTransactionsShellProps) {
+}: RecurringTransactionsProviderProps) {
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -135,7 +135,6 @@ export default function RecurringTransactionsShell({
 
       try {
         await deleteMutation.mutateAsync(transaction.recurringTransactionId);
-        // Update local state
         setRecurringTransactions(prev =>
           prev.filter(t => t.recurringTransactionId !== transaction.recurringTransactionId)
         );

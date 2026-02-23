@@ -1,5 +1,3 @@
-'use client';
-
 import { Suspense } from 'react';
 import { Box, Container } from '@/components/shared/ui';
 import ResetPasswordForm from './_components/ResetPasswordForm';

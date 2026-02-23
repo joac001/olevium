@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionButton, Box, Typography } from '@/components/shared/ui';
-import { useRecurringTransactionsPage } from './RecurringTransactionsShell';
+import { useRecurringTransactionsPage } from '../_context/RecurringTransactionsContext';
 
 export default function RecurringTransactionsHeader() {
   const { handleCreateRecurringTransaction } = useRecurringTransactionsPage();

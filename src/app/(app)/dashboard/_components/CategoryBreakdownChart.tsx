@@ -7,8 +7,8 @@ import { BadgeCheck } from 'lucide-react';
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
 import { toSignedAmount } from '@/lib/utils/transactions';
+import { useDashboard } from '../_context/DashboardContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -23,24 +23,14 @@ const categoryPalette = [
   '#fb7185',
 ];
 
-interface CategoryBreakdownChartProps {
-  transactions: Transaction[];
-  expensesByCurrency: Record<string, number>;
-  accountCurrencyMap: Record<string, string>;
-}
-
 interface CategorySlice {
   name: string;
   amount: number;
   currency: string;
 }
 
-export default function CategoryBreakdownChart({
-  transactions,
-  expensesByCurrency,
-  accountCurrencyMap,
-}: CategoryBreakdownChartProps) {
-  const totalExpenses = Object.values(expensesByCurrency).reduce((a, b) => a + b, 0);
+export default function CategoryBreakdownChart() {
+  const { filteredTransactions: transactions, expensesByCurrency, accountCurrencyMap } = useDashboard();
 
   const categorySlices = useMemo<CategorySlice[]>(() => {
     const totals = new Map<string, { name: string; amount: number; currency: string }>();

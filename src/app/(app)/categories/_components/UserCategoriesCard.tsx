@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Box, Card, Typography, ActionButton } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
@@ -10,32 +10,28 @@ import {
   useReactivateCategoryMutation,
 } from '@/features/categories/queries';
 import type { Category, TransactionType } from '@/lib/types';
-import type { User } from '@/lib/api';
 import EditCategoryForm from './EditCategoryForm';
 import DeleteCategoryForm from './DeleteCategoryForm';
 import CreateCategoryForm from './CreateCategoryForm';
 import ConfirmActionForm from './ConfirmActionForm';
 
-interface CategoriesShellProps {
+interface UserCategoriesCardProps {
   initialCategories: Category[];
   initialTransactionTypes: TransactionType[];
-  initialUser: User;
+  userId: string;
 }
 
-export default function CategoriesShell({
+export default function UserCategoriesCard({
   initialCategories,
   initialTransactionTypes,
-  initialUser,
-}: CategoriesShellProps) {
+  userId,
+}: UserCategoriesCardProps) {
   const { showModal, hideModal } = useModal();
 
   const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
   const deactivateMutation = useDeactivateCategoryMutation();
   const reactivateMutation = useReactivateCategoryMutation();
-  const [transactionTypes] = useState<TransactionType[]>(initialTransactionTypes);
-  const [user] = useState<User>(initialUser);
-
-  const userId = user ? String(user.user_id) : null;
+  const transactionTypes = initialTransactionTypes;
 
   const categoriesList = categories;
 
@@ -49,13 +45,8 @@ export default function CategoriesShell({
 
   const userCategories = useMemo(
     () =>
-      categoriesList.filter(category => category.user_id && (!userId || category.user_id === userId)),
+      categoriesList.filter(category => category.user_id && category.user_id === userId),
     [categoriesList, userId]
-  );
-
-  const defaultCategories = useMemo(
-    () => categoriesList.filter(category => !category.user_id),
-    [categoriesList]
   );
 
   const openEditModal = useCallback(
@@ -157,10 +148,9 @@ export default function CategoriesShell({
   }, [hideModal, showModal]);
 
   return (
-    <Box className="flex flex-col gap-6">
-      <Card
-        tone="neutral"
-        title="Tus categorías"
+    <Card
+      tone="neutral"
+      title="Tus categorías"
         actions={[
           {
             icon: 'fas fa-plus',
@@ -262,63 +252,6 @@ export default function CategoriesShell({
             </Typography>
           </Box>
         )}
-      </Card>
-
-      <Card
-        tone="neutral"
-        title="Categorías por defecto"
-        subtitle="Estas categorías vienen incluidas en Olevium y no pueden editarse."
-      >
-        {defaultCategories.length ? (
-          <Box className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-            {defaultCategories.map(category => {
-              const typeLabel = typeLabelById.get(category.type_id) ?? `Tipo #${category.type_id}`;
-              return (
-                <Box
-                  key={category.category_id}
-                  className="rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)] p-4"
-                >
-                  <Typography
-                    variant="body"
-                    className="text-sm font-semibold text-[color:var(--text-primary)]"
-                  >
-                    {category.description}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    className="text-xs uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
-                  >
-                    Tipo:{' '}
-                    <span className="font-semibold text-[color:var(--text-primary)]">
-                      {typeLabel}
-                    </span>
-                  </Typography>
-                  {category.color && (
-                    <Box className="flex items-center gap-2 w-fit">
-                      <span
-                        className="h-4 w-4 rounded-xl"
-                        style={{ backgroundColor: category.color }}
-                      ></span>
-                      <Typography
-                        variant="caption"
-                        className="text-xs text-[color:var(--text-muted)]"
-                      >
-                        {category.color}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              );
-            })}
-          </Box>
-        ) : (
-          <Box className="rounded-2xl border border-dashed border-[color:var(--surface-muted)] p-8 text-center">
-            <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-              No hay categorías por defecto para mostrar.
-            </Typography>
-          </Box>
-        )}
-      </Card>
-    </Box>
+    </Card>
   );
 }

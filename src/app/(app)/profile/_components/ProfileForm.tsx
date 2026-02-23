@@ -1,14 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
+import { Box, FormWrapper, Input } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
 import { useUpdateProfileMutation } from '@/features/user/mutations';
-import { useProfilePage } from './ProfileShell';
+import { useProfileQuery } from '@/features/user/queries';
 import { useNotification } from '@/context/NotificationContext';
+import type { User } from '@/types';
 
-export default function ProfileForm() {
-  const { user } = useProfilePage();
+interface ProfileFormProps {
+  initialUser: User;
+}
+
+export default function ProfileForm({ initialUser }: ProfileFormProps) {
+  const { data: user = initialUser } = useProfileQuery({ initialData: initialUser });
   const { showNotification } = useNotification();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

@@ -17,28 +17,20 @@ import { Line } from 'react-chartjs-2';
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
 import { toSignedAmount } from '@/lib/utils/transactions';
+import { useDashboard } from '../_context/DashboardContext';
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler);
 
-interface IncomeExpenseChartProps {
-  transactions: Transaction[];
-  grouping: 'daily' | 'monthly';
-  period: '10d' | '30d' | '365d' | 'month';
-  selectedMonth?: string;
-  selectedYear?: string;
-  accountCurrencyMap?: Record<string, string>;
-}
-
-export default function IncomeExpenseChart({
-  transactions,
-  grouping,
-  period,
-  selectedMonth,
-  selectedYear,
-  accountCurrencyMap,
-}: IncomeExpenseChartProps) {
+export default function IncomeExpenseChart() {
+  const {
+    filteredTransactions: transactions,
+    effectiveGrouping: grouping,
+    period,
+    selectedMonth,
+    selectedYear,
+    accountCurrencyMap,
+  } = useDashboard();
   const chartRef = useRef<ChartJS<'line'>>(null);
   const [ingresoVisible, setIngresoVisible] = useState(true);
   const [salidaVisible, setSalidaVisible] = useState(true);

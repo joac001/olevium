@@ -6,7 +6,7 @@ import {
   handleProtectedResult,
 } from '@/lib/server-auth';
 import { getRecurringTransactionsPageData } from './_api';
-import RecurringTransactionsShell from './_components/RecurringTransactionsShell';
+import RecurringTransactionsProvider from './_context/RecurringTransactionsContext';
 import RecurringTransactionsHeader from './_components/RecurringTransactionsHeader';
 import RecurringTransactionsTable from './_components/RecurringTransactionsTable';
 import RecurringTransactionsSkeleton from './_skeletons/RecurringTransactionsSkeleton';
@@ -19,7 +19,7 @@ export default async function RecurringTransactionsPage() {
 
   return (
     <Suspense fallback={<RecurringTransactionsSkeleton />}>
-      <RecurringTransactionsShell
+      <RecurringTransactionsProvider
         initialRecurringTransactions={data.recurringTransactions}
         initialAccounts={data.accounts}
         initialCategories={data.categories}
@@ -28,7 +28,7 @@ export default async function RecurringTransactionsPage() {
           <RecurringTransactionsHeader />
           <RecurringTransactionsTable />
         </Container>
-      </RecurringTransactionsShell>
+      </RecurringTransactionsProvider>
     </Suspense>
   );
 }
