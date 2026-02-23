@@ -8,9 +8,9 @@ import { useAccountDetailQuery } from '@/features/accounts/queries';
 import { useAccountTransactionsQuery } from '@/features/transactions/queries';
 import type { Account, AccountType, AccountTransaction } from '@/types';
 import type { Transaction } from '@/lib/types';
-import EditAccountForm from '../_components/EditAccountForm';
-import DeleteAccountForm from '../_components/DeleteAccountForm';
-import CreateTransactionForm from '../_components/CreateTransactionForm';
+import EditAccountForm from '../../_components/EditAccountForm';
+import DeleteAccountForm from '../../_components/DeleteAccountForm';
+import CreateTransactionForm from '../../_components/CreateTransactionForm';
 
 function normalizeTransaction(tx: Transaction): AccountTransaction {
   const categoryRaw = tx.category;
