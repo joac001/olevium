@@ -120,7 +120,7 @@ export function DemoSection() {
                 <span className="text-[#8696a0] text-sm">Mensaje</span>
               </div>
               <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                 </svg>
               </div>
@@ -135,7 +135,7 @@ export function DemoSection() {
           transition={{ duration: 0.4 }}
           className="hidden md:block"
         >
-          <svg width="60" height="24" viewBox="0 0 60 24" className="text-[var(--color-primary)]">
+          <svg width="60" height="24" viewBox="0 0 60 24" className="text-[var(--color-primary)]" aria-hidden="true">
             <path
               d="M0 12h50m0 0l-8-8m8 8l-8 8"
               stroke="currentColor"

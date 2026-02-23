@@ -19,6 +19,17 @@ const chaosItems = [
   { emoji: '🍕', label: 'Delivery pizza', amount: 9500 },
 ];
 
+// Pre-computado a nivel de módulo: evita que Math.random() se llame en cada render
+const chaosPositions = chaosItems.map((_, index) => {
+  const angle = (index / chaosItems.length) * Math.PI * 2;
+  const radius = 120 + Math.random() * 60;
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(angle) * radius * 0.6;
+  const rotation = (Math.random() - 0.5) * 30;
+  const floatDuration = 2 + Math.random();
+  return { x, y, rotation, floatDuration };
+});
+
 const organizedData = [
   { category: 'Hogar', emoji: '🏠', amount: 198000, color: 'var(--color-primary-light)' },
   { category: 'Delivery', emoji: '🛵', amount: 18000, color: 'var(--color-info-soft)' },
@@ -108,11 +119,7 @@ export function ChaosToOrderSection() {
           className="relative h-[350px] md:h-[400px]"
         >
           {chaosItems.map((item, index) => {
-            const angle = (index / chaosItems.length) * Math.PI * 2;
-            const radius = 120 + Math.random() * 60;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius * 0.6;
-            const rotation = (Math.random() - 0.5) * 30;
+            const { x, y, rotation, floatDuration } = chaosPositions[index];
 
             return (
               <motion.div
@@ -152,7 +159,7 @@ export function ChaosToOrderSection() {
                       : {}
                   }
                   transition={{
-                    duration: 2 + Math.random(),
+                    duration: floatDuration,
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}

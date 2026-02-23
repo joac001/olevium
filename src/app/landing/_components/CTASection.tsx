@@ -2,14 +2,12 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Typography, Button, AppLink } from '@/components/shared/ui';
+import { Typography, AppLink } from '@/components/shared/ui';
 import { Clock, CreditCard, FileText } from 'lucide-react';
 
 export function CTASection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
-  const router = useRouter();
 
   return (
     <section
@@ -63,12 +61,14 @@ export function CTASection() {
           transition={{ duration: 0.4, delay: 0.3, type: 'spring' }}
           className="mb-6"
         >
-          <Button
-            type="primary"
-            text="Crear mi cuenta"
-            onClick={() => router.push('/auth?mode=register')}
-            className="px-10 py-4 text-lg font-medium shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40 transition-shadow"
-          />
+          <AppLink
+            href="/auth?mode=register"
+            variant="unstyled"
+            data-variant="primary"
+            className="inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-hover)] px-10 py-4 text-lg font-medium leading-none transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)] bg-[var(--btn-bg)] bg-[image:var(--btn-bg-gradient)] text-[color:var(--btn-foreground,var(--text-primary))] hover:bg-[var(--btn-hover)] cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40"
+          >
+            Crear mi cuenta
+          </AppLink>
         </motion.div>
 
         {/* Link secundario */}
@@ -95,7 +95,7 @@ export function CTASection() {
         className="absolute bottom-6 text-center"
       >
         <Typography variant="body" className="text-xs text-[var(--text-muted)] opacity-50">
-          Olevium v0.1.2
+          Olevium v0.2.2
         </Typography>
       </motion.div>
     </section>

@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: 'Olevium — Organizá tus finanzas personales',
   description:
     'Registrá tus gastos en segundos con un mensaje. Sin planillas, sin complicaciones. Tu asistente financiero personal potenciado por IA.',
+  alternates: {
+    canonical: APP_URL,
+  },
   openGraph: {
     title: 'Olevium — Organizá tus finanzas personales',
     description:

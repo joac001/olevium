@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Typography, AppLink } from '@/components/shared/ui';
+import { Typography, AppLink } from '@/components/shared/ui';
 import Image from 'next/image';
 
 const questions = [
@@ -28,7 +27,6 @@ const questionPositions = [
 ];
 
 export function HeroSection() {
-  const router = useRouter();
   const [visibleQuestions, setVisibleQuestions] = useState<number[]>([]);
   const [showBrand, setShowBrand] = useState(false);
   const hasStarted = useRef(false);
@@ -133,12 +131,14 @@ export function HeroSection() {
           </Typography>
 
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <Button
-              type="primary"
-              text="Empezar gratis"
-              onClick={() => router.push('/auth?mode=register')}
-              className="px-8 py-3 text-lg w-full sm:w-auto"
-            />
+            <AppLink
+              href="/auth?mode=register"
+              variant="unstyled"
+              data-variant="primary"
+              className="inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-hover)] px-8 py-3 text-lg font-medium leading-none transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)] bg-[var(--btn-bg)] bg-[image:var(--btn-bg-gradient)] text-[color:var(--btn-foreground,var(--text-primary))] hover:bg-[var(--btn-hover)] cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-20px_var(--shadow-soft)] active:translate-y-0 w-full sm:w-auto"
+            >
+              Empezar gratis
+            </AppLink>
             <AppLink
               href="/auth"
               variant="unstyled"
