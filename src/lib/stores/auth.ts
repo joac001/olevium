@@ -4,7 +4,6 @@
 import { create } from 'zustand';
 
 import { api } from '@/lib/http';
-import { useUserStore } from '@/lib/stores/user';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
 import { resolveError } from '@/lib/utils/errorHandling';
 
@@ -111,7 +110,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       loading: false, // Asegurar que loading se resetee
     });
     tokenStorage.clear();
-    useUserStore.getState().reset();
   },
 
   login: async (email, password) => {
@@ -130,7 +128,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       }));
       tokenStorage.save(tokens);
-      useUserStore.getState().reset();
     } catch (error) {
       set({ loading: false });
       throw normalizeAuthError(error);
@@ -266,7 +263,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user: null,
           loading: false,
         });
-        useUserStore.getState().reset();
         return;
       }
 
@@ -293,7 +289,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
           });
           tokenStorage.clear();
-          useUserStore.getState().reset();
           // No re-throw el error para evitar notificaciones innecesarias durante la hidratación
           return;
         }
@@ -307,7 +302,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
       tokenStorage.clear();
-      useUserStore.getState().reset();
       throw error;
     } finally {
       set({ loading: false });
@@ -337,7 +331,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
       tokenStorage.clear();
-      useUserStore.getState().reset();
 
       // Forzar limpieza de cookies en el lado del servidor (Next route handler)
       if (typeof window !== 'undefined') {
