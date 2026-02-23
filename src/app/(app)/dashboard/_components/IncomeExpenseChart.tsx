@@ -17,30 +17,20 @@ import { Line } from 'react-chartjs-2';
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
 import { toSignedAmount } from '@/lib/utils/transactions';
+import { useDashboard } from '../_context/DashboardContext';
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler);
 
-interface IncomeExpenseChartProps {
-  transactions: Transaction[];
-  grouping: 'daily' | 'monthly';
-  period: '10d' | '30d' | '365d' | 'month' | 'day';
-  selectedMonth?: string;
-  selectedYear?: string;
-  selectedDay?: string;
-  accountCurrencyMap?: Record<string, string>;
-}
-
-export default function IncomeExpenseChart({
-  transactions,
-  grouping,
-  period,
-  selectedMonth,
-  selectedYear,
-  selectedDay,
-  accountCurrencyMap,
-}: IncomeExpenseChartProps) {
+export default function IncomeExpenseChart() {
+  const {
+    filteredTransactions: transactions,
+    effectiveGrouping: grouping,
+    period,
+    selectedMonth,
+    selectedYear,
+    accountCurrencyMap,
+  } = useDashboard();
   const chartRef = useRef<ChartJS<'line'>>(null);
   const [ingresoVisible, setIngresoVisible] = useState(true);
   const [salidaVisible, setSalidaVisible] = useState(true);
@@ -108,8 +98,6 @@ export default function IncomeExpenseChart({
           const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           dailyMap.set(key, { income: 0, expense: 0 });
         }
-      } else if (period === 'day' && selectedDay) {
-        dailyMap.set(selectedDay, { income: 0, expense: 0 });
       } else {
         const range = period === '10d' ? 10 : period === '30d' ? 30 : 365;
         const today = new Date();
@@ -143,7 +131,7 @@ export default function IncomeExpenseChart({
     }
 
     return { labels: chartLabels, incomeDataset: incomePoints, expenseDataset: expensePoints };
-  }, [currencyTransactions, grouping, period, selectedMonth, selectedYear, selectedDay]);
+  }, [currencyTransactions, grouping, period, selectedMonth, selectedYear]);
 
   const lineData = useMemo(
     () => ({
@@ -288,7 +276,12 @@ export default function IncomeExpenseChart({
         </Box>
       </Box>
       <Box className="h-72 md:h-80" style={{ minHeight: '18rem' }}>
-        <Line ref={chartRef} data={lineData} options={lineOptions} />
+        <Line
+          key={`${period}-${grouping}-${selectedMonth ?? ''}-${selectedYear ?? ''}`}
+          ref={chartRef}
+          data={lineData}
+          options={lineOptions}
+        />
       </Box>
     </Card>
   );

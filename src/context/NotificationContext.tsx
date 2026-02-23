@@ -1,12 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
+import { CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { StructuredError, ErrorProcessor, OperationContext } from '@/lib/utils/errorSystem';
 import NotificationWrapper from '@/components/shared/ui/wrappers/NotificationWrapper';
 
 interface NotificationContextType {
   // Metodos existentes para compatibilidad
-  showNotification: (icon: string, color: string, title: string, description: string) => void;
+  showNotification: (icon: ReactNode, color: string, title: string, description: string) => void;
   hideNotification: () => void;
 
   // Metodos mejorados
@@ -27,7 +28,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export interface NotificationProps {
-  icon: string;
+  icon: ReactNode;
   color: string;
   title: string;
   description: string;
@@ -73,7 +74,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
   // Metodo original para compatibilidad
   const showNotification = useCallback(
-    (icon: string, color: string, title: string, description: string) => {
+    (icon: ReactNode, color: string, title: string, description: string) => {
       setNotificationProps({ icon, color, title, description });
       setDuration(DEFAULT_DURATION);
       setIsOpen(true);
@@ -153,21 +154,21 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         }
       }
 
-      showNotification('fa-solid fa-circle-check', 'success', title, enhancedMessage);
+      showNotification(<CheckCircle className="h-5 w-5" />, 'success', title, enhancedMessage);
     },
     [showNotification]
   );
 
   const showWarning = useCallback(
     (message: string, title: string = 'Advertencia') => {
-      showNotification('fa-solid fa-triangle-exclamation', 'warning', title, message);
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'warning', title, message);
     },
     [showNotification]
   );
 
   const showInfo = useCallback(
     (message: string, title: string = 'Informacion') => {
-      showNotification('fa-solid fa-info-circle', 'info', title, message);
+      showNotification(<Info className="h-5 w-5" />, 'info', title, message);
     },
     [showNotification]
   );

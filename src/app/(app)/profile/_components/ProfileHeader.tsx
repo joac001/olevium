@@ -1,5 +1,6 @@
 'use client';
 
+import { MessageCircle } from 'lucide-react';
 import { ActionButton, Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import WhatsAppTokenModal from './WhatsAppTokenModal';
@@ -20,7 +21,7 @@ export default function ProfileHeader() {
         </Typography>
       </Box>
       <ActionButton
-        icon="fab fa-whatsapp"
+        icon={<MessageCircle className="h-4 w-4" />}
         type="success"
         text="WhatsApp"
         onClick={handleOpenWhatsApp}

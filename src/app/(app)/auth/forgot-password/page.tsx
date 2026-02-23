@@ -1,5 +1,3 @@
-'use client';
-
 import { Box, Container } from '@/components/shared/ui';
 import ForgotPasswordForm from './_components/ForgotPasswordForm';
 

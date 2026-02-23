@@ -38,6 +38,12 @@ let refreshPromise: Promise<boolean> | null = null;
 
 function buildUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
+  if (!API_BASE) {
+    throw new Error(
+      '[Olevium] NEXT_PUBLIC_API_URL no está configurado. ' +
+      'Definí la variable en .env.local para conectar con el backend.'
+    );
+  }
   const trimmedPath = path.trim();
   const needsSlash = !trimmedPath.startsWith('/');
   return `${API_BASE}${needsSlash ? '/' : ''}${trimmedPath}`;
@@ -184,6 +190,19 @@ export async function apiRequest(path: string, init: ApiRequestInit = {}): Promi
   // En SSR, si hay 401 lanzar error para que la página pueda redirigir
   if (response.status === 401 && typeof window === 'undefined' && !init.skipAuth) {
     throw new AuthExpiredError('Sesión expirada en servidor');
+  }
+
+  // Guard: si la API devuelve HTML en lugar de JSON, el error críptico de JSON.parse
+  // se reemplaza por uno descriptivo. Ocurre cuando NEXT_PUBLIC_API_URL apunta al
+  // servidor Next.js en vez del backend FastAPI.
+  if (response.ok && response.status !== 204) {
+    const contentType = response.headers.get('Content-Type') ?? '';
+    if (contentType.includes('text/html')) {
+      throw new Error(
+        `[Olevium] La API devolvió HTML en lugar de JSON para "${path}". ` +
+        `Verificá que NEXT_PUBLIC_API_URL (${API_BASE || '(vacío)'}) apunta al backend FastAPI, no al servidor Next.js.`
+      );
+    }
   }
 
   return response;

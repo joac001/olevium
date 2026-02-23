@@ -1,7 +1,12 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { Container, Box, AppLink } from '@/components/shared/ui';
 import { requireAuth, withAuthProtection, handleProtectedResult } from '@/lib/server-auth';
-import AccountDetailShell from './_components/AccountDetailShell';
+import AccountDetailProvider from './_context/AccountDetailContext';
+import AccountInfoCard from './_components/AccountInfoCard';
+import AccountTransactionsCard from './_components/AccountTransactionsCard';
+import AccountDetailSkeleton from './_skeletons/AccountDetailSkeleton';
 import { getAccountDetailPageData } from './_api';
 
 interface AccountDetailPageProps {
@@ -32,15 +37,22 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
           variant="unstyled"
           className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--text-primary)]"
         >
-          <i className="fas fa-arrow-left" aria-hidden />
+          <ArrowLeft className="h-4 w-4" aria-hidden />
           Volver
         </AppLink>
-        <AccountDetailShell
-          accountId={accountId}
-          initialAccount={data.account}
-          initialTransactions={data.transactions}
-          initialAccountTypes={data.accountTypes}
-        />
+        <Suspense fallback={<AccountDetailSkeleton />}>
+          <AccountDetailProvider
+            accountId={accountId}
+            initialAccount={data.account}
+            initialTransactions={data.transactions}
+            initialAccountTypes={data.accountTypes}
+          >
+            <Box className="flex w-full max-w-6xl flex-col gap-6">
+              <AccountInfoCard />
+              <AccountTransactionsCard />
+            </Box>
+          </AccountDetailProvider>
+        </Suspense>
       </Box>
     </Container>
   );

@@ -2,13 +2,10 @@
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import type { TransactionsSummary as TransactionsSummaryType } from './types';
+import { useTransactionsPage } from '../_context/TransactionsContext';
 
-interface TransactionsSummaryProps {
-  summary: TransactionsSummaryType;
-}
-
-export default function TransactionsSummary({ summary }: TransactionsSummaryProps) {
+export default function TransactionsSummary() {
+  const { summary } = useTransactionsPage();
   const summaryItems = [
     {
       label: 'Ingresos filtrados',

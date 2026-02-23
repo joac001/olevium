@@ -97,49 +97,6 @@ export const useErrorHandler = (options: UseErrorHandlerOptions = {}) => {
   };
 };
 
-// Hook específico para formularios
-export const useFormErrorHandler = () => {
-  const { showError, showSuccess } = useNotification();
-
-  const handleFormSubmission = useCallback(
-    async <T>(
-      submitFunction: () => Promise<T>,
-      options: {
-        successMessage?: string;
-        errorContext?: OperationContext;
-        onSuccess?: (result: T) => void;
-        onError?: (error: unknown) => void;
-      } = {}
-    ): Promise<boolean> => {
-      try {
-        const result = await submitFunction();
-
-        showSuccess(
-          options.successMessage || 'Formulario enviado exitosamente',
-          options.errorContext
-        );
-
-        if (options.onSuccess) {
-          options.onSuccess(result);
-        }
-
-        return true;
-      } catch (error) {
-        showError(error, options.errorContext);
-
-        if (options.onError) {
-          options.onError(error);
-        }
-
-        return false;
-      }
-    },
-    [showError, showSuccess]
-  );
-
-  return { handleFormSubmission };
-};
-
 // Hook para operaciones de autenticación
 export const useAuthErrorHandler = () => {
   const { showError, showSuccess } = useNotification();

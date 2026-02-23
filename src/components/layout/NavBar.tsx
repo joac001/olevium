@@ -5,11 +5,11 @@ import {
   useRef,
   useEffect,
   useMemo,
-  type ComponentType,
-  type SVGProps,
+  type ReactNode,
   type CSSProperties,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 
 import Box from '@/components/shared/ui/content/Box';
 import Typography from '@/components/shared/ui/text/Typography';
@@ -17,12 +17,8 @@ import { useAuthStore } from '@/lib/stores/auth';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
-/** Acepta ícono como clases (FA) o como componente React (Lucide u otros) */
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type IconType = string | IconComponent;
-
 export interface NavLink {
-  icon: IconType;
+  icon: ReactNode;
   label: string;
   href: string;
 }
@@ -177,7 +173,7 @@ function NavBar({ title, links }: NavBarProps) {
             aria-label="Cerrar sesión"
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 group hover:bg-[color:var(--surface-muted)]"
           >
-            <i className="fas fa-sign-out-alt text-[color:var(--text-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-300" />
+            <LogOut className="h-5 w-5 text-[color:var(--text-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-300" />
           </button>
         </Box>
       </div>
@@ -211,7 +207,7 @@ function NavBar({ title, links }: NavBarProps) {
               }}
               aria-current={isActive ? 'page' : undefined}
             >
-              <i className={`fas fa-${link.icon}`} />
+              {link.icon}
 
               <Typography variant="link">{link.label}</Typography>
               {isActive && (

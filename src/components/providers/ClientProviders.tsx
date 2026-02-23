@@ -12,6 +12,7 @@ interface ClientProvidersProps {
 
 export function ClientProviders({ children }: ClientProvidersProps) {
   const [queryClient] = useState(() => new QueryClient());
+
   return (
     <NotificationProvider>
       <QueryClientProvider client={queryClient}>

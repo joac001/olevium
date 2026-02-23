@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle, User, Mail, Lock } from 'lucide-react';
 
 import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
@@ -39,7 +40,7 @@ export default function SignupForm() {
         typeof passwordValue !== 'string'
       ) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error en el registro',
           'Todos los campos son obligatorios para crear una cuenta.'
@@ -84,7 +85,7 @@ export default function SignupForm() {
           label="Nombre completo"
           placeholder="Juan Pérez"
           required
-          icon="fas fa-user"
+          icon={<User className="h-4 w-4" />}
           autoComplete="name"
         />
 
@@ -94,7 +95,7 @@ export default function SignupForm() {
           label="Correo electrónico"
           placeholder="tu-correo@ejemplo.com"
           required
-          icon="fas fa-envelope"
+          icon={<Mail className="h-4 w-4" />}
           autoComplete="email"
         />
 
@@ -104,7 +105,7 @@ export default function SignupForm() {
           label="Contraseña"
           placeholder="Crea una contraseña segura"
           required
-          icon="fas fa-lock"
+          icon={<Lock className="h-4 w-4" />}
           autoComplete="new-password"
         />
       </Box>

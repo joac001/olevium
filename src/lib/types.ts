@@ -1,103 +1,29 @@
-import type {
-  ApiUserAccount,
-  ApiAccountType,
-  ApiCurrency,
-  ApiUserTransaction,
+// Central type barrel — all domain types live in src/types/.
+// This file re-exports them under the aliases that existing consumers expect.
+
+export type {
+  ApiUserAccount as Account,
+  ApiAccountType as AccountType,
+  CreateAccountPayload,
+  UpdateAccountPayload,
 } from '@/types';
-import type { RecurringTransaction as RootRecurringTransaction } from '@/types/recurring';
 
-export type Account = ApiUserAccount;
-export type AccountType = ApiAccountType;
+export type {
+  ApiCategory as Category,
+  Transaction,
+  ApiTransactionType as TransactionType,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+  CreateTransactionPayload,
+  UpdateTransactionPayload,
+} from '@/types';
 
-export type Category = {
-  category_id: string;
-  user_id: string | null;
-  type_id: number;
-  description: string;
-  color?: string | null;
-  icon?: string | null;
-  created_at?: string;
-  is_default?: boolean;
-  is_active?: boolean;
-};
+export type {
+  RecurringTransaction,
+  CreateRecurringTransactionPayload,
+  UpdateRecurringTransactionPayload,
+} from '@/types';
 
-export type Transaction = ApiUserTransaction & {
-  account?: unknown;
-  transaction_type?: unknown;
-};
-export type RecurringTransaction = RootRecurringTransaction;
+export type { ApiCurrency as Currency } from '@/types';
 
-export type TransactionType = {
-  type_id: number;
-  name: string;
-  created_at: string;
-};
-
-export type CreateAccountPayload = {
-  name: string;
-  type_id: number;
-  currency_id: number;
-  balance?: number;
-};
-
-export type UpdateAccountPayload = Partial<CreateAccountPayload>;
-
-export type CreateCategoryPayload = {
-  description: string;
-  type_id: number;
-  color?: string | null;
-  icon?: string | null;
-};
-
-export type UpdateCategoryPayload = Partial<CreateCategoryPayload>;
-
-export type CreateTransactionPayload = {
-  account_id: string;
-  amount: number;
-  type_id: number;
-  category_id?: string;
-  category?: {
-    description: string;
-    type_id: number;
-    color?: string | null;
-    icon?: string | null;
-  };
-  description?: string;
-  date: string;
-};
-
-export type UpdateTransactionPayload = Partial<CreateTransactionPayload>;
-
-export type CreateRecurringTransactionPayload = {
-  account_id: string;
-  category_id?: string;
-  category?: {
-    description: string;
-    type_id: number;
-    color?: string | null;
-    icon?: string | null;
-  };
-  type_id: number;
-  amount: number;
-  description?: string;
-  frequency: 'daily' | 'weekly' | 'monthly';
-  interval?: number;
-  weekday?: number;
-  day_of_month?: number;
-  start_date: string;
-  end_date?: string;
-  require_confirmation?: boolean;
-};
-
-export type UpdateRecurringTransactionPayload = Partial<CreateRecurringTransactionPayload> & {
-  is_active?: boolean;
-};
-
-export type Currency = ApiCurrency;
-
-export type FeedbackPayload = {
-  type: 'bug' | 'feature' | 'other';
-  message: string;
-  page_path?: string;
-  metadata?: Record<string, unknown>;
-};
+export type { FeedbackPayload } from '@/types';

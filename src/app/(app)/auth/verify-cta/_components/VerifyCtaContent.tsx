@@ -1,3 +1,4 @@
+import { ArrowLeft, Mail } from 'lucide-react';
 import { Container, Box, Card, Typography, AppLink } from '@/components/shared/ui';
 
 export default function VerifyCtaContent() {
@@ -9,7 +10,7 @@ export default function VerifyCtaContent() {
           variant="unstyled"
           className="flex w-fit items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--text-primary)]"
         >
-          <i className="fas fa-arrow-left" aria-hidden />
+          <ArrowLeft className="h-4 w-4" aria-hidden />
           Volver al acceso
         </AppLink>
 
@@ -18,8 +19,8 @@ export default function VerifyCtaContent() {
             <Typography variant="body" className="text-lg md:text-xl">
               Verifica tu email con el enlace que acabamos de enviar a tu bandeja de entrada.
             </Typography>
-            <i
-              className="fas fa-envelope text-4xl text-[color:var(--text-muted)] md:text-5xl"
+            <Mail
+              className="h-10 w-10 text-[color:var(--text-muted)] md:h-12 md:w-12"
               aria-hidden
             />
           </Box>

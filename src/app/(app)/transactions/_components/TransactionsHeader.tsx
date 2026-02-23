@@ -1,18 +1,12 @@
 'use client';
 
+import { Plus, FileDown } from 'lucide-react';
 import { ActionButton, Box, Typography } from '@/components/shared/ui';
+import { useTransactionsPage } from '../_context/TransactionsContext';
 
-interface TransactionsHeaderProps {
-  onCreateTransaction: () => void;
-  onExportCsv?: () => void;
-  isExporting?: boolean;
-}
+export default function TransactionsHeader() {
+  const { handleCreateTransaction, handleExportCsv, isExporting } = useTransactionsPage();
 
-export default function TransactionsHeader({
-  onCreateTransaction,
-  onExportCsv,
-  isExporting = false,
-}: TransactionsHeaderProps) {
   return (
     <Box className="flex flex-col gap-3">
       <Box className="flex flex-col gap-2">
@@ -24,20 +18,18 @@ export default function TransactionsHeader({
       </Box>
       <Box className="flex flex-wrap items-center gap-2">
         <ActionButton
-          icon="fas fa-plus"
+          icon={<Plus className="h-4 w-4" />}
           type="primary"
           text="Nueva transacción"
-          onClick={onCreateTransaction}
+          onClick={handleCreateTransaction}
         />
-        {onExportCsv && (
-          <ActionButton
-            icon="fas fa-file-arrow-down"
-            type="accent"
-            text={isExporting ? 'Exportando...' : 'Exportar CSV'}
-            onClick={onExportCsv}
-            disabled={isExporting}
-          />
-        )}
+        <ActionButton
+          icon={<FileDown className="h-4 w-4" />}
+          type="accent"
+          text={isExporting ? 'Exportando...' : 'Exportar CSV'}
+          onClick={handleExportCsv}
+          disabled={isExporting}
+        />
       </Box>
     </Box>
   );

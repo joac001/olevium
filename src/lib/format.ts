@@ -7,11 +7,6 @@ export function formatCurrency(value: number, currency: string = 'ARS'): string 
   return formatter.format(value || 0);
 }
 
-export function formatSignedCurrency(value: number, currency: string = 'ARS'): string {
-  const formatted = formatCurrency(Math.abs(value), currency);
-  return value >= 0 ? `+${formatted}` : `-${formatted}`;
-}
-
 export function formatDate(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {

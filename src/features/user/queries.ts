@@ -1,26 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/http';
-import type { ApiCollectionResult } from '@/lib/api';
-import type { StoredProfile } from '@/lib/auth';
+import type { UseQueryOptions } from '@tanstack/react-query';
+import { getCurrentUser } from '@/lib/api';
+import type { User } from '@/types';
 
-async function getProfile(): Promise<ApiCollectionResult<StoredProfile>> {
-  try {
-    const response = await apiRequest('/users/me/');
-    if (!response.ok) {
-      throw new Error(`status ${response.status}`);
-    }
-    const raw = (await response.json()) as unknown;
-    const profile = raw as StoredProfile;
-    return { data: profile };
-  } catch (error) {
-    console.warn('[olevium] error al obtener perfil', error);
-    return { data: { name: 'Usuario de Olevium', email: 'user@olevium.com' } };
-  }
-}
+export const userKeys = {
+  me: ['user', 'me'] as const,
+};
 
-export const useProfileQuery = () => {
-  return useQuery({
-    queryKey: ['profile'],
-    queryFn: getProfile,
+type ProfileQueryOptions = Omit<UseQueryOptions<User, Error>, 'queryKey' | 'queryFn'>;
+
+export const useProfileQuery = (options?: ProfileQueryOptions) => {
+  return useQuery<User, Error>({
+    queryKey: userKeys.me,
+    queryFn: () => getCurrentUser().then(r => r.data),
+    ...options,
   });
 };

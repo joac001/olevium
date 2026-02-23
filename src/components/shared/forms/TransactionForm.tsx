@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { CheckCircle, Circle } from 'lucide-react';
 import {
   Box,
   Card,
@@ -14,14 +15,14 @@ import {
 } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useCategoriesQuery } from '@/features/categories/queries';
 import {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
-} from '@/features/transactions/mutations';
+} from '@/features/transactions/queries';
 import { CATEGORY_COLOR_OPTIONS } from '@/lib/category-presets';
 import { formatAccountName } from '@/lib/format';
-import type { Category } from '@/lib/types';
+import type { Category, CreateTransactionPayload } from '@/lib/types';
 import type { Account, AccountTransaction } from '@/types';
 
 const EXPENSE_TYPE_ID = 1;
@@ -57,7 +58,7 @@ export interface TransactionFormProps {
   fixedAccountId?: string;
   /** Lista de cuentas (cuando se permite seleccionar cuenta) */
   accounts?: Account[];
-  /** Lista de categorias (si no se provee, se cargan del store) */
+  /** Lista de categorias (si no se provee, se cargan via React Query) */
   categories?: Category[];
   /** Incluir Card wrapper con titulo */
   withCard?: boolean;
@@ -82,13 +83,13 @@ function buildInitialState(
     // Normalizar la transaccion (puede venir en formato snake_case o camelCase)
     const txAccountId = 'accountId' in transaction
       ? String(transaction.accountId)
-      : String((transaction as any).account_id ?? '');
+      : String(transaction.account_id ?? '');
     const txTypeId = 'typeId' in transaction
       ? transaction.typeId
-      : (transaction as any).type_id ?? EXPENSE_TYPE_ID;
+      : transaction.type_id ?? EXPENSE_TYPE_ID;
     const txCategoryId = 'categoryId' in transaction
       ? transaction.categoryId
-      : (transaction as any).category_id;
+      : transaction.category_id;
     const txDate = 'date' in transaction ? transaction.date : '';
     const txDescription = 'description' in transaction ? transaction.description : '';
 
@@ -137,23 +138,16 @@ export default function TransactionForm({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Store para categorias (si no se proveen externamente)
-  const storeCategories = useTransactionsStore(state => state.categories);
-  const categoriesLoading = useTransactionsStore(state => state.categoriesLoading);
-  const fetchCategories = useTransactionsStore(state => state.fetchCategories);
-
-  const categories = externalCategories ?? storeCategories;
-
-  // Cargar categorias si no estan en cache
-  useEffect(() => {
-    if (!externalCategories && !storeCategories.length && !categoriesLoading) {
-      fetchCategories();
-    }
-  }, [externalCategories, storeCategories.length, categoriesLoading, fetchCategories]);
+  // Cargar categorias via React Query si no se proveen externamente
+  const { data: queriedCategories = [], isLoading: queriedCategoriesLoading } = useCategoriesQuery({
+    enabled: !externalCategories,
+  });
+  const categories = externalCategories ?? queriedCategories;
+  const categoriesLoading = !externalCategories && queriedCategoriesLoading;
 
   // Mutations
   const transactionId = transaction
-    ? ('transactionId' in transaction ? transaction.transactionId : (transaction as any).transaction_id)
+    ? ('transactionId' in transaction ? transaction.transactionId : transaction.transaction_id)
     : null;
   const createMutation = useCreateTransactionMutation();
   const updateMutation = useUpdateTransactionMutation(transactionId);
@@ -174,22 +168,17 @@ export default function TransactionForm({
     const currentCategoryId = formValues.categoryId;
     return categories
       .filter(category => {
-        const catTypeId = 'typeId' in category ? category.typeId : (category as any).type_id;
-        const catId = 'categoryId' in category ? category.categoryId : (category as any).category_id;
-        const isActive = 'isActive' in category ? category.isActive : (category as any).is_active;
-        // Filtrar por tipo y solo mostrar activas (o la actualmente seleccionada en edit mode)
+        const catTypeId = category.type_id;
+        const catId = category.category_id;
+        const isActive = category.is_active;
         return catTypeId === typeId && (isActive !== false || String(catId) === currentCategoryId);
       })
       .slice()
       .sort((a, b) => a.description.localeCompare(b.description))
-      .map(category => {
-        const catId = 'categoryId' in category ? category.categoryId : (category as any).category_id;
-        const isActive = 'isActive' in category ? category.isActive : (category as any).is_active;
-        return {
-          value: String(catId),
-          label: isActive === false ? `${category.description} (inactiva)` : category.description,
-        };
-      });
+      .map(category => ({
+        value: String(category.category_id),
+        label: category.is_active === false ? `${category.description} (inactiva)` : category.description,
+      }));
   }, [categories, formValues.typeId, formValues.categoryId]);
 
   const typeOptions: DropMenuOption[] = [
@@ -248,7 +237,7 @@ export default function TransactionForm({
     const normalizedAmount = Math.abs(Number(formValues.amount) || 0);
     const typeId = Number(formValues.typeId);
 
-    const payload: Record<string, unknown> = {
+    const payload: CreateTransactionPayload = {
       account_id: fixedAccountId ?? formValues.accountId,
       amount: normalizedAmount,
       type_id: typeId,
@@ -277,10 +266,10 @@ export default function TransactionForm({
 
     try {
       if (mode === 'create') {
-        await createMutation.mutateAsync(payload as any);
+        await createMutation.mutateAsync(payload);
         onSuccess?.('created');
       } else if (transactionId) {
-        await updateMutation.mutateAsync(payload as any);
+        await updateMutation.mutateAsync(payload);
         onSuccess?.('updated');
       }
     } catch (error) {
@@ -375,7 +364,7 @@ export default function TransactionForm({
             return (
               <ActionButton
                 key={value}
-                icon={isActive ? 'fas fa-check-circle' : 'fas fa-circle'}
+                icon={isActive ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                 type={isActive ? 'accent' : 'neutral'}
                 text={label}
                 onClick={() =>

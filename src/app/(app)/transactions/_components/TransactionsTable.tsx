@@ -1,32 +1,24 @@
 'use client';
 
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
-import type { Category, Transaction } from '@/lib/types';
-import type { Account } from '@/types';
+import { useTransactionsPage } from '../_context/TransactionsContext';
 
 const EXPENSE_TYPE_ID = 1;
 const INCOME_TYPE_ID = 2;
 
-interface TransactionsTableProps {
-  transactions: Transaction[];
-  accounts: Record<string, Account>;
-  categories: Record<string, Category>;
-  onEditTransaction: (transaction: Transaction) => void;
-  onDeleteTransaction: (transaction: Transaction) => Promise<void>;
-}
-
-export default function TransactionsTable({
-  transactions,
-  accounts: accountDictionary,
-  categories: categoryDictionary,
-  onEditTransaction: handleEditTransaction,
-  onDeleteTransaction: handleDeleteTransaction,
-}: TransactionsTableProps) {
-  const isLoading = false; // Ya no hay loading porque los datos vienen del servidor
-  const filteredTransactions = transactions;
-  const summary = { count: transactions.length };
+export default function TransactionsTable() {
+  const {
+    filteredTransactions,
+    accountDictionary,
+    categoryDictionary,
+    handleEditTransaction,
+    handleDeleteTransaction,
+  } = useTransactionsPage();
+  const isLoading = false;
+  const summary = { count: filteredTransactions.length };
 
   return (
     <Card title="Detalle de movimientos" subtitle={`${summary.count} registros filtrados`}>
@@ -102,13 +94,13 @@ export default function TransactionsTable({
                     <td className="px-4 py-3">
                       <Box className="flex justify-end gap-2">
                         <ActionButton
-                          icon="fas fa-pen-to-square"
+                          icon={<Pencil className="h-4 w-4" />}
                           type="accent"
                           text="Editar"
                           onClick={() => handleEditTransaction(tx)}
                         />
                         <ActionButton
-                          icon="fas fa-trash"
+                          icon={<Trash2 className="h-4 w-4" />}
                           type="danger"
                           text="Eliminar"
                           onClick={() => handleDeleteTransaction(tx)}

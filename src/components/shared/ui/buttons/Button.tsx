@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import clsx from 'clsx';
 
 import type { ColorKey } from '@/types/ColorKey';
 import ButtonBase from './ButtonBase';
@@ -10,7 +9,7 @@ export interface ButtonProps {
   disabled?: boolean;
   onClick?: () => void;
   htmlType?: 'button' | 'submit' | 'reset';
-  icon?: ReactNode | string;
+  icon?: ReactNode;
   iconPosition?: 'start' | 'end';
   fullWidth?: boolean;
   className?: string;
@@ -40,13 +39,7 @@ export default function Button({
         ...style,
       };
 
-  const renderIcon = () => {
-    if (!icon) return null;
-    if (typeof icon === 'string') {
-      return <i className={clsx(icon, 'text-base md:text-lg')} aria-hidden />;
-    }
-    return icon;
-  };
+  const renderIcon = () => icon ?? null;
 
   return (
     <ButtonBase

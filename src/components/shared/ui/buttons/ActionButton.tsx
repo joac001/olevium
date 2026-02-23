@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 
 import Box from '@/components/shared/ui/content/Box';
@@ -7,7 +8,7 @@ import Tooltip from '@/components/shared/ui/text/Tooltip';
 import { ColorKey } from '@/types/ColorKey';
 import ButtonBase from './ButtonBase';
 export interface ActionButtonProps {
-  icon: string; // ej: "fas fa-plus"
+  icon: ReactNode;
   type?: ColorKey; // default: accent (azul)
   text?: string; // etiqueta (se oculta en mobile)
   onClick?: () => void;
@@ -24,7 +25,7 @@ function ActionCore({
   className = '',
   disabled = false,
 }: {
-  icon: string;
+  icon: ReactNode;
   text?: string;
   onClick?: () => void;
   variant: ColorKey;
@@ -41,7 +42,7 @@ function ActionCore({
         'min-w-0 px-3 py-2 text-sm font-medium tracking-tight md:px-3.5 md:py-2.5',
         className
       )}
-      leadingIcon={<i className={clsx(icon, 'text-base md:text-lg')} aria-hidden="true" />}
+      leadingIcon={<span className="text-base md:text-lg leading-none" aria-hidden="true">{icon}</span>}
       ariaLabel={text || 'Acción'}
     >
       {text && <span className="hidden whitespace-nowrap text-sm md:inline">{text}</span>}

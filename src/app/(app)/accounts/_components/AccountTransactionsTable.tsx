@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useCallback } from 'react';
+import { Pen, Trash2 } from 'lucide-react';
 
 import { Box, Typography, Card, ActionButton } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
@@ -155,13 +156,13 @@ export default function AccountTransactionsTable({
 
                 <Box className="flex w-full items-center gap-2">
                   <ActionButton
-                    icon="fas fa-pen"
+                    icon={<Pen className="h-4 w-4" />}
                     type="accent"
                     tooltip="Editar transacción"
                     onClick={() => handleEdit(transaction)}
                   />
                   <ActionButton
-                    icon="fas fa-trash"
+                    icon={<Trash2 className="h-4 w-4" />}
                     type="danger"
                     tooltip="Eliminar transacción"
                     onClick={() => handleDelete(transaction)}
@@ -185,13 +186,13 @@ export default function AccountTransactionsTable({
               </Typography>
               <Box className="flex items-center justify-end gap-2">
                 <ActionButton
-                  icon="fas fa-pen"
+                  icon={<Pen className="h-4 w-4" />}
                   type="accent"
                   tooltip="Editar transacción"
                   onClick={() => handleEdit(transaction)}
                 />
                 <ActionButton
-                  icon="fas fa-trash"
+                  icon={<Trash2 className="h-4 w-4" />}
                   type="danger"
                   tooltip="Eliminar transacción"
                   onClick={() => handleDelete(transaction)}

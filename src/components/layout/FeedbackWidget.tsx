@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { usePathname } from 'next/navigation';
+import { CheckCircle, Circle, Send, MessageSquare } from 'lucide-react';
 
 import { Box, Card, Typography, Button, ActionButton, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -95,7 +96,7 @@ function FeedbackModalContent() {
             ].map(option => (
               <ActionButton
                 key={option.value}
-                icon={type === option.value ? 'fas fa-check-circle' : 'fas fa-circle'}
+                icon={type === option.value ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                 type={type === option.value ? 'accent' : 'neutral'}
                 text={option.label}
                 onClick={() => setType(option.value as FeedbackType)}
@@ -121,7 +122,7 @@ function FeedbackModalContent() {
               text={isSubmitting ? 'Enviando...' : 'Enviar'}
               disabled={isSubmitting || !message.trim()}
               htmlType="submit"
-              icon="fas fa-paper-plane"
+              icon={<Send className="h-4 w-4" />}
               iconPosition="end"
             />
           </Box>
@@ -140,7 +141,7 @@ export default function FeedbackWidget() {
 
   return (
     <ActionButton
-      icon="fas fa-message"
+      icon={<MessageSquare className="h-4 w-4" />}
       type="accent"
       tooltip="Enviar feedback"
       onClick={handleOpenFeedback}

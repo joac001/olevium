@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui/buttons';
 import { useChangePasswordMutation } from '@/features/user/mutations';
@@ -16,7 +17,7 @@ export default function ChangePasswordForm() {
 
   const handleSubmit = async () => {
     if (newPassword !== confirmPassword) {
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error', 'Las contraseñas no coinciden');
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', 'Las contraseñas no coinciden');
       return;
     }
     try {
@@ -24,13 +25,13 @@ export default function ChangePasswordForm() {
         current_password: currentPassword,
         new_password: newPassword,
       });
-      showNotification('fas fa-circle-check', 'success', 'Contraseña actualizada', 'Tu contraseña se cambió correctamente.');
+      showNotification(<CheckCircle className="h-5 w-5" />, 'success', 'Contraseña actualizada', 'Tu contraseña se cambió correctamente.');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo cambiar la contraseña';
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
     }
   };
 

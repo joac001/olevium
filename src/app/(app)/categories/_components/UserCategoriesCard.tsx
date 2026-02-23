@@ -1,46 +1,40 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { Plus, Pen, EyeOff, Eye, Trash2 } from 'lucide-react';
 
 import { Box, Card, Typography, ActionButton } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
-import { getCategories, deactivateCategory, reactivateCategory } from '@/lib/api/categories';
+import {
+  useCategoriesQuery,
+  useDeactivateCategoryMutation,
+  useReactivateCategoryMutation,
+} from '@/features/categories/queries';
 import type { Category, TransactionType } from '@/lib/types';
-import type { User } from '@/lib/api';
 import EditCategoryForm from './EditCategoryForm';
 import DeleteCategoryForm from './DeleteCategoryForm';
 import CreateCategoryForm from './CreateCategoryForm';
 import ConfirmActionForm from './ConfirmActionForm';
 
-interface CategoriesShellProps {
+interface UserCategoriesCardProps {
   initialCategories: Category[];
   initialTransactionTypes: TransactionType[];
-  initialUser: User;
+  userId: string;
 }
 
-export default function CategoriesShell({
+export default function UserCategoriesCard({
   initialCategories,
   initialTransactionTypes,
-  initialUser,
-}: CategoriesShellProps) {
+  userId,
+}: UserCategoriesCardProps) {
   const { showModal, hideModal } = useModal();
 
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [transactionTypes] = useState<TransactionType[]>(initialTransactionTypes);
-  const [user] = useState<User>(initialUser);
-
-  const userId = user ? String(user.user_id) : null;
+  const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
+  const deactivateMutation = useDeactivateCategoryMutation();
+  const reactivateMutation = useReactivateCategoryMutation();
+  const transactionTypes = initialTransactionTypes;
 
   const categoriesList = categories;
-
-  const refreshCategories = useCallback(async () => {
-    try {
-      const { data } = await getCategories();
-      setCategories(data);
-    } catch (error) {
-      // Silently fail - the user will see stale data
-    }
-  }, []);
 
   const typeLabelById = useMemo(() => {
     const record = new Map<number, string>();
@@ -52,13 +46,8 @@ export default function CategoriesShell({
 
   const userCategories = useMemo(
     () =>
-      categoriesList.filter(category => category.user_id && (!userId || category.user_id === userId)),
+      categoriesList.filter(category => category.user_id && category.user_id === userId),
     [categoriesList, userId]
-  );
-
-  const defaultCategories = useMemo(
-    () => categoriesList.filter(category => !category.user_id),
-    [categoriesList]
   );
 
   const openEditModal = useCallback(
@@ -74,15 +63,12 @@ export default function CategoriesShell({
             category={target}
             transactionTypes={transactionTypes}
             loadingTypes={false}
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal, transactionTypes]
+    [categoriesList, hideModal, showModal, transactionTypes]
   );
 
   const openDeleteModal = useCallback(
@@ -96,15 +82,12 @@ export default function CategoriesShell({
         <Card tone="danger" title="Eliminar categoría">
           <DeleteCategoryForm
             category={target}
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, hideModal, showModal]
   );
 
   const openDeactivateModal = useCallback(
@@ -121,17 +104,14 @@ export default function CategoriesShell({
             description="La categoría no aparecerá en los selects de nuevas transacciones, pero se mantendrá en las transacciones existentes."
             confirmLabel="Desactivar categoría"
             confirmVariant="accent"
-            onConfirm={() => deactivateCategory(categoryId)}
+            onConfirm={() => deactivateMutation.mutateAsync(categoryId)}
             successMessage="Categoría desactivada. Ya no aparecerá en nuevas transacciones."
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, deactivateMutation, hideModal, showModal]
   );
 
   const openActivateModal = useCallback(
@@ -148,40 +128,33 @@ export default function CategoriesShell({
             description="La categoría volverá a aparecer en los selects de nuevas transacciones."
             confirmLabel="Activar categoría"
             confirmVariant="accent"
-            onConfirm={() => reactivateCategory(categoryId)}
+            onConfirm={() => reactivateMutation.mutateAsync(categoryId)}
             successMessage="Categoría activada. Ya está disponible para nuevas transacciones."
-            onSuccess={async () => {
-              hideModal();
-              await refreshCategories();
-            }}
+            onSuccess={() => hideModal()}
           />
         </Card>
       );
     },
-    [categoriesList, hideModal, refreshCategories, showModal]
+    [categoriesList, reactivateMutation, hideModal, showModal]
   );
 
   const openCreateModal = useCallback(() => {
     showModal(
       <Card tone="accent" title="Crear categoría">
         <CreateCategoryForm
-          onSuccess={async () => {
-            hideModal();
-            await refreshCategories();
-          }}
+          onSuccess={() => hideModal()}
         />
       </Card>
     );
-  }, [hideModal, refreshCategories, showModal]);
+  }, [hideModal, showModal]);
 
   return (
-    <Box className="flex flex-col gap-6">
-      <Card
-        tone="neutral"
-        title="Tus categorías"
+    <Card
+      tone="neutral"
+      title="Tus categorías"
         actions={[
           {
-            icon: 'fas fa-plus',
+            icon: <Plus className="h-4 w-4" />,
             type: 'primary',
             tooltip: 'Crear categoría',
             onClick: openCreateModal,
@@ -242,28 +215,28 @@ export default function CategoriesShell({
                   </Box>
                   <Box className="flex items-center gap-2">
                     <ActionButton
-                      icon="fas fa-pen"
+                      icon={<Pen className="h-4 w-4" />}
                       type="accent"
                       tooltip="Editar categoría"
                       onClick={() => openEditModal(category.category_id)}
                     />
                     {isActive ? (
                       <ActionButton
-                        icon="fas fa-eye-slash"
+                        icon={<EyeOff className="h-4 w-4" />}
                         type="neutral"
                         tooltip="Desactivar categoría"
                         onClick={() => openDeactivateModal(category.category_id)}
                       />
                     ) : (
                       <ActionButton
-                        icon="fas fa-eye"
+                        icon={<Eye className="h-4 w-4" />}
                         type="accent"
                         tooltip="Activar categoría"
                         onClick={() => openActivateModal(category.category_id)}
                       />
                     )}
                     <ActionButton
-                      icon="fas fa-trash"
+                      icon={<Trash2 className="h-4 w-4" />}
                       type="danger"
                       tooltip="Eliminar categoría"
                       onClick={() => openDeleteModal(category.category_id)}
@@ -280,63 +253,6 @@ export default function CategoriesShell({
             </Typography>
           </Box>
         )}
-      </Card>
-
-      <Card
-        tone="neutral"
-        title="Categorías por defecto"
-        subtitle="Estas categorías vienen incluidas en Olevium y no pueden editarse."
-      >
-        {defaultCategories.length ? (
-          <Box className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-            {defaultCategories.map(category => {
-              const typeLabel = typeLabelById.get(category.type_id) ?? `Tipo #${category.type_id}`;
-              return (
-                <Box
-                  key={category.category_id}
-                  className="rounded-2xl border border-[color:var(--surface-muted)] bg-[color:var(--surface-glass)] p-4"
-                >
-                  <Typography
-                    variant="body"
-                    className="text-sm font-semibold text-[color:var(--text-primary)]"
-                  >
-                    {category.description}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    className="text-xs uppercase tracking-[0.18em] text-[color:var(--text-muted)]"
-                  >
-                    Tipo:{' '}
-                    <span className="font-semibold text-[color:var(--text-primary)]">
-                      {typeLabel}
-                    </span>
-                  </Typography>
-                  {category.color && (
-                    <Box className="flex items-center gap-2 w-fit">
-                      <span
-                        className="h-4 w-4 rounded-xl"
-                        style={{ backgroundColor: category.color }}
-                      ></span>
-                      <Typography
-                        variant="caption"
-                        className="text-xs text-[color:var(--text-muted)]"
-                      >
-                        {category.color}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              );
-            })}
-          </Box>
-        ) : (
-          <Box className="rounded-2xl border border-dashed border-[color:var(--surface-muted)] p-8 text-center">
-            <Typography variant="body" className="text-sm text-[color:var(--text-muted)]">
-              No hay categorías por defecto para mostrar.
-            </Typography>
-          </Box>
-        )}
-      </Card>
-    </Box>
+    </Card>
   );
 }

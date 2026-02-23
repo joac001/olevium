@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
+import { CheckCircle, AlertTriangle, Wallet, TrendingUp } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
 import type { AccountType } from '@/types';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import { useCurrenciesQuery, useCreateAccountMutation } from '@/features/accounts/queries';
 import { useNotification } from '@/context/NotificationContext';
 import {
   buildAccountTypeOptions,
@@ -27,12 +28,10 @@ export default function CreateAccountForm({
   defaultTypeId,
 }: CreateAccountFormProps) {
   const { showNotification } = useNotification();
-  const createAccount = useAccountsStore(state => state.createAccount);
-  const getCurrencies = useAccountsStore(state => state.getCurrencies);
-  const currencies = useAccountsStore(state => state.currencies);
-  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
+  const { data: currencies = [], isLoading: loadingCurrencies } = useCurrenciesQuery();
+  const createAccountMutation = useCreateAccountMutation();
+  const isSubmitting = createAccountMutation.isPending;
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const initialTypeId = defaultTypeId ?? accountTypes[0]?.typeId ?? null;
 
   const typeOptions: DropMenuOption[] = useMemo(
@@ -44,10 +43,6 @@ export default function CreateAccountForm({
     () => buildCurrencyOptions(currencies),
     [currencies]
   );
-
-  useEffect(() => {
-    getCurrencies();
-  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -69,17 +64,16 @@ export default function CreateAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
-        await createAccount({
+        await createAccountMutation.mutateAsync({
           name: normalized.name,
-          typeId: normalized.typeId,
-          currencyId: normalized.currencyId,
+          type_id: normalized.typeId,
+          currency_id: normalized.currencyId,
           balance: normalized.balance,
         });
 
         showNotification(
-          'fa-solid fa-circle-check',
+          <CheckCircle className="h-5 w-5" />,
           'success',
           'Cuenta creada',
           'Tu cuenta quedó registrada y ya forma parte del panel.'
@@ -121,16 +115,14 @@ export default function CreateAccountForm({
         }
 
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error al crear cuenta',
           message
         );
-      } finally {
-        setIsSubmitting(false);
       }
     },
-    [createAccount, onSuccess, showNotification]
+    [createAccountMutation, onSuccess, showNotification]
   );
 
   return (
@@ -141,7 +133,7 @@ export default function CreateAccountForm({
           label="Nombre de la cuenta"
           placeholder="Cuenta Corriente Banco Nación"
           required
-          icon="fas fa-wallet"
+          icon={<Wallet className="h-4 w-4" />}
         />
 
         <DropMenu
@@ -169,7 +161,7 @@ export default function CreateAccountForm({
           type="number"
           placeholder="0"
           required
-          icon="fas fa-money-bill-trend-up"
+          icon={<TrendingUp className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>
