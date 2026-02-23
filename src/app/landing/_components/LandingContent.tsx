@@ -1,12 +1,14 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { HeroSection } from './HeroSection';
-import { DemoSection } from './DemoSection';
-import { FrustrationsSection } from './FrustrationsSection';
-import { ChaosToOrderSection } from './ChaosToOrderSection';
-import { PrivacySection } from './PrivacySection';
-import { CTASection } from './CTASection';
+
+const DemoSection = dynamic(() => import('./DemoSection').then(m => ({ default: m.DemoSection })));
+const FrustrationsSection = dynamic(() => import('./FrustrationsSection').then(m => ({ default: m.FrustrationsSection })));
+const ChaosToOrderSection = dynamic(() => import('./ChaosToOrderSection').then(m => ({ default: m.ChaosToOrderSection })));
+const PrivacySection = dynamic(() => import('./PrivacySection').then(m => ({ default: m.PrivacySection })));
+const CTASection = dynamic(() => import('./CTASection').then(m => ({ default: m.CTASection })));
 
 const TOTAL_SECTIONS = 6;
 const SCROLL_COOLDOWN = 800; // ms between scroll actions (increased for smooth animations)

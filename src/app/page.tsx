@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirectIfAuthenticated } from '@/lib/server-auth';
-import LandingContent from './landing/_components/LandingContent';
+import LandingContent from '@/app/landing/_components/LandingContent';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.olevium.com';
 
