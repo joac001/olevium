@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Home, Wallet, Tags, Table2, RefreshCw, User } from 'lucide-react';
 import { NavBar, NavLink } from '@/components/layout/';
-import FeedbackWidget from '@/components/layout/FeedbackWidget';
+import FloatingActions from '@/components/layout/FloatingActions';
 import { Typography } from '@/components/shared/ui';
 import { ClientProviders } from '@/components/providers/ClientProviders';
 
@@ -26,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Typography variant="caption" className="block text-center mt-8 mb-4">
         &copy; {new Date().getFullYear()} Olevium - v0.2.2
       </Typography>
-      <FeedbackWidget />
+      <FloatingActions />
     </ClientProviders>
   );
 }
