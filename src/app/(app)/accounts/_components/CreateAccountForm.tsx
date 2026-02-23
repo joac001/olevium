@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { CheckCircle, AlertTriangle, Wallet, TrendingUp } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
@@ -72,7 +73,7 @@ export default function CreateAccountForm({
         });
 
         showNotification(
-          'fa-solid fa-circle-check',
+          <CheckCircle className="h-5 w-5" />,
           'success',
           'Cuenta creada',
           'Tu cuenta quedó registrada y ya forma parte del panel.'
@@ -114,7 +115,7 @@ export default function CreateAccountForm({
         }
 
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error al crear cuenta',
           message
@@ -132,7 +133,7 @@ export default function CreateAccountForm({
           label="Nombre de la cuenta"
           placeholder="Cuenta Corriente Banco Nación"
           required
-          icon="fas fa-wallet"
+          icon={<Wallet className="h-4 w-4" />}
         />
 
         <DropMenu
@@ -160,7 +161,7 @@ export default function CreateAccountForm({
           type="number"
           placeholder="0"
           required
-          icon="fas fa-money-bill-trend-up"
+          icon={<TrendingUp className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>

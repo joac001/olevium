@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle, Key } from 'lucide-react';
 
 import { Box, FormWrapper, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -42,7 +43,7 @@ export default function DeleteAccountForm({
       const nameValue = formData.get('confirmName');
       if (typeof nameValue !== 'string' || nameValue.trim() !== accountName) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Confirmación inválida',
           'Debes escribir el nombre exacto de la cuenta para eliminarla.'
@@ -91,7 +92,7 @@ export default function DeleteAccountForm({
           value={inputValue}
           onValueChange={value => setInputValue(String(value))}
           required
-          icon="fas fa-key"
+          icon={<Key className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>

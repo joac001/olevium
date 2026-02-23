@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle, Mail, Lock } from 'lucide-react';
 import { Box, FormWrapper, Input, Typography, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -34,7 +35,7 @@ export default function LoginForm() {
 
       if (typeof emailValue !== 'string' || typeof passwordValue !== 'string') {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error de autenticación',
           'Completa los campos requeridos para continuar.'
@@ -70,7 +71,7 @@ export default function LoginForm() {
           label="Correo electrónico"
           placeholder="tu-correo@ejemplo.com"
           required
-          icon="fas fa-envelope"
+          icon={<Mail className="h-4 w-4" />}
           autoComplete="email"
         />
 
@@ -80,7 +81,7 @@ export default function LoginForm() {
           label="Contraseña"
           placeholder="••••••••"
           required
-          icon="fas fa-lock"
+          icon={<Lock className="h-4 w-4" />}
           autoComplete="current-password"
         />
 

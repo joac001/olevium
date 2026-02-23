@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { CheckCircle, AlertTriangle, Wallet, TrendingUp } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
@@ -70,7 +71,7 @@ export default function EditAccountForm({
         });
 
         showNotification(
-          'fa-solid fa-circle-check',
+          <CheckCircle className="h-5 w-5" />,
           'success',
           'Cuenta actualizada',
           'Guardamos los cambios en tu cuenta.'
@@ -111,7 +112,7 @@ export default function EditAccountForm({
         }
 
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error al actualizar',
           message
@@ -129,7 +130,7 @@ export default function EditAccountForm({
           label="Nombre de la cuenta"
           defaultValue={account.name}
           required
-          icon="fas fa-wallet"
+          icon={<Wallet className="h-4 w-4" />}
         />
 
         <DropMenu
@@ -158,7 +159,7 @@ export default function EditAccountForm({
           type="number"
           defaultValue={account.balance}
           required
-          icon="fas fa-money-bill-trend-up"
+          icon={<TrendingUp className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>

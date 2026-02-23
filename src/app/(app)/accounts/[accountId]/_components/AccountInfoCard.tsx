@@ -1,5 +1,6 @@
 'use client';
 
+import { Pen, Trash2 } from 'lucide-react';
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
 import { useAccountDetail } from '../_context/AccountDetailContext';
@@ -24,13 +25,13 @@ export default function AccountInfoCard() {
       subtitle={`Saldo actual: ${formatAmount(account.balance, currencyLabel)}`}
       actions={[
         {
-          icon: 'fas fa-pen',
+          icon: <Pen className="h-4 w-4" />,
           text: 'Editar',
           type: 'primary',
           onClick: handleOpenEdit,
         },
         {
-          icon: 'fas fa-trash',
+          icon: <Trash2 className="h-4 w-4" />,
           text: 'Eliminar',
           type: 'danger',
           onClick: handleOpenDelete,

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 
 import OverlayBase from '@/components/shared/ui/wrappers/OverlayBase';
 
@@ -76,7 +77,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({ children, isOpen, onClose }
             className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-muted)] transition-colors duration-200 hover:bg-[var(--color-info-light)]"
             aria-label="Cerrar modal"
           >
-            <i className="fas fa-times text-[color:var(--text-primary)]" />
+            <X className="h-4 w-4 text-[color:var(--text-primary)]" />
           </button>
 
           <div className="max-h-[90vh] overflow-y-auto">{children}</div>

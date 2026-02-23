@@ -1,5 +1,6 @@
 'use client';
 
+import { Plus } from 'lucide-react';
 import { ActionButton, Box, Typography } from '@/components/shared/ui';
 import { useRecurringTransactionsPage } from '../_context/RecurringTransactionsContext';
 
@@ -15,7 +16,7 @@ export default function RecurringTransactionsHeader() {
         </Typography>
       </Box>
       <ActionButton
-        icon="fas fa-plus"
+        icon={<Plus className="h-4 w-4" />}
         type="primary"
         text="Nueva transacción recurrente"
         onClick={handleCreateRecurringTransaction}

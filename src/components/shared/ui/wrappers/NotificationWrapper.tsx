@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useEffect, useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { StructuredError } from '@/lib/utils/errorSystem';
 
 import OverlayBase from '@/components/shared/ui/wrappers/OverlayBase';
@@ -13,7 +14,7 @@ interface NotificationWrapperProps {
   duration: number;
   onClose?: () => void;
   props: {
-    icon?: string;
+    icon?: ReactNode;
     color?: string;
     title?: string;
     description?: string;
@@ -57,7 +58,7 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
     }
   }, [isOpen, duration, onClose]);
 
-  const { color = 'info', icon = 'info-circle', title = '', description = '' } = props || {};
+  const { color = 'info', icon, title = '', description = '' } = props || {};
 
   const variant = normalize(color);
 
@@ -81,7 +82,7 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
           {structuredErrors.map(error => (
             <div key={error.id} className="mb-3 last:mb-0">
               <div className="flex items-start gap-3">
-                <i className="warning-triangle mt-0.5 text-lg md:text-xl" />
+                <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
                 <div className="flex-1 text-pretty">
                   <h3 className="text-base font-semibold md:text-lg">{error.title}</h3>
                   <p className="text-sm font-normal opacity-90 md:text-base">{error.message}</p>
@@ -120,7 +121,7 @@ const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
         ].join(' ')}
       >
         <div className="flex items-start gap-3">
-          <i className={`${icon} mt-0.5 text-lg md:text-xl`} />
+          {icon && <span className="mt-0.5 shrink-0">{icon}</span>}
           <div className="text-pretty">
             {!!title && <h2 className="text-base font-semibold md:text-lg">{title}</h2>}
             {!!description && (

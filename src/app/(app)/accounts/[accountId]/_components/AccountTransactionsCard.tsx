@@ -1,5 +1,6 @@
 'use client';
 
+import { Plus } from 'lucide-react';
 import { Card } from '@/components/shared/ui';
 import { useAccountDetail } from '../_context/AccountDetailContext';
 import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
@@ -16,7 +17,7 @@ export default function AccountTransactionsCard() {
       subtitle="Movimientos asociados a esta cuenta"
       actions={[
         {
-          icon: 'fas fa-plus',
+          icon: <Plus className="h-4 w-4" />,
           tooltip: 'Agregar transacción',
           type: 'primary',
           onClick: handleOpenCreateTransaction,

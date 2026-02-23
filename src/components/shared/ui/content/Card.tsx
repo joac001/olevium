@@ -81,7 +81,7 @@ export default function Card({
               <div className="flex flex-col-reverse items-stretch justify-end gap-2 sm:flex-row sm:items-center">
                 {actions.map((action, index) => (
                   <ActionButton
-                    key={`${action.icon}-${action.text ?? index}`}
+                    key={action.text ?? index}
                     {...action}
                     className={clsx('justify-center', action.className)}
                   />

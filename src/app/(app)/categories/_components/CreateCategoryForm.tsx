@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import { AlertTriangle, Tag } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu, Typography, Button, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
@@ -54,7 +55,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
 
       if (typeof descriptionValue !== 'string' || !selectedTypeId) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Formulario incompleto',
           'Descripcion y tipo son obligatorios.'
@@ -65,7 +66,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       const trimmedDescription = descriptionValue.trim();
       if (!trimmedDescription) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Datos invalidos',
           'La descripcion no puede estar vacia.'
@@ -76,7 +77,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
       const typeId = Number(selectedTypeId);
       if (!Number.isFinite(typeId)) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Tipo invalido',
           'Selecciona un tipo valido.'
@@ -114,7 +115,7 @@ export default function CreateCategoryForm({ onSuccess }: CreateCategoryFormProp
           label="Descripcion"
           placeholder="Nombre de la categoria"
           required
-          icon="fas fa-tag"
+          icon={<Tag className="h-4 w-4" />}
         />
 
         <DropMenu

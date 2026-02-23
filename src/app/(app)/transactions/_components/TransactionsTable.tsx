@@ -1,5 +1,6 @@
 'use client';
 
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
@@ -93,13 +94,13 @@ export default function TransactionsTable() {
                     <td className="px-4 py-3">
                       <Box className="flex justify-end gap-2">
                         <ActionButton
-                          icon="fas fa-pen-to-square"
+                          icon={<Pencil className="h-4 w-4" />}
                           type="accent"
                           text="Editar"
                           onClick={() => handleEditTransaction(tx)}
                         />
                         <ActionButton
-                          icon="fas fa-trash"
+                          icon={<Trash2 className="h-4 w-4" />}
                           type="danger"
                           text="Eliminar"
                           onClick={() => handleDeleteTransaction(tx)}

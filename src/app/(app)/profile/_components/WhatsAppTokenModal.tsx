@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CheckCircle, AlertTriangle, Copy, Plus, RefreshCw, ExternalLink } from 'lucide-react';
 import { Box, Card, Typography, Input } from '@/components/shared/ui';
 import { ActionButton } from '@/components/shared/ui';
 import {
@@ -10,7 +11,6 @@ import {
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
 
@@ -45,7 +45,7 @@ export default function WhatsAppTokenModal() {
       const result = await createTokenMutation.mutateAsync();
       saveToken(result.chat_token);
       showNotification(
-        'fas fa-circle-check',
+        <CheckCircle className="h-5 w-5" />,
         'success',
         'Token creado',
         'Tu token de WhatsApp fue creado exitosamente.'
@@ -61,7 +61,7 @@ export default function WhatsAppTokenModal() {
           const result = await regenerateTokenMutation.mutateAsync();
           saveToken(result.chat_token);
           showNotification(
-            'fas fa-circle-check',
+            <CheckCircle className="h-5 w-5" />,
             'success',
             'Token regenerado',
             'Ya tenías un token activo. Se generó uno nuevo.'
@@ -70,12 +70,12 @@ export default function WhatsAppTokenModal() {
         } catch (regenError) {
           const message =
             regenError instanceof Error ? regenError.message : 'No se pudo regenerar el token';
-          showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+          showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
           return;
         }
       }
       const message = errorMessage || 'No se pudo crear el token';
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
     }
   };
 
@@ -84,21 +84,21 @@ export default function WhatsAppTokenModal() {
       const result = await regenerateTokenMutation.mutateAsync();
       saveToken(result.chat_token);
       showNotification(
-        'fas fa-circle-check',
+        <CheckCircle className="h-5 w-5" />,
         'success',
         'Token regenerado',
         'Tu token de WhatsApp fue regenerado. El anterior ya no funcionará.'
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo regenerar el token';
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
     }
   };
 
   const handleCopyToken = () => {
     if (formattedToken) {
       navigator.clipboard.writeText(formattedToken);
-      showNotification('fas fa-copy', 'success', 'Copiado', 'Token copiado al portapapeles.');
+      showNotification(<Copy className="h-5 w-5" />, 'success', 'Copiado', 'Token copiado al portapapeles.');
     }
   };
 
@@ -144,7 +144,7 @@ export default function WhatsAppTokenModal() {
             <Box className="flex items-center gap-2">
               <Input value={formattedToken} disabled />
               <ActionButton
-                icon="fas fa-copy"
+                icon={<Copy className="h-4 w-4" />}
                 type="accent"
                 tooltip="Copiar token"
                 onClick={handleCopyToken}
@@ -163,7 +163,7 @@ export default function WhatsAppTokenModal() {
         <Box className="flex flex-wrap items-center gap-2 pt-2">
           {!hasToken ? (
             <ActionButton
-              icon="fas fa-plus"
+              icon={<Plus className="h-4 w-4" />}
               type="success"
               text="Crear Token"
               onClick={handleCreateToken}
@@ -171,7 +171,7 @@ export default function WhatsAppTokenModal() {
             />
           ) : (
             <ActionButton
-              icon="fas fa-arrows-rotate"
+              icon={<RefreshCw className="h-4 w-4" />}
               type="warning"
               text="Regenerar Token"
               onClick={handleRegenerateToken}

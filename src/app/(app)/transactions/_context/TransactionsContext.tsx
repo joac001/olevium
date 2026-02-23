@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import dynamic from 'next/dynamic';
+import { CheckCircle, Pencil, Trash2, FileDown, AlertTriangle } from 'lucide-react';
 import { Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -202,7 +203,7 @@ export default function TransactionsProvider({
         onCancel={hideModal}
         onCompleted={() => {
           hideModal();
-          showNotification('fas fa-circle-check', 'success', 'Transacción creada', 'La transacción se registró correctamente.');
+          showNotification(<CheckCircle className="h-5 w-5" />, 'success', 'Transacción creada', 'La transacción se registró correctamente.');
         }}
       />
     );
@@ -219,7 +220,7 @@ export default function TransactionsProvider({
           onCancel={hideModal}
           onCompleted={() => {
             hideModal();
-            showNotification('fas fa-pen-to-square', 'success', 'Transacción actualizada', 'Los cambios se guardaron correctamente.');
+            showNotification(<Pencil className="h-5 w-5" />, 'success', 'Transacción actualizada', 'Los cambios se guardaron correctamente.');
           }}
         />
       );
@@ -241,10 +242,10 @@ export default function TransactionsProvider({
           transactionId: transaction.transaction_id,
           accountId: transaction.account_id,
         });
-        showNotification('fas fa-trash-check', 'accent', 'Transacción eliminada', 'El movimiento se eliminó correctamente.');
+        showNotification(<Trash2 className="h-5 w-5" />, 'accent', 'Transacción eliminada', 'El movimiento se eliminó correctamente.');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción';
-        showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+        showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
       }
     },
     [accountDictionary, deleteTransactionMutation, showNotification]
@@ -273,10 +274,10 @@ export default function TransactionsProvider({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      showNotification('fas fa-file-arrow-down', 'success', 'Exportación iniciada', 'El archivo CSV se está descargando.');
+      showNotification(<FileDown className="h-5 w-5" />, 'success', 'Exportación iniciada', 'El archivo CSV se está descargando.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo exportar las transacciones a CSV.';
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error al exportar', message);
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error al exportar', message);
     } finally {
       setIsExporting(false);
     }

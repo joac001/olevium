@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { AlertTriangle, RotateCcw, CheckCircle, LogIn, Lock, Info, ArrowLeft } from 'lucide-react';
 import { Box, Card, FormWrapper, Input, Typography, Button, AppLink } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -37,7 +38,7 @@ export default function ResetPasswordForm() {
 
       if (typeof newPassword !== 'string' || !newPassword.trim()) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Campo requerido',
           'Por favor, ingresa tu nueva contraseña.'
@@ -47,7 +48,7 @@ export default function ResetPasswordForm() {
 
       if (newPassword !== confirmPassword) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Las contraseñas no coinciden',
           'Asegúrate de que ambas contraseñas sean iguales.'
@@ -57,7 +58,7 @@ export default function ResetPasswordForm() {
 
       if (newPassword.length < 8) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Contraseña muy corta',
           'La contraseña debe tener al menos 8 caracteres.'
@@ -67,7 +68,7 @@ export default function ResetPasswordForm() {
 
       if (!token) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Token no válido',
           'El enlace de recuperación no es válido. Solicita uno nuevo.'
@@ -102,7 +103,7 @@ export default function ResetPasswordForm() {
       <Card className="p-8">
         <Box className="text-center space-y-6">
           <Box className="w-16 h-16 mx-auto bg-[var(--color-danger-soft)] rounded-full flex items-center justify-center">
-            <i className="fas fa-exclamation-triangle text-2xl text-[var(--color-danger)]" />
+            <AlertTriangle className="h-8 w-8 text-[var(--color-danger)]" />
           </Box>
 
           <Box className="space-y-2">
@@ -119,7 +120,7 @@ export default function ResetPasswordForm() {
             <Button
               type="primary"
               text="Solicitar nuevo enlace"
-              icon="fas fa-redo"
+              icon={<RotateCcw className="h-4 w-4" />}
               onClick={() => router.push('/auth/forgot-password')}
               className="!px-6 !py-3"
             />
@@ -135,7 +136,7 @@ export default function ResetPasswordForm() {
       <Card className="p-8">
         <Box className="text-center space-y-6">
           <Box className="w-16 h-16 mx-auto bg-[var(--color-success-soft)] rounded-full flex items-center justify-center">
-            <i className="fas fa-check-circle text-2xl text-[var(--color-success)]" />
+            <CheckCircle className="h-8 w-8 text-[var(--color-success)]" />
           </Box>
 
           <Box className="space-y-2">
@@ -152,7 +153,7 @@ export default function ResetPasswordForm() {
             <Button
               type="primary"
               text="Iniciar sesión ahora"
-              icon="fas fa-sign-in-alt"
+              icon={<LogIn className="h-4 w-4" />}
               onClick={() => router.push('/auth')}
               className="!px-6 !py-3"
             />
@@ -167,7 +168,7 @@ export default function ResetPasswordForm() {
       <Box className="space-y-6">
         <Box className="text-center space-y-2">
           <Box className="w-16 h-16 mx-auto bg-[var(--color-primary-soft)] rounded-full flex items-center justify-center mb-4">
-            <i className="fas fa-lock text-2xl text-[var(--color-primary)]" />
+            <Lock className="h-8 w-8 text-[var(--color-primary)]" />
           </Box>
           <Typography variant="h2" className="text-xl font-semibold">
             Restablecer contraseña
@@ -185,7 +186,7 @@ export default function ResetPasswordForm() {
               label="Nueva contraseña"
               placeholder="••••••••"
               required
-              icon="fas fa-lock"
+              icon={<Lock className="h-4 w-4" />}
             />
 
             <Input
@@ -194,11 +195,11 @@ export default function ResetPasswordForm() {
               label="Confirmar contraseña"
               placeholder="••••••••"
               required
-              icon="fas fa-lock"
+              icon={<Lock className="h-4 w-4" />}
             />
 
             <Typography variant="body" className="text-xs text-[var(--text-muted)]">
-              <i className="fas fa-info-circle mr-1" />
+              <Info className="inline h-3 w-3 mr-1" />
               La contraseña debe tener al menos 8 caracteres.
             </Typography>
           </Box>
@@ -211,7 +212,7 @@ export default function ResetPasswordForm() {
               variant="unstyled"
               className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
             >
-              <i className="fas fa-redo" />
+              <RotateCcw className="h-4 w-4" />
               Solicitar nuevo enlace
             </AppLink>
           </Box>
@@ -222,7 +223,7 @@ export default function ResetPasswordForm() {
             href="/auth"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="h-4 w-4" />
             Volver al inicio de sesión
           </AppLink>
         </Box>

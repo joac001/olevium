@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { Plus, Pen, EyeOff, Eye, Trash2 } from 'lucide-react';
 
 import { Box, Card, Typography, ActionButton } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
@@ -153,7 +154,7 @@ export default function UserCategoriesCard({
       title="Tus categorías"
         actions={[
           {
-            icon: 'fas fa-plus',
+            icon: <Plus className="h-4 w-4" />,
             type: 'primary',
             tooltip: 'Crear categoría',
             onClick: openCreateModal,
@@ -214,28 +215,28 @@ export default function UserCategoriesCard({
                   </Box>
                   <Box className="flex items-center gap-2">
                     <ActionButton
-                      icon="fas fa-pen"
+                      icon={<Pen className="h-4 w-4" />}
                       type="accent"
                       tooltip="Editar categoría"
                       onClick={() => openEditModal(category.category_id)}
                     />
                     {isActive ? (
                       <ActionButton
-                        icon="fas fa-eye-slash"
+                        icon={<EyeOff className="h-4 w-4" />}
                         type="neutral"
                         tooltip="Desactivar categoría"
                         onClick={() => openDeactivateModal(category.category_id)}
                       />
                     ) : (
                       <ActionButton
-                        icon="fas fa-eye"
+                        icon={<Eye className="h-4 w-4" />}
                         type="accent"
                         tooltip="Activar categoría"
                         onClick={() => openActivateModal(category.category_id)}
                       />
                     )}
                     <ActionButton
-                      icon="fas fa-trash"
+                      icon={<Trash2 className="h-4 w-4" />}
                       type="danger"
                       tooltip="Eliminar categoría"
                       onClick={() => openDeleteModal(category.category_id)}

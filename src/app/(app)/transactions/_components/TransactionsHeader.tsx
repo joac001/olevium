@@ -1,5 +1,6 @@
 'use client';
 
+import { Plus, FileDown } from 'lucide-react';
 import { ActionButton, Box, Typography } from '@/components/shared/ui';
 import { useTransactionsPage } from '../_context/TransactionsContext';
 
@@ -17,13 +18,13 @@ export default function TransactionsHeader() {
       </Box>
       <Box className="flex flex-wrap items-center gap-2">
         <ActionButton
-          icon="fas fa-plus"
+          icon={<Plus className="h-4 w-4" />}
           type="primary"
           text="Nueva transacción"
           onClick={handleCreateTransaction}
         />
         <ActionButton
-          icon="fas fa-file-arrow-down"
+          icon={<FileDown className="h-4 w-4" />}
           type="accent"
           text={isExporting ? 'Exportando...' : 'Exportar CSV'}
           onClick={handleExportCsv}

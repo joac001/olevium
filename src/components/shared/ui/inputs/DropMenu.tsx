@@ -12,6 +12,7 @@ import {
 import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
 import clsx from 'clsx';
+import { ChevronDown } from 'lucide-react';
 
 import Box from '@/components/shared/ui/content/Box';
 import FieldWrapper from './FieldWrapper';
@@ -347,9 +348,9 @@ const DropMenu = forwardRef<DropMenuRef, DropMenuProps>(function DropMenu(
               >
                 {selectedLabel}
               </span>
-              <i
+              <ChevronDown
                 className={clsx(
-                  'fas fa-angle-down text-sm md:text-base transition-transform duration-300',
+                  'h-4 w-4 shrink-0 transition-transform duration-300',
                   isOpen ? 'rotate-180' : ''
                 )}
               />

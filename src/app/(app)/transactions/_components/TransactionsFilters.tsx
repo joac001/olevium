@@ -1,5 +1,6 @@
 'use client';
 
+import { RotateCcw } from 'lucide-react';
 import { Box, DropMenu, Input, ActionButton } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 import type { DateFilter, TypeFilter } from './types';
@@ -66,7 +67,7 @@ export default function TransactionsFilters() {
       />
       <Box className="md:col-span-4">
         <ActionButton
-          icon="fas fa-rotate"
+          icon={<RotateCcw className="h-4 w-4" />}
           type="neutral"
           text="Limpiar filtros"
           onClick={onClearFilters}

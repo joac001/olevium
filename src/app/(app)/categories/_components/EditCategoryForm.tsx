@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
+import { AlertTriangle, Tag } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu, Typography, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
@@ -58,7 +59,7 @@ export default function EditCategoryForm({
     async () => {
       if (!category.user_id) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Acción no permitida',
           'Esta categoría no se puede editar.'
@@ -69,7 +70,7 @@ export default function EditCategoryForm({
       const trimmedDescription = description.trim();
       if (!trimmedDescription) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Datos inválidos',
           'La descripción no puede estar vacía.'
@@ -80,7 +81,7 @@ export default function EditCategoryForm({
       const numTypeId = Number(typeId);
       if (!Number.isFinite(numTypeId)) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Tipo inválido',
           'Selecciona un tipo válido.'
@@ -125,7 +126,7 @@ export default function EditCategoryForm({
           value={description}
           onValueChange={(value) => setDescription(String(value ?? ''))}
           required
-          icon="fas fa-tag"
+          icon={<Tag className="h-4 w-4" />}
         />
 
         <DropMenu

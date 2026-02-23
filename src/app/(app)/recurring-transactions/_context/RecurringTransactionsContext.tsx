@@ -8,6 +8,7 @@ import {
   type ReactNode
 } from 'react';
 import dynamic from 'next/dynamic';
+import { CheckCircle, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import { Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -93,7 +94,7 @@ export default function RecurringTransactionsProvider({
           hideModal();
           await handleRefresh();
           showNotification(
-            'fas fa-circle-check',
+            <CheckCircle className="h-5 w-5" />,
             'success',
             'Transacción recurrente creada',
             'La transacción recurrente se creó correctamente.'
@@ -116,7 +117,7 @@ export default function RecurringTransactionsProvider({
             hideModal();
             await handleRefresh();
             showNotification(
-              'fas fa-pen-to-square',
+              <Pencil className="h-5 w-5" />,
               'success',
               'Transacción recurrente actualizada',
               'Los cambios se guardaron correctamente.'
@@ -139,14 +140,14 @@ export default function RecurringTransactionsProvider({
           prev.filter(t => t.recurringTransactionId !== transaction.recurringTransactionId)
         );
         showNotification(
-          'fas fa-trash-check',
+          <Trash2 className="h-5 w-5" />,
           'accent',
           'Transacción recurrente eliminada',
           'La transacción recurrente se eliminó correctamente.'
         );
       } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción recurrente';
-        showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+        showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
       }
     },
     [deleteMutation, showNotification]

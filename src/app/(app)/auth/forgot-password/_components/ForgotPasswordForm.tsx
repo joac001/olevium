@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import { AlertTriangle, MailOpen, ArrowLeft, Key, Mail } from 'lucide-react';
 import { Box, Card, FormWrapper, Input, Typography, AppLink, ButtonBase } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -32,7 +33,7 @@ export default function ForgotPasswordForm() {
 
       if (typeof emailValue !== 'string' || !emailValue.trim()) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Campo requerido',
           'Por favor, ingresa tu correo electrónico.'
@@ -60,7 +61,7 @@ export default function ForgotPasswordForm() {
       <Card className="p-8">
         <Box className="text-center space-y-6">
           <Box className="w-16 h-16 mx-auto bg-[var(--color-success-soft)] rounded-full flex items-center justify-center">
-            <i className="fas fa-envelope-open-text text-2xl text-[var(--color-success)]" />
+            <MailOpen className="h-8 w-8 text-[var(--color-success)]" />
           </Box>
 
           <Box className="space-y-2">
@@ -94,7 +95,7 @@ export default function ForgotPasswordForm() {
               variant="unstyled"
               className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="h-4 w-4" />
               Volver al inicio de sesión
             </AppLink>
           </Box>
@@ -108,7 +109,7 @@ export default function ForgotPasswordForm() {
       <Box className="space-y-6">
         <Box className="text-center space-y-2">
           <Box className="w-16 h-16 mx-auto bg-[var(--color-primary-soft)] rounded-full flex items-center justify-center mb-4">
-            <i className="fas fa-key text-2xl text-[var(--color-primary)]" />
+            <Key className="h-8 w-8 text-[var(--color-primary)]" />
           </Box>
           <Typography variant="h2" className="text-xl font-semibold">
             ¿Olvidaste tu contraseña?
@@ -125,7 +126,7 @@ export default function ForgotPasswordForm() {
             label="Correo electrónico"
             placeholder="tu-correo@ejemplo.com"
             required
-            icon="fas fa-envelope"
+            icon={<Mail className="h-4 w-4" />}
             autoComplete="email"
           />
         </FormWrapper>
@@ -136,7 +137,7 @@ export default function ForgotPasswordForm() {
             variant="unstyled"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="h-4 w-4" />
             Volver al inicio de sesión
           </AppLink>
         </Box>

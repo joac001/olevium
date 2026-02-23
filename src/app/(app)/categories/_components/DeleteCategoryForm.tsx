@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 import { Box, Typography, ButtonBase } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -37,7 +38,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
   const handleDelete = useCallback(async () => {
     if (!category.user_id) {
       showNotification(
-        'fa-solid fa-triangle-exclamation',
+        <AlertTriangle className="h-5 w-5" />,
         'danger',
         'Accion no permitida',
         'No puedes eliminar una categoria predefinida.'
@@ -47,7 +48,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
 
     if (transactionCount && transactionCount > 0) {
       showNotification(
-        'fa-solid fa-triangle-exclamation',
+        <AlertTriangle className="h-5 w-5" />,
         'danger',
         'Accion no permitida',
         'Esta categoria tiene transacciones asociadas. Desactivala en su lugar.'

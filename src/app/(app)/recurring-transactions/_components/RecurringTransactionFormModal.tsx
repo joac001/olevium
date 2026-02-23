@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CheckCircle, Circle } from 'lucide-react';
 import {
   Box,
   Card,
@@ -264,7 +265,7 @@ export default function RecurringTransactionFormModal({
               return (
                 <ActionButton
                   key={value}
-                  icon={isActive ? 'fas fa-check-circle' : 'fas fa-circle'}
+                  icon={isActive ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                   type={isActive ? 'accent' : 'neutral'}
                   text={label}
                   onClick={() =>
