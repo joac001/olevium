@@ -11,6 +11,7 @@ import {
 import { useNotification } from '@/context/NotificationContext';
 import { useModal } from '@/context/ModalContext';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
 
