@@ -88,11 +88,11 @@ export function DemoSection() {
                 className="flex justify-end relative z-10"
               >
                 <div className="bg-[#005c4b] rounded-lg rounded-tr-none px-3 py-2 max-w-[80%] shadow">
-                  <p className="text-white text-sm">Supermercado 45000</p>
+                  <Typography variant="body" className="text-white text-sm">Supermercado 45000</Typography>
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className="text-[10px] text-[#8696a0]">14:32</span>
-                    {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" />}
-                    {step >= 3 && <CheckCheck className="w-4 h-4 text-[#53bdeb]" />}
+                    {step >= 2 && step < 3 && <Check className="w-4 h-4 text-[#8696a0]" aria-hidden="true" />}
+                    {step >= 3 && <CheckCheck className="w-4 h-4 text-[#53bdeb]" aria-hidden="true" />}
                   </div>
                 </div>
               </motion.div>
@@ -105,10 +105,10 @@ export function DemoSection() {
                 className="flex justify-start relative z-10"
               >
                 <div className="bg-[#202c33] rounded-lg rounded-tl-none px-3 py-2 max-w-[85%] shadow">
-                  <p className="text-white text-sm">
+                  <Typography variant="body" className="text-white text-sm">
                     Registrado en <span className="text-[var(--color-primary)]">Alimentación</span>
-                  </p>
-                  <p className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</p>
+                  </Typography>
+                  <Typography variant="body" className="text-[#8696a0] text-xs mt-1">-$45.000 desde Efectivo</Typography>
                   <span className="text-[10px] text-[#8696a0] float-right mt-1">14:32</span>
                 </div>
               </motion.div>
@@ -120,7 +120,7 @@ export function DemoSection() {
                 <span className="text-[#8696a0] text-sm">Mensaje</span>
               </div>
               <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                 </svg>
               </div>
@@ -135,7 +135,7 @@ export function DemoSection() {
           transition={{ duration: 0.4 }}
           className="hidden md:block"
         >
-          <svg width="60" height="24" viewBox="0 0 60 24" className="text-[var(--color-primary)]">
+          <svg width="60" height="24" viewBox="0 0 60 24" className="text-[var(--color-primary)]" aria-hidden="true">
             <path
               d="M0 12h50m0 0l-8-8m8 8l-8 8"
               stroke="currentColor"

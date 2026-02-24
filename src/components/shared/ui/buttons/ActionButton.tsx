@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 
 import Box from '@/components/shared/ui/content/Box';
@@ -7,9 +8,10 @@ import Tooltip from '@/components/shared/ui/text/Tooltip';
 import { ColorKey } from '@/types/ColorKey';
 import ButtonBase from './ButtonBase';
 export interface ActionButtonProps {
-  icon: string; // ej: "fas fa-plus"
+  icon: ReactNode;
   type?: ColorKey; // default: accent (azul)
-  text?: string; // etiqueta (se oculta en mobile)
+  text?: string; // etiqueta (se oculta en mobile salvo que alwaysShowText=true)
+  alwaysShowText?: boolean; // fuerza el texto visible en cualquier tamaño
   onClick?: () => void;
   tooltip?: string; // tooltip explícito (desktop); en mobile se usa el texto
   className?: string; // opcional extra classes
@@ -19,13 +21,15 @@ export interface ActionButtonProps {
 function ActionCore({
   icon,
   text,
+  alwaysShowText = false,
   onClick,
   variant,
   className = '',
   disabled = false,
 }: {
-  icon: string;
+  icon: ReactNode;
   text?: string;
+  alwaysShowText?: boolean;
   onClick?: () => void;
   variant: ColorKey;
   className?: string;
@@ -41,10 +45,14 @@ function ActionCore({
         'min-w-0 px-3 py-2 text-sm font-medium tracking-tight md:px-3.5 md:py-2.5',
         className
       )}
-      leadingIcon={<i className={clsx(icon, 'text-base md:text-lg')} aria-hidden="true" />}
+      leadingIcon={<span className="text-base md:text-lg leading-none" aria-hidden="true">{icon}</span>}
       ariaLabel={text || 'Acción'}
     >
-      {text && <span className="hidden whitespace-nowrap text-sm md:inline">{text}</span>}
+      {text && (
+        <span className={clsx('whitespace-nowrap text-sm', !alwaysShowText && 'hidden md:inline')}>
+          {text}
+        </span>
+      )}
     </ButtonBase>
   );
 }
@@ -53,6 +61,7 @@ export default function ActionButton({
   icon,
   type = 'accent',
   text,
+  alwaysShowText,
   onClick,
   tooltip,
   className,
@@ -62,6 +71,7 @@ export default function ActionButton({
     <ActionCore
       icon={icon}
       text={text}
+      alwaysShowText={alwaysShowText}
       onClick={onClick}
       variant={type}
       className={className}

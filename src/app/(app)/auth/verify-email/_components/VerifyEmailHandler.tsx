@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CheckCircle, AlertTriangle, Loader } from 'lucide-react';
 
 import { Box, Button, Typography } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -80,24 +81,21 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
     };
   }, [router, showNotification, token, verifyEmail, showError, showSuccess]);
 
-  const iconClass = useMemo(() => {
+  const statusIcon = useMemo(() => {
     switch (status) {
       case 'success':
-        return 'fa-solid fa-circle-check';
+        return <CheckCircle className="h-10 w-10 text-[color:var(--text-muted)] md:h-12 md:w-12" aria-hidden />;
       case 'error':
-        return 'fa-solid fa-triangle-exclamation';
+        return <AlertTriangle className="h-10 w-10 text-[color:var(--text-muted)] md:h-12 md:w-12" aria-hidden />;
       case 'loading':
       default:
-        return 'fa-solid fa-circle-notch fa-spin';
+        return <Loader className="h-10 w-10 animate-spin text-[color:var(--text-muted)] md:h-12 md:w-12" aria-hidden />;
     }
   }, [status]);
 
   return (
     <Box className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-      <i
-        className={`${iconClass} text-4xl text-[color:var(--text-muted)] md:text-5xl`}
-        aria-hidden
-      />
+      {statusIcon}
       <Typography variant="body" className="text-lg md:text-xl">
         {message}
       </Typography>

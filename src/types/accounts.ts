@@ -6,6 +6,7 @@ export interface ApiUserAccount {
   user_id: Ulid;
   name: string;
   type_id: number;
+  account_type_id?: number; // alternative field name in some API responses
   currency_id: number;
   currency: Nullable<ApiCurrency>;
   balance: number;
@@ -46,3 +47,13 @@ export interface AccountCreateInput {
   currencyId: number;
   balance: number;
 }
+
+// API input payloads (snake_case, sent directly to backend)
+export type CreateAccountPayload = {
+  name: string;
+  type_id: number;
+  currency_id: number;
+  balance?: number;
+};
+
+export type UpdateAccountPayload = Partial<CreateAccountPayload>;

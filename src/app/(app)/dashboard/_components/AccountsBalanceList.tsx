@@ -4,19 +4,13 @@ import { useMemo } from 'react';
 
 import { Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
-import type { Account } from '@/types';
+import { useDashboard } from '../_context/DashboardContext';
 
-interface AccountsBalanceListProps {
-  accounts: Account[];
-}
-
-export default function AccountsBalanceList({ accounts }: AccountsBalanceListProps) {
+export default function AccountsBalanceList() {
+  const { accounts } = useDashboard();
   const balancesByCurrency = useMemo(() => {
     return accounts.reduce<Record<string, { total: number; count: number }>>((acc, account) => {
-      const currency =
-        typeof account.currency === 'string'
-          ? account.currency
-          : ((account.currency as any)?.label ?? 'ARS');
+      const currency = account.currency ?? 'ARS';
       const current = acc[currency] ?? { total: 0, count: 0 };
       acc[currency] = {
         total: current.total + Number(account.balance ?? 0),

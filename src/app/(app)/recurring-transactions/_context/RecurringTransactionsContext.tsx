@@ -8,6 +8,7 @@ import {
   type ReactNode
 } from 'react';
 import dynamic from 'next/dynamic';
+import { CheckCircle, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import { Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -17,7 +18,7 @@ import type { RecurringTransaction, Category } from '@/lib/types';
 import type { Account } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 
-const RecurringTransactionFormModal = dynamic(() => import('./RecurringTransactionFormModal'), {
+const RecurringTransactionFormModal = dynamic(() => import('../_components/RecurringTransactionFormModal'), {
   ssr: false,
   loading: () => (
     <Box className="w-full max-w-xl space-y-4 p-4">
@@ -42,24 +43,24 @@ const RecurringTransactionsContext = createContext<RecurringTransactionsContextV
 export function useRecurringTransactionsPage() {
   const context = useContext(RecurringTransactionsContext);
   if (!context) {
-    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsShell');
+    throw new Error('useRecurringTransactionsPage debe usarse dentro de RecurringTransactionsProvider');
   }
   return context;
 }
 
-interface RecurringTransactionsShellProps {
+interface RecurringTransactionsProviderProps {
   initialRecurringTransactions: RecurringTransaction[];
   initialAccounts: Account[];
   initialCategories: Category[];
   children: ReactNode;
 }
 
-export default function RecurringTransactionsShell({
+export default function RecurringTransactionsProvider({
   initialRecurringTransactions,
   initialAccounts,
   initialCategories,
   children
-}: RecurringTransactionsShellProps) {
+}: RecurringTransactionsProviderProps) {
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -93,7 +94,7 @@ export default function RecurringTransactionsShell({
           hideModal();
           await handleRefresh();
           showNotification(
-            'fas fa-circle-check',
+            <CheckCircle className="h-5 w-5" />,
             'success',
             'Transacción recurrente creada',
             'La transacción recurrente se creó correctamente.'
@@ -116,7 +117,7 @@ export default function RecurringTransactionsShell({
             hideModal();
             await handleRefresh();
             showNotification(
-              'fas fa-pen-to-square',
+              <Pencil className="h-5 w-5" />,
               'success',
               'Transacción recurrente actualizada',
               'Los cambios se guardaron correctamente.'
@@ -134,20 +135,19 @@ export default function RecurringTransactionsShell({
       if (!confirmed) return;
 
       try {
-        await deleteMutation.mutateAsync(transaction.recurring_transaction_id);
-        // Update local state
+        await deleteMutation.mutateAsync(transaction.recurringTransactionId);
         setRecurringTransactions(prev =>
-          prev.filter(t => t.recurring_transaction_id !== transaction.recurring_transaction_id)
+          prev.filter(t => t.recurringTransactionId !== transaction.recurringTransactionId)
         );
         showNotification(
-          'fas fa-trash-check',
+          <Trash2 className="h-5 w-5" />,
           'accent',
           'Transacción recurrente eliminada',
           'La transacción recurrente se eliminó correctamente.'
         );
       } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción recurrente';
-        showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+        showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
       }
     },
     [deleteMutation, showNotification]

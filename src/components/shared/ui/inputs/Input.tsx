@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import { useEffect, useState, useCallback, forwardRef, useImperativeHandle, useRef, type ReactNode } from 'react';
+import { Eye, EyeOff, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 
 import Box from '@/components/shared/ui/content/Box';
@@ -73,7 +74,7 @@ interface InputProps {
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
-  icon?: string;
+  icon?: ReactNode;
   autoComplete?: string;
   rows?: number;
   step?: number | string;
@@ -250,7 +251,7 @@ const Input = forwardRef<InputRef, InputProps>(
           <Box className={containerClassName}>
             {!rows && icon && (
               <Box className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[color:var(--text-muted)] md:left-4">
-                <i className={icon} />
+                {icon}
               </Box>
             )}
             {inputType === 'date' && (
@@ -305,7 +306,7 @@ const Input = forwardRef<InputRef, InputProps>(
                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)]"
                 disabled={disabled}
               >
-                {showPassword ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             )}
             {inputType === 'date' && (
@@ -315,7 +316,7 @@ const Input = forwardRef<InputRef, InputProps>(
                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)]"
                 disabled={disabled}
               >
-                <i className="far fa-calendar-alt" />
+                <Calendar className="h-4 w-4" />
               </button>
             )}
           </Box>

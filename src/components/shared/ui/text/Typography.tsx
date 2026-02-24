@@ -9,6 +9,7 @@ interface TypographyProps {
   children: ReactNode;
   as?: ElementType;
   className?: string;
+  suppressHydrationWarning?: boolean;
 }
 
 interface VariantConfig {
@@ -43,7 +44,7 @@ const variantConfig: Record<Variant, VariantConfig> = {
   },
 };
 
-export default function Typography({ variant, children, as, className }: TypographyProps) {
+export default function Typography({ variant, children, as, className, suppressHydrationWarning }: TypographyProps) {
   const config = variantConfig[variant];
   const Component = (as ?? config.tag) as ElementType;
 
@@ -51,6 +52,7 @@ export default function Typography({ variant, children, as, className }: Typogra
     Component,
     {
       className: clsx('text-pretty', config.className, className),
+      ...(suppressHydrationWarning && { suppressHydrationWarning }),
     },
     children
   );

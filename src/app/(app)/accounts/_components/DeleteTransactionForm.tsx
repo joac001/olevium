@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Box, FormWrapper, Typography } from '@/components/shared/ui';
 import type { AccountTransaction } from '@/types';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useDeleteTransactionMutation } from '@/features/transactions/queries';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
@@ -21,9 +21,9 @@ export default function DeleteTransactionForm({
   currency,
   onSuccess,
 }: DeleteTransactionFormProps) {
-  const deleteTransaction = useTransactionsStore(state => state.deleteTransaction);
+  const deleteTransactionMutation = useDeleteTransactionMutation();
   const { showNotification, showError, showSuccess } = useNotification();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting = deleteTransactionMutation.isPending;
   const signedAmount = useMemo(
     () => toSignedAmount(transaction.amount, transaction.typeId),
     [transaction.amount, transaction.typeId]
@@ -44,9 +44,11 @@ export default function DeleteTransactionForm({
   const handleSubmit = useCallback(
     async (formData: FormData) => {
       void formData;
-      setIsSubmitting(true);
       try {
-        await deleteTransaction(transaction.transactionId);
+        await deleteTransactionMutation.mutateAsync({
+          transactionId: transaction.transactionId,
+          accountId: transaction.accountId,
+        });
         const context = createOperationContext('delete', 'transacción', 'la transacción');
         showSuccess(
           'Transacción eliminada exitosamente. Movimiento quitado de la cuenta.',
@@ -56,14 +58,13 @@ export default function DeleteTransactionForm({
       } catch (error) {
         const context = createOperationContext('delete', 'transacción', 'la transacción');
         showError(error, context);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
-      deleteTransaction,
+      deleteTransactionMutation,
       showNotification,
       transaction.transactionId,
+      transaction.accountId,
       onSuccess,
       showError,
       showSuccess,

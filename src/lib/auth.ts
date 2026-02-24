@@ -17,8 +17,9 @@ export async function login(
       name: useAuthStore.getState().user?.name ?? undefined,
     };
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error?.message ?? 'No se pudo iniciar sesión' };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'No se pudo iniciar sesión';
+    return { success: false, message };
   }
 }
 
@@ -39,8 +40,9 @@ export async function signup(payload: {
     }
     await useAuthStore.getState().login(payload.email, payload.password);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error?.message ?? 'No se pudo crear la cuenta' };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'No se pudo crear la cuenta';
+    return { success: false, message };
   }
 }
 

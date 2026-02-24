@@ -2,10 +2,11 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle, Key } from 'lucide-react';
 
 import { Box, FormWrapper, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import { useDeleteAccountMutation } from '@/features/accounts/queries';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
 interface DeleteAccountFormProps {
@@ -20,8 +21,8 @@ export default function DeleteAccountForm({
   onSuccess,
 }: DeleteAccountFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const deleteAccount = useAccountsStore(state => state.deleteAccount);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const deleteAccountMutation = useDeleteAccountMutation();
+  const isSubmitting = deleteAccountMutation.isPending;
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
 
@@ -42,7 +43,7 @@ export default function DeleteAccountForm({
       const nameValue = formData.get('confirmName');
       if (typeof nameValue !== 'string' || nameValue.trim() !== accountName) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Confirmación inválida',
           'Debes escribir el nombre exacto de la cuenta para eliminarla.'
@@ -50,13 +51,12 @@ export default function DeleteAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
         // Primero cerrar modal para evitar que el componente padre intente actualizar
         onSuccess?.();
 
         // Eliminar cuenta
-        await deleteAccount(accountId);
+        await deleteAccountMutation.mutateAsync(accountId);
 
         // Navegar inmediatamente
         router.replace('/accounts');
@@ -69,14 +69,12 @@ export default function DeleteAccountForm({
       } catch (error) {
         const context = createOperationContext('delete', 'cuenta', 'la cuenta');
         showError(error);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
       accountId,
       accountName,
-      deleteAccount,
+      deleteAccountMutation,
       onSuccess,
       router,
       showNotification,
@@ -94,7 +92,7 @@ export default function DeleteAccountForm({
           value={inputValue}
           onValueChange={value => setInputValue(String(value))}
           required
-          icon="fas fa-key"
+          icon={<Key className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>

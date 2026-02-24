@@ -1,19 +1,63 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteAccount, getAccountTypes, getAccounts, postAccount, putAccount } from '@/lib/api';
+import type { UseQueryOptions } from '@tanstack/react-query';
+import {
+  deleteAccount,
+  getAccountDetail,
+  getAccountTypes,
+  getAccounts,
+  getCurrencies,
+  postAccount,
+  putAccount,
+} from '@/lib/api';
+import type { Account, AccountType, Currency } from '@/types';
 import type { CreateAccountPayload, UpdateAccountPayload } from '@/lib/types';
 
 export const accountsKeys = {
   all: ['accounts'] as const,
   list: () => [...accountsKeys.all] as const,
-  types: () => ['accountTypes'] as const
+  detail: (id: string) => [...accountsKeys.all, id] as const,
+  types: () => ['accountTypes'] as const,
 };
 
-export function useAccountsQuery() {
-  return useQuery({ queryKey: accountsKeys.list(), queryFn: getAccounts });
+export const currenciesKeys = {
+  all: ['currencies'] as const,
+};
+
+type AccountsQueryOptions = Omit<UseQueryOptions<Account[], Error>, 'queryKey' | 'queryFn'>;
+type AccountDetailQueryOptions = Omit<UseQueryOptions<Account, Error>, 'queryKey' | 'queryFn'>;
+type AccountTypesQueryOptions = Omit<UseQueryOptions<AccountType[], Error>, 'queryKey' | 'queryFn'>;
+type CurrenciesQueryOptions = Omit<UseQueryOptions<Currency[], Error>, 'queryKey' | 'queryFn'>;
+
+export function useAccountsQuery(options?: AccountsQueryOptions) {
+  return useQuery<Account[], Error>({
+    queryKey: accountsKeys.list(),
+    queryFn: () => getAccounts().then(r => r.data),
+    ...options,
+  });
 }
 
-export function useAccountTypesQuery() {
-  return useQuery({ queryKey: accountsKeys.types(), queryFn: getAccountTypes });
+export function useAccountDetailQuery(accountId: string, options?: AccountDetailQueryOptions) {
+  return useQuery<Account, Error>({
+    queryKey: accountsKeys.detail(accountId),
+    queryFn: () => getAccountDetail(accountId).then(r => r.data),
+    ...options,
+  });
+}
+
+export function useAccountTypesQuery(options?: AccountTypesQueryOptions) {
+  return useQuery<AccountType[], Error>({
+    queryKey: accountsKeys.types(),
+    queryFn: () => getAccountTypes().then(r => r.data),
+    ...options,
+  });
+}
+
+export function useCurrenciesQuery(options?: CurrenciesQueryOptions) {
+  return useQuery<Currency[], Error>({
+    queryKey: currenciesKeys.all,
+    queryFn: getCurrencies,
+    ...options,
+  });
 }
 
 export function useCreateAccountMutation() {
@@ -21,11 +65,8 @@ export function useCreateAccountMutation() {
   return useMutation({
     mutationFn: (payload: CreateAccountPayload) => postAccount(payload),
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: accountsKeys.list() }),
-        queryClient.invalidateQueries({ queryKey: accountsKeys.types() })
-      ]);
-    }
+      await queryClient.invalidateQueries({ queryKey: accountsKeys.list() });
+    },
   });
 }
 
@@ -37,8 +78,13 @@ export function useUpdateAccountMutation(accountId: string | null) {
       return putAccount(accountId, payload);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: accountsKeys.list() });
-    }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: accountsKeys.list() }),
+        ...(accountId
+          ? [queryClient.invalidateQueries({ queryKey: accountsKeys.detail(accountId) })]
+          : []),
+      ]);
+    },
   });
 }
 
@@ -48,6 +94,6 @@ export function useDeleteAccountMutation() {
     mutationFn: (accountId: string) => deleteAccount(accountId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: accountsKeys.list() });
-    }
+    },
   });
 }

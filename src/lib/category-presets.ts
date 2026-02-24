@@ -8,4 +8,3 @@ export const CATEGORY_COLOR_OPTIONS = [
   { label: 'Gris', value: '#94a3b8' },
 ];
 
-export const CATEGORY_EMOJI_SUGGESTIONS = ['🛒', '🚌', '🍽️', '🏠', '💡', '🩺', '🎁', '🎬', '💼', '🏦'];

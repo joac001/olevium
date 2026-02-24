@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, createElement, type ReactNode } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 import type { DropMenuOption } from '@/components/shared/ui';
 import type { TransactionCategory, TransactionType } from '@/types';
@@ -188,7 +189,7 @@ interface NormalizeTransactionFormArgs {
   selectedCategory: string;
   customCategoryName: string;
   customCategoryDescription: string;
-  showNotification: (icon: string, tone: string, title: string, message: string) => void;
+  showNotification: (icon: ReactNode, tone: string, title: string, message: string) => void;
 }
 
 export interface NormalizedTransactionFormData {
@@ -225,7 +226,7 @@ export const normalizeTransactionFormData = ({
     typeof typeValue !== 'string'
   ) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Formulario incompleto',
       'Monto, fecha y tipo son obligatorios.'
@@ -236,7 +237,7 @@ export const normalizeTransactionFormData = ({
   const amount = Math.abs(Number(amountValue));
   if (!Number.isFinite(amount)) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Datos inválidos',
       'El monto debe ser numérico.'
@@ -248,7 +249,7 @@ export const normalizeTransactionFormData = ({
 
   if (!typeId) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Tipo inválido',
       'Selecciona un tipo de transacción válido.'
@@ -275,7 +276,7 @@ export const normalizeTransactionFormData = ({
     const trimmedDescription = customCategoryDescription.trim();
     if (!trimmedName || !trimmedDescription) {
       showNotification(
-        'fa-solid fa-triangle-exclamation',
+        createElement(AlertTriangle, { className: 'h-5 w-5' }),
         'danger',
         'Datos de categoría incompletos',
         'Debes ingresar el nombre y la descripción de la nueva categoría.'

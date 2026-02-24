@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, parseErrorMessage } from '@/lib/http';
+import { normalizeRecurringTransaction } from '@/lib/api';
 import type {
   RecurringTransaction,
   CreateRecurringTransactionPayload,
@@ -17,7 +18,8 @@ export async function postRecurringTransaction(
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo crear la transacción recurrente (status ${response.status})`);
   }
-  return (await response.json()) as RecurringTransaction;
+  const raw = (await response.json()) as Record<string, unknown>;
+  return normalizeRecurringTransaction(raw);
 }
 
 export async function putRecurringTransaction(
@@ -32,7 +34,8 @@ export async function putRecurringTransaction(
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo actualizar la transacción recurrente (status ${response.status})`);
   }
-  return (await response.json()) as RecurringTransaction;
+  const raw = (await response.json()) as Record<string, unknown>;
+  return normalizeRecurringTransaction(raw);
 }
 
 export async function deleteRecurringTransaction(recurringTransactionId: string): Promise<void> {

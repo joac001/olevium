@@ -2,14 +2,12 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Typography, Button } from '@/components/shared/ui';
+import { Typography, AppLink } from '@/components/shared/ui';
 import { Clock, CreditCard, FileText } from 'lucide-react';
 
 export function CTASection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
-  const router = useRouter();
 
   return (
     <section
@@ -50,7 +48,7 @@ export function CTASection() {
               key={index}
               className="flex items-center gap-2 text-[var(--text-muted)]"
             >
-              <item.icon className="w-4 h-4" />
+              <item.icon className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm">{item.text}</span>
             </div>
           ))}
@@ -63,12 +61,14 @@ export function CTASection() {
           transition={{ duration: 0.4, delay: 0.3, type: 'spring' }}
           className="mb-6"
         >
-          <Button
-            type="primary"
-            text="Crear mi cuenta"
-            onClick={() => router.push('/auth?mode=register')}
-            className="px-10 py-4 text-lg font-medium shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40 transition-shadow"
-          />
+          <AppLink
+            href="/auth?mode=register"
+            variant="unstyled"
+            data-variant="primary"
+            className="inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-hover)] px-10 py-4 text-lg font-medium leading-none transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)] bg-[var(--btn-bg)] bg-[image:var(--btn-bg-gradient)] text-[color:var(--btn-foreground,var(--text-primary))] hover:bg-[var(--btn-hover)] cursor-pointer hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40"
+          >
+            Crear mi cuenta
+          </AppLink>
         </motion.div>
 
         {/* Link secundario */}
@@ -77,12 +77,13 @@ export function CTASection() {
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.4, delay: 0.45 }}
         >
-          <button
-            onClick={() => router.push('/auth')}
+          <AppLink
+            href="/auth"
+            variant="unstyled"
             className="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors underline-offset-4 hover:underline"
           >
             ¿Ya tenés cuenta? Iniciá sesión
-          </button>
+          </AppLink>
         </motion.div>
       </motion.div>
 
@@ -94,7 +95,7 @@ export function CTASection() {
         className="absolute bottom-6 text-center"
       >
         <Typography variant="body" className="text-xs text-[var(--text-muted)] opacity-50">
-          Olevium v0.1.2
+          Olevium v0.2.2
         </Typography>
       </motion.div>
     </section>

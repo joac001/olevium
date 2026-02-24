@@ -4,7 +4,6 @@ import {
   withAuthProtection,
   handleProtectedResult,
 } from '@/lib/server-auth';
-import ProfileShell from './_components/ProfileShell';
 import ProfileHeader from './_components/ProfileHeader';
 import ProfileForm from './_components/ProfileForm';
 import ChangePasswordForm from './_components/ChangePasswordForm';
@@ -17,12 +16,10 @@ export default async function ProfilePage() {
   const data = await handleProtectedResult(result);
 
   return (
-    <ProfileShell initialUser={data.user}>
-      <Container className="gap-6 items-center py-10">
-        <ProfileHeader />
-        <ProfileForm />
-        <ChangePasswordForm />
-      </Container>
-    </ProfileShell>
+    <Container className="gap-6 items-center py-10">
+      <ProfileHeader />
+      <ProfileForm initialUser={data.user} />
+      <ChangePasswordForm />
+    </Container>
   );
 }

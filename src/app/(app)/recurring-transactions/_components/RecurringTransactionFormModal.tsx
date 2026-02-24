@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CheckCircle, Circle } from 'lucide-react';
 import {
   Box,
   Card,
@@ -71,15 +72,15 @@ function buildInitialState(transaction?: RecurringTransaction): RecurringTransac
   return {
     description: transaction.description ?? '',
     amount: String(transaction.amount),
-    accountId: String(transaction.account_id),
+    accountId: String(transaction.accountId),
     categoryMode: 'existing',
-    categoryId: String(transaction.category_id),
+    categoryId: String(transaction.categoryId),
     newCategoryDescription: '',
-    newCategoryType: String(transaction.type_id),
+    newCategoryType: String(transaction.typeId),
     newCategoryColor: CATEGORY_COLOR_OPTIONS[0]?.value ?? '#3f8aff',
-    typeId: String(transaction.type_id),
+    typeId: String(transaction.typeId),
     frequency: transaction.frequency,
-    startDate: transaction.start_date,
+    startDate: transaction.startDate,
   };
 }
 
@@ -212,7 +213,7 @@ export default function RecurringTransactionFormModal({
         onCompleted('created');
       } else if (transaction) {
         await updateMutation.mutateAsync({
-          id: transaction.recurring_transaction_id,
+          id: transaction.recurringTransactionId,
           payload,
         });
         onCompleted('updated');
@@ -264,7 +265,7 @@ export default function RecurringTransactionFormModal({
               return (
                 <ActionButton
                   key={value}
-                  icon={isActive ? 'fas fa-check-circle' : 'fas fa-circle'}
+                  icon={isActive ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                   type={isActive ? 'accent' : 'neutral'}
                   text={label}
                   onClick={() =>

@@ -35,5 +35,7 @@
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  }
+  },
+  "snyk.advanced.organization": "3e83c4c9-9c57-4b2a-845c-aba8b5308e52",
+  "snyk.advanced.autoSelectOrganization": true
 }

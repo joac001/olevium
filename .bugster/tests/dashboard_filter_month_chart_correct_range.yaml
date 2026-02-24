@@ -1,0 +1,16 @@
+name: Dashboard Filter - Month Filter Applies Correct X-Axis Range to Chart
+page: dashboard
+page_path: /dashboard
+task: Verify that when "Mes específico" is selected with a specific month and year, the "Flujo de ingresos y salidas" chart displays only the days of that selected month on the X-axis, not a full year range
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /dashboard
+  - Set the "Período" filter to "Mes específico"
+  - Set the "Mes" filter to "Febrero"
+  - Set the "Año" filter to "2026"
+  - Verify that the "Agrupar" filter is disabled and automatically locked to "Diario" (monthly grouping is not available for "Mes específico")
+  - Observe the "Flujo de ingresos y salidas" line chart
+  - Verify the X-axis of the chart shows dates only within February 2026 (labels like "2026-02-01" through "2026-02-28")
+  - Verify the X-axis does NOT start from a date in 2025 (e.g., no "2025-02-xx" or similar dates from a year ago)
+  - Verify the X-axis contains approximately 28 date labels (days of February), not 365
+expected_result: With "Mes específico → Febrero 2026" selected and daily grouping, the chart X-axis shows only the 28 days of February 2026. The chart does not display a year-long timeline (365 days) with an empty left side and a spike on the right.

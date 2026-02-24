@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 import { Box, Typography, ButtonBase } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
-import {
-  deleteCategory as apiDeleteCategory,
-  getCategoryTransactionCount,
-} from '@/lib/api/categories';
+import { getCategoryTransactionCount } from '@/lib/api/categories';
+import { useDeleteCategoryMutation } from '@/features/categories/queries';
 import type { Category } from '@/lib/types';
 
 interface DeleteCategoryFormProps {
@@ -18,7 +17,7 @@ interface DeleteCategoryFormProps {
 
 export default function DeleteCategoryForm({ category, onSuccess }: DeleteCategoryFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const deleteCategoryMutation = useDeleteCategoryMutation();
   const [transactionCount, setTransactionCount] = useState<number | null>(null);
   const [loadingCount, setLoadingCount] = useState(true);
 
@@ -39,7 +38,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
   const handleDelete = useCallback(async () => {
     if (!category.user_id) {
       showNotification(
-        'fa-solid fa-triangle-exclamation',
+        <AlertTriangle className="h-5 w-5" />,
         'danger',
         'Accion no permitida',
         'No puedes eliminar una categoria predefinida.'
@@ -49,7 +48,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
 
     if (transactionCount && transactionCount > 0) {
       showNotification(
-        'fa-solid fa-triangle-exclamation',
+        <AlertTriangle className="h-5 w-5" />,
         'danger',
         'Accion no permitida',
         'Esta categoria tiene transacciones asociadas. Desactivala en su lugar.'
@@ -57,17 +56,14 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await apiDeleteCategory(category.category_id);
+      await deleteCategoryMutation.mutateAsync(category.category_id);
       const context = createOperationContext('delete', 'categoria', 'la categoria');
       showSuccess('Categoria eliminada permanentemente.', context);
       onSuccess?.();
     } catch (error) {
       const context = createOperationContext('delete', 'categoria', 'la categoria');
       showError(error, context);
-    } finally {
-      setIsSubmitting(false);
     }
   }, [
     category.category_id,
@@ -75,6 +71,7 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
     transactionCount,
     onSuccess,
     showNotification,
+    deleteCategoryMutation,
     showError,
     showSuccess,
   ]);
@@ -107,10 +104,10 @@ export default function DeleteCategoryForm({ category, onSuccess }: DeleteCatego
       <ButtonBase
         variant="danger"
         onClick={handleDelete}
-        disabled={isSubmitting || loadingCount || !canDelete}
+        disabled={deleteCategoryMutation.isPending || loadingCount || !canDelete}
         className="w-full"
       >
-        {isSubmitting ? 'Eliminando...' : 'Eliminar permanentemente'}
+        {deleteCategoryMutation.isPending ? 'Eliminando...' : 'Eliminar permanentemente'}
       </ButtonBase>
     </Box>
   );

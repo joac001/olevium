@@ -1,9 +1,11 @@
+import { createElement, type ReactNode } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import type { DropMenuOption } from '@/components/shared/ui';
 import type { AccountType, Currency } from '@/types';
 
 interface NormalizeAccountFormArgs {
   formData: FormData;
-  showNotification: (icon: string, tone: string, title: string, message: string) => void;
+  showNotification: (icon: ReactNode, tone: string, title: string, message: string) => void;
 }
 
 export interface NormalizedAccountFormData {
@@ -41,7 +43,7 @@ export const normalizeAccountFormData = ({
     typeof balanceValue !== 'string'
   ) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Formulario incompleto',
       'Completa todos los campos para continuar.'
@@ -53,7 +55,7 @@ export const normalizeAccountFormData = ({
 
   if (!trimmedName) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Datos inválidos',
       'El nombre de la cuenta es obligatorio.'
@@ -67,7 +69,7 @@ export const normalizeAccountFormData = ({
 
   if (!Number.isFinite(balance)) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Datos inválidos',
       'El balance debe ser un número válido.'
@@ -77,7 +79,7 @@ export const normalizeAccountFormData = ({
 
   if (!Number.isFinite(currencyId) || currencyId <= 0) {
     showNotification(
-      'fa-solid fa-triangle-exclamation',
+      createElement(AlertTriangle, { className: 'h-5 w-5' }),
       'danger',
       'Datos inválidos',
       'Debes seleccionar una moneda válida.'

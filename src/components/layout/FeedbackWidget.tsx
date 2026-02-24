@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from 'react';
 import { usePathname } from 'next/navigation';
+import { Bug, Lightbulb, Send, MessageSquare } from 'lucide-react';
+import clsx from 'clsx';
 
 import { Box, Card, Typography, Button, ActionButton, Input } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
@@ -9,6 +11,12 @@ import { useModal } from '@/context/ModalContext';
 import { postFeedback } from '@/lib/api';
 
 type FeedbackType = 'bug' | 'feature' | 'other';
+
+const FEEDBACK_TYPES: { value: FeedbackType; label: string; icon: React.ReactNode }[] = [
+  { value: 'bug', label: 'Problema', icon: <Bug className="h-4 w-4" /> },
+  { value: 'feature', label: 'Mejora', icon: <Lightbulb className="h-4 w-4" /> },
+  { value: 'other', label: 'Otro', icon: <MessageSquare className="h-4 w-4" /> },
+];
 
 function FeedbackModalContent() {
   const [type, setType] = useState<FeedbackType>('bug');
@@ -82,25 +90,28 @@ function FeedbackModalContent() {
   return (
     <Card tone="accent" title="Enviar feedback">
       <Box className="space-y-4">
-        <Typography variant="body" className="text-[color:var(--text-muted)]">
+        <Typography variant="body" className="text-(--text-muted)">
           Contanos qué problema encontraste o qué te gustaría mejorar. Si podés, explica de la
           manera más detallada posible qué estabas haciendo y qué esperabas que pasara.
         </Typography>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Box className="flex flex-wrap gap-2">
-            {[
-              { value: 'bug', label: 'Tengo un problema' },
-              { value: 'feature', label: 'Quiero proponer una mejora' },
-              { value: 'other', label: 'Otro comentario' },
-            ].map(option => (
-              <ActionButton
+          <Box className="flex overflow-hidden rounded-lg border border-(--border-soft)">
+            {FEEDBACK_TYPES.map((option, index) => (
+              <button
                 key={option.value}
-                icon={type === option.value ? 'fas fa-check-circle' : 'fas fa-circle'}
-                type={type === option.value ? 'accent' : 'neutral'}
-                text={option.label}
-                onClick={() => setType(option.value as FeedbackType)}
-                className="flex-1"
-              />
+                type="button"
+                onClick={() => setType(option.value)}
+                className={clsx(
+                  'flex flex-1 flex-col items-center justify-center gap-1.5 px-2 py-3 text-xs font-medium transition-colors md:flex-row md:gap-2',
+                  index > 0 && 'border-l border-(--border-soft)',
+                  type === option.value
+                    ? 'bg-(--color-accent) text-white'
+                    : 'bg-(--surface-muted) text-(--text-secondary) hover:bg-(--surface-highlight)'
+                )}
+              >
+                {option.icon}
+                <span>{option.label}</span>
+              </button>
             ))}
           </Box>
 
@@ -121,7 +132,7 @@ function FeedbackModalContent() {
               text={isSubmitting ? 'Enviando...' : 'Enviar'}
               disabled={isSubmitting || !message.trim()}
               htmlType="submit"
-              icon="fas fa-paper-plane"
+              icon={<Send className="h-4 w-4" />}
               iconPosition="end"
             />
           </Box>
@@ -140,11 +151,12 @@ export default function FeedbackWidget() {
 
   return (
     <ActionButton
-      icon="fas fa-message"
+      icon={<MessageSquare className="h-4 w-4" />}
       type="accent"
+      text="Feedback"
       tooltip="Enviar feedback"
       onClick={handleOpenFeedback}
-      className="fixed bottom-4 right-4 z-[1100] h-11 w-11 rounded-full shadow-lg"
+      className="h-11 w-11 rounded-full shadow-lg md:w-auto"
     />
   );
 }

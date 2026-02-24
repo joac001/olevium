@@ -1,10 +1,17 @@
+import { Suspense } from 'react';
+import { Container } from '@/components/shared/ui';
 import {
   requireAuth,
   withAuthProtection,
   handleProtectedResult,
 } from '@/lib/server-auth';
 import { getTransactionsPageData } from './_api';
-import TransactionsShell from './_components/TransactionsShell';
+import TransactionsSkeleton from './_skeletons/TransactionsSkeleton';
+import TransactionsProvider from './_context/TransactionsContext';
+import TransactionsHeader from './_components/TransactionsHeader';
+import TransactionsSummary from './_components/TransactionsSummary';
+import TransactionsFilters from './_components/TransactionsFilters';
+import TransactionsTable from './_components/TransactionsTable';
 
 export default async function TransactionsPage() {
   await requireAuth();
@@ -13,10 +20,19 @@ export default async function TransactionsPage() {
   const data = await handleProtectedResult(result);
 
   return (
-    <TransactionsShell
-      initialTransactions={data.transactions}
-      initialAccounts={data.accounts}
-      initialCategories={data.categories}
-    />
+    <Suspense fallback={<TransactionsSkeleton />}>
+      <TransactionsProvider
+        initialTransactions={data.transactions}
+        initialAccounts={data.accounts}
+        initialCategories={data.categories}
+      >
+        <Container className="gap-6">
+          <TransactionsHeader />
+          <TransactionsSummary />
+          <TransactionsFilters />
+          <TransactionsTable />
+        </Container>
+      </TransactionsProvider>
+    </Suspense>
   );
 }

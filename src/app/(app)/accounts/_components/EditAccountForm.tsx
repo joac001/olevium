@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
+import { CheckCircle, AlertTriangle, Wallet, TrendingUp } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import type { AccountDetail, AccountType, Currency } from '@/types';
-import { useAccountsStore } from '@/lib/stores/accounts';
+import type { AccountDetail, AccountType } from '@/types';
+import { useCurrenciesQuery, useUpdateAccountMutation } from '@/features/accounts/queries';
 import { useNotification } from '@/context/NotificationContext';
 import {
   buildAccountTypeOptions,
@@ -27,12 +28,9 @@ export default function EditAccountForm({
   onSuccess,
 }: EditAccountFormProps) {
   const { showNotification } = useNotification();
-  const updateAccount = useAccountsStore(state => state.updateAccount);
-  const getCurrencies = useAccountsStore(state => state.getCurrencies);
-  const currencies = useAccountsStore(state => state.currencies);
-  const loadingCurrencies = useAccountsStore(state => state.loadingCurrencies);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: currencies = [], isLoading: loadingCurrencies } = useCurrenciesQuery();
+  const updateAccountMutation = useUpdateAccountMutation(account.accountId);
+  const isSubmitting = updateAccountMutation.isPending;
 
   const typeOptions: DropMenuOption[] = useMemo(
     () => buildAccountTypeOptions(accountTypes),
@@ -43,10 +41,6 @@ export default function EditAccountForm({
     () => buildCurrencyOptions(currencies),
     [currencies]
   );
-
-  useEffect(() => {
-    getCurrencies();
-  }, [getCurrencies]);
 
   const buttons = useMemo(
     () => [
@@ -68,17 +62,16 @@ export default function EditAccountForm({
         return;
       }
 
-      setIsSubmitting(true);
       try {
-        await updateAccount(account.accountId, {
+        await updateAccountMutation.mutateAsync({
           name: normalized.name,
-          typeId: normalized.typeId,
-          currencyId: normalized.currencyId,
+          type_id: normalized.typeId,
+          currency_id: normalized.currencyId,
           balance: normalized.balance,
         });
 
         showNotification(
-          'fa-solid fa-circle-check',
+          <CheckCircle className="h-5 w-5" />,
           'success',
           'Cuenta actualizada',
           'Guardamos los cambios en tu cuenta.'
@@ -119,16 +112,14 @@ export default function EditAccountForm({
         }
 
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Error al actualizar',
           message
         );
-      } finally {
-        setIsSubmitting(false);
       }
     },
-    [account.accountId, showNotification, updateAccount, onSuccess]
+    [updateAccountMutation, showNotification, onSuccess]
   );
 
   return (
@@ -139,7 +130,7 @@ export default function EditAccountForm({
           label="Nombre de la cuenta"
           defaultValue={account.name}
           required
-          icon="fas fa-wallet"
+          icon={<Wallet className="h-4 w-4" />}
         />
 
         <DropMenu
@@ -168,7 +159,7 @@ export default function EditAccountForm({
           type="number"
           defaultValue={account.balance}
           required
-          icon="fas fa-money-bill-trend-up"
+          icon={<TrendingUp className="h-4 w-4" />}
         />
       </Box>
     </FormWrapper>

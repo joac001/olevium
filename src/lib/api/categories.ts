@@ -1,13 +1,13 @@
 import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type {
-  Category,
+  ApiCategory as Category,
   CreateCategoryPayload,
   UpdateCategoryPayload,
-} from '@/lib/types';
+} from '@/types';
 import type { ApiCollectionResult } from './types';
 
-const normalizeCategory = (raw: any): Category => ({
-  category_id: String(raw.category_id ?? raw.id ?? ''),
+const normalizeCategory = (raw: Category): Category => ({
+  category_id: String(raw.category_id ?? ''),
   user_id: raw.user_id ? String(raw.user_id) : null,
   type_id: Number(raw.type_id ?? 0),
   description: String(raw.description ?? ''),
@@ -23,7 +23,7 @@ export async function getCategories(): Promise<ApiCollectionResult<Category[]>> 
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as Category[];
   return { data: raw.map(normalizeCategory) };
 }
 
@@ -36,7 +36,7 @@ export async function postCategory(payload: CreateCategoryPayload): Promise<Cate
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo crear la categoría (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as Category;
   return normalizeCategory(raw);
 }
 
@@ -49,7 +49,7 @@ export async function putCategory(categoryId: string, payload: UpdateCategoryPay
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo actualizar la categoría (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as Category;
   return normalizeCategory(raw);
 }
 
@@ -66,7 +66,7 @@ export async function getActiveCategories(): Promise<ApiCollectionResult<Categor
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as Category[];
   return { data: raw.map(normalizeCategory) };
 }
 
@@ -78,7 +78,7 @@ export async function deactivateCategory(categoryId: string): Promise<Category> 
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo desactivar la categoría (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as Category;
   return normalizeCategory(raw);
 }
 
@@ -90,7 +90,7 @@ export async function reactivateCategory(categoryId: string): Promise<Category> 
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo reactivar la categoría (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as Category;
   return normalizeCategory(raw);
 }
 

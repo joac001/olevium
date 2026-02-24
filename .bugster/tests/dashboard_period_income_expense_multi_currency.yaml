@@ -1,0 +1,16 @@
+name: Dashboard - Period Income and Expenses Show Correct Currency
+page: dashboard
+page_path: /dashboard
+task: Verify that the "Ingresos del período" and "Salidas del período" cards display amounts in the correct currency per transaction, not all as ARS
+steps:
+  - Log in using ${BUGSTER_USERNAME} and ${BUGSTER_PASSWORD}
+  - Navigate to /accounts
+  - Ensure a USD account exists (create one if needed)
+  - Register an Ingreso transaction of 300 in the USD account
+  - Navigate to /dashboard
+  - Set the period filter to "Último año" to include recent transactions
+  - Locate the "Ingresos del período" card
+  - Verify the card shows a USD income amount (e.g., "US$ 300,00") and not "$ 300,00" (ARS formatting for a USD transaction)
+  - If ARS income also exists, verify ARS and USD income amounts are shown separately
+  - Locate the "Salidas del período" card and verify the same multi-currency behavior
+expected_result: Income and expense cards display amounts with the correct currency symbol. A USD transaction of 300 shows as "US$ 300,00", not "$ 300,00". Both cards correctly separate ARS and USD amounts.

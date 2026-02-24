@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Typography } from '@/components/shared/ui';
+import { Typography, AppLink } from '@/components/shared/ui';
 import Image from 'next/image';
 
 const questions = [
@@ -28,7 +27,6 @@ const questionPositions = [
 ];
 
 export function HeroSection() {
-  const router = useRouter();
   const [visibleQuestions, setVisibleQuestions] = useState<number[]>([]);
   const [showBrand, setShowBrand] = useState(false);
   const hasStarted = useRef(false);
@@ -78,6 +76,7 @@ export function HeroSection() {
               transform: `rotate(${position.rotate}deg)`,
             }}
             className="max-w-xs md:max-w-sm pointer-events-none"
+            aria-hidden="true"
           >
             <Typography
               variant="body"
@@ -132,18 +131,21 @@ export function HeroSection() {
           </Typography>
 
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <Button
-              type="primary"
-              text="Empezar gratis"
-              onClick={() => router.push('/auth?mode=register')}
-              className="px-8 py-3 text-lg w-full sm:w-auto"
-            />
-            <button
-              onClick={() => router.push('/auth')}
+            <AppLink
+              href="/auth?mode=register"
+              variant="unstyled"
+              data-variant="primary"
+              className="inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--btn-hover)] px-8 py-3 text-lg font-medium leading-none transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interactive-ring)] bg-[var(--btn-bg)] bg-[image:var(--btn-bg-gradient)] text-[color:var(--btn-foreground,var(--text-primary))] hover:bg-[var(--btn-hover)] cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-20px_var(--shadow-soft)] active:translate-y-0 w-full sm:w-auto"
+            >
+              Empezar gratis
+            </AppLink>
+            <AppLink
+              href="/auth"
+              variant="unstyled"
               className="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors underline-offset-4 hover:underline"
             >
               Ya tengo cuenta
-            </button>
+            </AppLink>
           </div>
         </motion.div>
       </motion.div>
@@ -154,6 +156,7 @@ export function HeroSection() {
         animate={{ opacity: showBrand ? 0.5 : 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
         className="absolute bottom-8"
+        aria-hidden="true"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

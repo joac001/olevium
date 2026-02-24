@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
+import { AlertTriangle, Tag } from 'lucide-react';
 
 import { Box, FormWrapper, Input, DropMenu, Typography, ButtonBase } from '@/components/shared/ui';
 import type { DropMenuOption } from '@/components/shared/ui';
-import { useTransactionsStore } from '@/lib/stores/transactions';
+import { useUpdateCategoryMutation } from '@/features/categories/queries';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 import type { Category, TransactionType } from '@/lib/types';
@@ -24,8 +25,7 @@ export default function EditCategoryForm({
   onSuccess,
 }: EditCategoryFormProps) {
   const { showNotification, showError, showSuccess } = useNotification();
-  const updateCategory = useTransactionsStore(state => state.updateCategory);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateCategoryMutation = useUpdateCategoryMutation(category.category_id);
   const [description, setDescription] = useState(category.description);
   const [typeId, setTypeId] = useState<string>(String(category.type_id));
   const [selectedColor, setSelectedColor] = useState<string>(
@@ -40,6 +40,8 @@ export default function EditCategoryForm({
       })),
     [transactionTypes]
   );
+
+  const isSubmitting = updateCategoryMutation.isPending;
 
   const buttons = useMemo(
     () => [
@@ -57,7 +59,7 @@ export default function EditCategoryForm({
     async () => {
       if (!category.user_id) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Acción no permitida',
           'Esta categoría no se puede editar.'
@@ -68,7 +70,7 @@ export default function EditCategoryForm({
       const trimmedDescription = description.trim();
       if (!trimmedDescription) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Datos inválidos',
           'La descripción no puede estar vacía.'
@@ -79,7 +81,7 @@ export default function EditCategoryForm({
       const numTypeId = Number(typeId);
       if (!Number.isFinite(numTypeId)) {
         showNotification(
-          'fa-solid fa-triangle-exclamation',
+          <AlertTriangle className="h-5 w-5" />,
           'danger',
           'Tipo inválido',
           'Selecciona un tipo válido.'
@@ -87,15 +89,11 @@ export default function EditCategoryForm({
         return;
       }
 
-      setIsSubmitting(true);
-
       try {
-        await updateCategory({
-          categoryId: category.category_id,
+        await updateCategoryMutation.mutateAsync({
           description: trimmedDescription,
-          typeId: numTypeId,
+          type_id: numTypeId,
           color: selectedColor,
-          userId: category.user_id,
         });
 
         const context = createOperationContext('update', 'categoría', 'la categoría');
@@ -105,18 +103,15 @@ export default function EditCategoryForm({
       } catch (error) {
         const context = createOperationContext('update', 'categoría', 'la categoría');
         showError(error, context);
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [
-      category.category_id,
       category.user_id,
       description,
       typeId,
       selectedColor,
       showNotification,
-      updateCategory,
+      updateCategoryMutation,
       onSuccess,
       showError,
       showSuccess,
@@ -131,7 +126,7 @@ export default function EditCategoryForm({
           value={description}
           onValueChange={(value) => setDescription(String(value ?? ''))}
           required
-          icon="fas fa-tag"
+          icon={<Tag className="h-4 w-4" />}
         />
 
         <DropMenu

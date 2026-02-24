@@ -2,19 +2,16 @@ import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type {
   Account,
   AccountType,
+  ApiUserAccount,
+  ApiAccountType,
+  ApiCurrency,
+  Currency,
+  CreateAccountPayload,
+  UpdateAccountPayload,
 } from '@/types';
 import type { ApiCollectionResult } from './types';
 
-type CreateAccountPayload = {
-  name: string;
-  type_id: number;
-  currency_id: number;
-  balance?: number;
-};
-
-type UpdateAccountPayload = Partial<CreateAccountPayload>;
-
-const normalizeAccount = (raw: any): Account => ({
+const normalizeAccount = (raw: ApiUserAccount): Account => ({
   accountId: String(raw.account_id),
   name: String(raw.name ?? ''),
   typeId: Number(raw.type_id ?? raw.account_type_id ?? 0),
@@ -26,12 +23,18 @@ const normalizeAccount = (raw: any): Account => ({
   description: raw.description ?? null,
 });
 
+const normalizeAccountType = (raw: ApiAccountType): AccountType => ({
+  typeId: Number(raw.type_id ?? 0),
+  name: String(raw.name ?? 'Desconocido'),
+  createdAt: String(raw.created_at ?? new Date().toISOString()),
+});
+
 export async function getAccounts(): Promise<ApiCollectionResult<Account[]>> {
   const response = await apiRequest('/accounts/');
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as unknown[];
+  const raw = (await response.json()) as ApiUserAccount[];
   return { data: raw.map(normalizeAccount) };
 }
 
@@ -40,13 +43,8 @@ export async function getAccountTypes(): Promise<ApiCollectionResult<AccountType
   if (!response.ok) {
     return { data: [] };
   }
-  const raw = (await response.json()) as any[];
-  const normalized = raw.map(item => ({
-    typeId: Number(item.type_id ?? item.account_type_id ?? 0),
-    name: String(item.name ?? 'Desconocido'),
-    createdAt: String(item.created_at ?? item.createdAt ?? new Date().toISOString()),
-  }));
-  return { data: normalized };
+  const raw = (await response.json()) as ApiAccountType[];
+  return { data: raw.map(normalizeAccountType) };
 }
 
 export async function postAccount(payload: CreateAccountPayload): Promise<Account> {
@@ -58,7 +56,7 @@ export async function postAccount(payload: CreateAccountPayload): Promise<Accoun
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo crear la cuenta (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as ApiUserAccount;
   return normalizeAccount(raw);
 }
 
@@ -71,7 +69,7 @@ export async function putAccount(accountId: string, payload: UpdateAccountPayloa
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo actualizar la cuenta (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as ApiUserAccount;
   return normalizeAccount(raw);
 }
 
@@ -83,11 +81,24 @@ export async function deleteAccount(accountId: string): Promise<void> {
   }
 }
 
+export async function getCurrencies(): Promise<Currency[]> {
+  const response = await apiRequest('/currencies/');
+  if (!response.ok) {
+    return [];
+  }
+  const raw = (await response.json()) as ApiCurrency[];
+  return raw.map(item => ({
+    currencyId: item.currency_id,
+    label: item.label,
+    name: item.name,
+  }));
+}
+
 export async function getAccountDetail(accountId: string): Promise<ApiCollectionResult<Account>> {
   const response = await apiRequest(`/accounts/${accountId}`);
   if (!response.ok) {
     throw new Error(`No se pudo obtener el detalle de la cuenta (status ${response.status})`);
   }
-  const raw = await response.json();
+  const raw = (await response.json()) as ApiUserAccount;
   return { data: normalizeAccount(raw) };
 }

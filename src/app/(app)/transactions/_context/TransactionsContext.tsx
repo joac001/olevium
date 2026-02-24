@@ -1,40 +1,39 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import dynamic from 'next/dynamic';
-import { Box, Typography, Container } from '@/components/shared/ui';
+import { CheckCircle, Pencil, Trash2, FileDown, AlertTriangle } from 'lucide-react';
+import { Box, Typography } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useNotification } from '@/context/NotificationContext';
-import { useDeleteTransactionMutation } from '@/features/transactions/mutations';
-import { getTransactions, getCategories, exportTransactionsCsv } from '@/lib/api';
+import {
+  useDeleteTransactionMutation,
+  useTransactionsQuery,
+} from '@/features/transactions/queries';
+import { useAccountsQuery } from '@/features/accounts/queries';
+import { useCategoriesQuery } from '@/features/categories/queries';
+import { exportTransactionsCsv } from '@/lib/api';
+import { formatAccountName } from '@/lib/format';
+import { toSignedAmount } from '@/lib/utils/transactions';
 import type { Category, Transaction } from '@/lib/types';
 import type { Account } from '@/types';
-import { formatAccountName } from '@/lib/format';
-import type { DateFilter, TypeFilter, TransactionsSummary as TransactionsSummaryType } from './types';
-import { toSignedAmount } from '@/lib/utils/transactions';
-import TransactionsHeader from './TransactionsHeader';
-import TransactionsSummary from './TransactionsSummary';
-import TransactionsFilters from './TransactionsFilters';
-import TransactionsTable from './TransactionsTable';
+import type { DateFilter, TypeFilter, TransactionsSummary } from '../_components/types';
 
-const EXPENSE_TYPE_ID = 1;
-const INCOME_TYPE_ID = 2;
-
-const TransactionFormModal = dynamic(() => import('./TransactionFormModal'), {
+const TransactionFormModal = dynamic(() => import('../_components/TransactionFormModal'), {
   ssr: false,
   loading: () => (
     <Box className="w-full max-w-xl space-y-4 p-4">
       <Typography variant="body">Cargando formulario...</Typography>
     </Box>
-  )
+  ),
 });
-
-interface TransactionsShellProps {
-  initialTransactions: Transaction[];
-  initialAccounts: Account[];
-  initialCategories: Category[];
-}
 
 function buildAccountDictionary(accounts: Account[]): Record<string, Account> {
   return accounts.reduce<Record<string, Account>>((acc, account) => {
@@ -101,12 +100,51 @@ function filterTransactions(
   });
 }
 
-export default function TransactionsShell({
+type TransactionsContextValue = {
+  filteredTransactions: Transaction[];
+  accountDictionary: Record<string, Account>;
+  categoryDictionary: Record<string, Category>;
+  categoryOptions: Category[];
+  summary: TransactionsSummary;
+  typeFilter: TypeFilter;
+  categoryFilter: string;
+  dateFilter: DateFilter;
+  searchTerm: string;
+  isExporting: boolean;
+  setTypeFilter: (v: TypeFilter) => void;
+  setCategoryFilter: (v: string) => void;
+  setDateFilter: (v: DateFilter) => void;
+  setSearchTerm: (v: string) => void;
+  clearFilters: () => void;
+  handleCreateTransaction: () => void;
+  handleEditTransaction: (tx: Transaction) => void;
+  handleDeleteTransaction: (tx: Transaction) => Promise<void>;
+  handleExportCsv: () => Promise<void>;
+};
+
+const TransactionsContext = createContext<TransactionsContextValue | null>(null);
+
+export function useTransactionsPage() {
+  const context = useContext(TransactionsContext);
+  if (!context) {
+    throw new Error('useTransactionsPage debe usarse dentro de TransactionsProvider');
+  }
+  return context;
+}
+
+interface TransactionsProviderProps {
+  initialTransactions: Transaction[];
+  initialAccounts: Account[];
+  initialCategories: Category[];
+  children: ReactNode;
+}
+
+export default function TransactionsProvider({
   initialTransactions,
   initialAccounts,
   initialCategories,
-}: TransactionsShellProps) {
-  const queryClient = useQueryClient();
+  children,
+}: TransactionsProviderProps) {
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
 
@@ -116,10 +154,9 @@ export default function TransactionsShell({
   const [searchTerm, setSearchTerm] = useState('');
   const [isExporting, setIsExporting] = useState(false);
 
-  // Usar datos iniciales del servidor
-  const [transactions, setTransactions] = useState(initialTransactions);
-  const [accounts, setAccounts] = useState(initialAccounts);
-  const [categories, setCategories] = useState(initialCategories);
+  const { data: transactions = initialTransactions } = useTransactionsQuery({ initialData: initialTransactions });
+  const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
+  const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
 
@@ -127,47 +164,27 @@ export default function TransactionsShell({
   const categoryDictionary = useMemo(() => buildCategoryDictionary(categories), [categories]);
 
   const categoryOptions = useMemo(
-    () =>
-      categories
-        .slice()
-        .sort((a, b) => a.description.localeCompare(b.description)),
+    () => categories.slice().sort((a, b) => a.description.localeCompare(b.description)),
     [categories]
   );
 
   const filteredTransactions = useMemo(
-    () =>
-      filterTransactions(
-        transactions,
-        typeFilter,
-        categoryFilter,
-        dateFilter,
-        searchTerm,
-        categoryDictionary
-      ),
+    () => filterTransactions(transactions, typeFilter, categoryFilter, dateFilter, searchTerm, categoryDictionary),
     [transactions, typeFilter, categoryFilter, dateFilter, searchTerm, categoryDictionary]
   );
 
-  const summary = useMemo<TransactionsSummaryType>(() => {
+  const summary = useMemo<TransactionsSummary>(() => {
     const totals = filteredTransactions.reduce(
       (acc, tx) => {
         const signedAmount = toSignedAmount(tx.amount, tx.type_id);
-
-        if (signedAmount >= 0) {
-          acc.incomeTotal += Math.abs(signedAmount);
-        } else {
-          acc.expenseTotal += Math.abs(signedAmount);
-        }
+        if (signedAmount >= 0) acc.incomeTotal += Math.abs(signedAmount);
+        else acc.expenseTotal += Math.abs(signedAmount);
         acc.netTotal += signedAmount;
         return acc;
       },
       { incomeTotal: 0, expenseTotal: 0, netTotal: 0 }
     );
-    return {
-      incomeTotal: totals.incomeTotal,
-      expenseTotal: totals.expenseTotal,
-      netTotal: totals.netTotal,
-      count: filteredTransactions.length
-    };
+    return { ...totals, count: filteredTransactions.length };
   }, [filteredTransactions]);
 
   const clearFilters = useCallback(() => {
@@ -177,18 +194,6 @@ export default function TransactionsShell({
     setSearchTerm('');
   }, []);
 
-  const refetchTransactions = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    const { data } = await getTransactions();
-    setTransactions(data);
-  }, [queryClient]);
-
-  const refetchCategories = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['categories'] });
-    const { data } = await getCategories();
-    setCategories(data);
-  }, [queryClient]);
-
   const handleCreateTransaction = useCallback(() => {
     showModal(
       <TransactionFormModal
@@ -196,27 +201,13 @@ export default function TransactionsShell({
         accounts={accounts}
         categories={categories}
         onCancel={hideModal}
-        onCompleted={async () => {
+        onCompleted={() => {
           hideModal();
-          await Promise.all([refetchTransactions(), refetchCategories()]);
-          showNotification(
-            'fas fa-circle-check',
-            'success',
-            'Transacción creada',
-            'La transacción se registró correctamente.'
-          );
+          showNotification(<CheckCircle className="h-5 w-5" />, 'success', 'Transacción creada', 'La transacción se registró correctamente.');
         }}
       />
     );
-  }, [
-    accounts,
-    categories,
-    hideModal,
-    refetchCategories,
-    refetchTransactions,
-    showModal,
-    showNotification
-  ]);
+  }, [accounts, categories, hideModal, showModal, showNotification]);
 
   const handleEditTransaction = useCallback(
     (transaction: Transaction) => {
@@ -227,68 +218,45 @@ export default function TransactionsShell({
           accounts={accounts}
           categories={categories}
           onCancel={hideModal}
-          onCompleted={async () => {
+          onCompleted={() => {
             hideModal();
-            await Promise.all([refetchTransactions(), refetchCategories()]);
-            showNotification(
-              'fas fa-pen-to-square',
-              'success',
-              'Transacción actualizada',
-              'Los cambios se guardaron correctamente.'
-            );
+            showNotification(<Pencil className="h-5 w-5" />, 'success', 'Transacción actualizada', 'Los cambios se guardaron correctamente.');
           }}
         />
       );
     },
-    [
-      accounts,
-      categories,
-      hideModal,
-      refetchCategories,
-      refetchTransactions,
-      showModal,
-      showNotification
-    ]
+    [accounts, categories, hideModal, showModal, showNotification]
   );
 
   const handleDeleteTransaction = useCallback(
     async (transaction: Transaction) => {
       const account = accountDictionary[transaction.account_id];
       const label = transaction.description ?? transaction.date;
-      const currencyLabel =
-        typeof account?.currency === 'string'
-          ? account.currency
-          : (account?.currency as any)?.label ?? 'ARS';
+      const currencyLabel = account?.currency ?? 'ARS';
       const confirmed = window.confirm(
         `¿Eliminar la transacción "${label}" de ${account ? formatAccountName(account.name, currencyLabel) : 'la cuenta seleccionada'}?`
       );
       if (!confirmed) return;
-
       try {
-        await deleteTransactionMutation.mutateAsync(transaction.transaction_id);
-        await refetchTransactions();
-        showNotification(
-          'fas fa-trash-check',
-          'accent',
-          'Transacción eliminada',
-          'El movimiento se eliminó correctamente.'
-        );
+        await deleteTransactionMutation.mutateAsync({
+          transactionId: transaction.transaction_id,
+          accountId: transaction.account_id,
+        });
+        showNotification(<Trash2 className="h-5 w-5" />, 'accent', 'Transacción eliminada', 'El movimiento se eliminó correctamente.');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción';
-        showNotification('fas fa-triangle-exclamation', 'danger', 'Error', message);
+        showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
       }
     },
-    [accountDictionary, deleteTransactionMutation, refetchTransactions, showNotification]
+    [accountDictionary, deleteTransactionMutation, showNotification]
   );
 
   const handleExportCsv = useCallback(async () => {
     try {
       setIsExporting(true);
-
       const now = new Date();
       let startDate: string | undefined;
       let endDate: string | undefined;
-
       if (dateFilter === '30d' || dateFilter === '90d') {
         const days = dateFilter === '30d' ? 30 : 90;
         const from = new Date(now);
@@ -296,12 +264,7 @@ export default function TransactionsShell({
         startDate = from.toISOString().slice(0, 10);
         endDate = now.toISOString().slice(0, 10);
       }
-
-      const blob = await exportTransactionsCsv({
-        startDate,
-        endDate,
-      });
-
+      const blob = await exportTransactionsCsv({ startDate, endDate });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -311,52 +274,40 @@ export default function TransactionsShell({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      showNotification(
-        'fas fa-file-arrow-down',
-        'success',
-        'Exportación iniciada',
-        'El archivo CSV se está descargando.'
-      );
+      showNotification(<FileDown className="h-5 w-5" />, 'success', 'Exportación iniciada', 'El archivo CSV se está descargando.');
     } catch (error) {
-      console.error('Error al exportar CSV', error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'No se pudo exportar las transacciones a CSV.';
-      showNotification('fas fa-triangle-exclamation', 'danger', 'Error al exportar', message);
+      const message = error instanceof Error ? error.message : 'No se pudo exportar las transacciones a CSV.';
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error al exportar', message);
     } finally {
       setIsExporting(false);
     }
   }, [dateFilter, showNotification]);
 
   return (
-    <Container className="gap-6">
-      <TransactionsHeader
-        onCreateTransaction={handleCreateTransaction}
-        onExportCsv={handleExportCsv}
-        isExporting={isExporting}
-      />
-      <TransactionsSummary summary={summary} />
-      <TransactionsFilters
-        typeFilter={typeFilter}
-        categoryFilter={categoryFilter}
-        dateFilter={dateFilter}
-        searchTerm={searchTerm}
-        categories={categoryOptions}
-        onTypeFilterChange={setTypeFilter}
-        onCategoryFilterChange={setCategoryFilter}
-        onDateFilterChange={setDateFilter}
-        onSearchTermChange={setSearchTerm}
-        onClearFilters={clearFilters}
-      />
-      <TransactionsTable
-        transactions={filteredTransactions}
-        accounts={accountDictionary}
-        categories={categoryDictionary}
-        onEditTransaction={handleEditTransaction}
-        onDeleteTransaction={handleDeleteTransaction}
-      />
-    </Container>
+    <TransactionsContext.Provider
+      value={{
+        filteredTransactions,
+        accountDictionary,
+        categoryDictionary,
+        categoryOptions,
+        summary,
+        typeFilter,
+        categoryFilter,
+        dateFilter,
+        searchTerm,
+        isExporting,
+        setTypeFilter,
+        setCategoryFilter,
+        setDateFilter,
+        setSearchTerm,
+        clearFilters,
+        handleCreateTransaction,
+        handleEditTransaction,
+        handleDeleteTransaction,
+        handleExportCsv,
+      }}
+    >
+      {children}
+    </TransactionsContext.Provider>
   );
 }
