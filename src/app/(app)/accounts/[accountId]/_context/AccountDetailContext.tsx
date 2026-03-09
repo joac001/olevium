@@ -12,7 +12,7 @@ import EditAccountForm from '../../_components/EditAccountForm';
 import DeleteAccountForm from '../../_components/DeleteAccountForm';
 import CreateTransactionForm from '../../_components/CreateTransactionForm';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 15;
 
 function normalizeTransaction(tx: Transaction): AccountTransaction {
   const categoryRaw = tx.category;

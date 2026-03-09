@@ -35,7 +35,7 @@ const TransactionFormModal = dynamic(() => import('../_components/TransactionFor
   ),
 });
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 15;
 const FILTERS_KEY = 'olevium_tx_filters';
 
 type StoredFilters = {
