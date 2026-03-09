@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Pen, Trash2 } from 'lucide-react';
 
-import { Box, Typography, Card, ActionButton } from '@/components/shared/ui';
+import { Box, Typography, Card, ActionButton, Paginator, Skeleton } from '@/components/shared/ui';
 import { formatAmount, formatDate } from '@/lib/utils/parser';
 import { toSignedAmount } from '@/lib/utils/transactions';
 import type { AccountTransaction } from '@/types';
@@ -15,6 +15,9 @@ interface AccountTransactionsTableProps {
   transactions: AccountTransaction[];
   loading: boolean;
   currency: string | null;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   onRefresh?: () => void;
 }
 
@@ -22,14 +25,14 @@ export default function AccountTransactionsTable({
   transactions,
   loading,
   currency,
+  page,
+  totalPages,
+  onPageChange,
   onRefresh,
 }: AccountTransactionsTableProps) {
   const { showModal, hideModal } = useModal();
   const hasTransactions = transactions.length > 0;
-  const ordered = useMemo(
-    () => [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [transactions]
-  );
+  const ordered = transactions;
   const currentYear = new Date().getFullYear();
 
   const handleEdit = useCallback(
@@ -68,7 +71,29 @@ export default function AccountTransactionsTable({
   );
 
   if (loading && !hasTransactions) {
-    return <Typography variant="body">Cargando movimientos...</Typography>;
+    return (
+      <Box className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Box key={i} className="rounded-2xl bg-[color:var(--surface-glass)] p-4">
+            <Box className="hidden gap-4 md:grid md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
+              <Skeleton height="20px" />
+              <Skeleton height="20px" />
+              <Skeleton height="20px" />
+              <Skeleton height="20px" />
+              <Box className="flex justify-end gap-2">
+                <Skeleton width="36px" height="36px" circle />
+                <Skeleton width="36px" height="36px" circle />
+              </Box>
+            </Box>
+            <Box className="flex flex-col gap-3 md:hidden">
+              <Skeleton height="20px" />
+              <Skeleton width="128px" height="16px" />
+              <Skeleton width="96px" height="16px" />
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    );
   }
 
   if (!hasTransactions) {
@@ -93,7 +118,7 @@ export default function AccountTransactionsTable({
         </Box>
       </Box>
 
-      {ordered.map(transaction => {
+      {ordered.map((transaction) => {
         const isCurrentYear = new Date(transaction.date).getFullYear() === currentYear;
         const formattedDate = formatDate(transaction.date, isCurrentYear ? 'dd/mm' : 'dd/mm/aa');
         const isCredit = transaction.typeId === 2;
@@ -202,6 +227,14 @@ export default function AccountTransactionsTable({
           </Box>
         );
       })}
+      <Box className="pt-2">
+        <Paginator
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          isLoading={loading}
+        />
+      </Box>
     </Box>
   );
 }

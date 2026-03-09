@@ -7,13 +7,12 @@ import { AlertTriangle, User, Mail, Lock } from 'lucide-react';
 import { Box, FormWrapper, Input, Typography } from '@/components/shared/ui';
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
-import { useAuthStore } from '@/lib/stores/auth';
+import { signup } from '@/lib/auth';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
 export default function SignupForm() {
   const router = useRouter();
   const { showNotification, showError, showSuccess } = useNotification();
-  const signup = useAuthStore(state => state.signup);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buttons: ButtonProps[] = useMemo(
@@ -69,7 +68,7 @@ export default function SignupForm() {
         setIsSubmitting(false);
       }
     },
-    [router, showNotification, signup, showError, showSuccess]
+    [router, showNotification, showError, showSuccess]
   );
 
   return (

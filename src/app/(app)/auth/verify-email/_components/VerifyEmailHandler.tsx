@@ -6,7 +6,7 @@ import { CheckCircle, AlertTriangle, Loader } from 'lucide-react';
 
 import { Box, Button, Typography } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
-import { useAuthStore } from '@/lib/stores/auth';
+import { verifyEmail } from '@/lib/auth';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
 interface VerifyEmailHandlerProps {
@@ -18,7 +18,6 @@ type VerifyStatus = 'idle' | 'loading' | 'success' | 'error';
 export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
   const router = useRouter();
   const { showNotification, showError, showSuccess } = useNotification();
-  const verifyEmail = useAuthStore(state => state.verifyEmail);
   const [status, setStatus] = useState<VerifyStatus>(token ? 'loading' : 'error');
   const [message, setMessage] = useState<string>(() =>
     token ? 'Validando tu enlace de verificación...' : 'Token de verificación faltante o inválido.'
@@ -79,7 +78,7 @@ export default function VerifyEmailHandler({ token }: VerifyEmailHandlerProps) {
         clearTimeout(redirectTimeout);
       }
     };
-  }, [router, showNotification, token, verifyEmail, showError, showSuccess]);
+  }, [router, showNotification, token, showError, showSuccess]);
 
   const statusIcon = useMemo(() => {
     switch (status) {

@@ -11,7 +11,6 @@ import {
   useRegenerateChatTokenMutation,
 } from '@/features/user/mutations';
 import { useNotification } from '@/context/NotificationContext';
-import { useAuthStore } from '@/lib/stores/auth';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
@@ -30,9 +29,7 @@ export default function WhatsAppWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { showError } = useNotification();
 
-  const storeToken = useAuthStore(state => state.accessToken);
-  // El store arranca vacío hasta que se hidrata — leemos las cookies como fallback
-  const isAuthenticated = Boolean(storeToken || tokenStorage.read().accessToken);
+  const isAuthenticated = Boolean(tokenStorage.read().accessToken);
 
   const createToken = useCreateChatTokenMutation();
   const regenerateToken = useRegenerateChatTokenMutation();

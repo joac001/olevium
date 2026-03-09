@@ -21,11 +21,11 @@ export default async function DashboardPage() {
   await requireAuth();
 
   const result = await withAuthProtection(() => getDashboardPageData());
-  const { accounts, transactions } = await handleProtectedResult(result);
+  const { accounts } = await handleProtectedResult(result);
 
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      <DashboardProvider initialAccounts={accounts} initialTransactions={transactions}>
+      <DashboardProvider initialAccounts={accounts}>
         <Container className="py-8 space-y-8">
           <DashboardFilters />
           <DashboardStatsCards />

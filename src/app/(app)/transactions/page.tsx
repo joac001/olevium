@@ -22,7 +22,6 @@ export default async function TransactionsPage() {
   return (
     <Suspense fallback={<TransactionsSkeleton />}>
       <TransactionsProvider
-        initialTransactions={data.transactions}
         initialAccounts={data.accounts}
         initialCategories={data.categories}
       >

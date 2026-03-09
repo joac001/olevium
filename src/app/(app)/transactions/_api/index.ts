@@ -1,14 +1,12 @@
-import { getTransactions, getAccounts, getCategories } from '@/lib/api';
+import { getAccounts, getCategories } from '@/lib/api';
 
 export async function getTransactionsPageData() {
-  const [transactionsResult, accountsResult, categoriesResult] = await Promise.all([
-    getTransactions(),
+  const [accountsResult, categoriesResult] = await Promise.all([
     getAccounts(),
     getCategories(),
   ]);
 
   return {
-    transactions: transactionsResult.data,
     accounts: accountsResult.data,
     categories: categoriesResult.data,
   };
