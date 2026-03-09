@@ -15,14 +15,15 @@ export {
 // Re-export transactions functions
 export {
   getTransactions,
+  getDashboardStats,
   getTransactionsByDateRange,
-  getAccountTransactions,
   getTransactionTypes,
   postTransaction,
   putTransaction,
   deleteTransaction,
   exportTransactionsCsv,
   type TransactionsExportParams,
+  type DashboardStats,
 } from './transactions';
 
 // Re-export categories functions

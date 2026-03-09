@@ -6,7 +6,7 @@ import { useAccountDetail } from '../_context/AccountDetailContext';
 import AccountTransactionsTable from '../../_components/AccountTransactionsTable';
 
 export default function AccountTransactionsCard() {
-  const { account, normalizedTransactions, loadingTransactions, handleOpenCreateTransaction } = useAccountDetail();
+  const { account, normalizedTransactions, loadingTransactions, page, totalPages, setPage, handleOpenCreateTransaction } = useAccountDetail();
 
   const currencyLabel = account?.currency ?? 'Sin moneda';
 
@@ -28,6 +28,9 @@ export default function AccountTransactionsCard() {
         transactions={normalizedTransactions}
         loading={loadingTransactions}
         currency={currencyLabel}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
       />
     </Card>
   );

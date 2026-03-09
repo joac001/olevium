@@ -1,27 +1,25 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
-import { Card, Box, Typography, ActionButton, Skeleton } from '@/components/shared/ui';
+import { Card, Box, Typography, ActionButton, Skeleton, Paginator } from '@/components/shared/ui';
 import { formatCurrency, formatDate, formatAccountName } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
 import { useTransactionsPage } from '../_context/TransactionsContext';
 
-const EXPENSE_TYPE_ID = 1;
-const INCOME_TYPE_ID = 2;
-
 export default function TransactionsTable() {
   const {
-    filteredTransactions,
+    transactions,
     accountDictionary,
-    categoryDictionary,
+    isFetching,
+    page,
+    totalPages,
+    setPage,
     handleEditTransaction,
     handleDeleteTransaction,
   } = useTransactionsPage();
-  const isLoading = false;
-  const summary = { count: filteredTransactions.length };
 
   return (
-    <Card title="Detalle de movimientos" subtitle={`${summary.count} registros filtrados`}>
+    <Card title="Detalle de movimientos" subtitle={`Página ${page} de ${totalPages}`}>
       <Box className="overflow-x-auto">
         <table className="min-w-full divide-y divide-white/10 text-sm">
           <thead className="bg-white/5 text-xs uppercase tracking-wide text-[color:var(--text-muted)]">
@@ -35,31 +33,19 @@ export default function TransactionsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-[color:var(--text-secondary)]">
-            {isLoading ? (
+            {isFetching ? (
               Array.from({ length: 4 }).map((_, idx) => (
                 <tr key={`sk-row-${idx}`}>
-                  <td className="px-4 py-4">
-                    <Skeleton width="96px" height="16px" rounded="0.375rem" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="160px" height="16px" rounded="0.375rem" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="112px" height="16px" rounded="0.375rem" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="144px" height="16px" rounded="0.375rem" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="80px" height="16px" rounded="0.375rem" />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Skeleton width="96px" height="16px" rounded="0.375rem" />
-                  </td>
+                  <td className="px-4 py-4"><Skeleton width="96px" height="16px" rounded="0.375rem" /></td>
+                  <td className="px-4 py-4"><Skeleton width="160px" height="16px" rounded="0.375rem" /></td>
+                  <td className="px-4 py-4"><Skeleton width="112px" height="16px" rounded="0.375rem" /></td>
+                  <td className="px-4 py-4"><Skeleton width="144px" height="16px" rounded="0.375rem" /></td>
+                  <td className="px-4 py-4"><Skeleton width="80px" height="16px" rounded="0.375rem" /></td>
+                  <td className="px-4 py-4"><Skeleton width="96px" height="16px" rounded="0.375rem" /></td>
                 </tr>
               ))
-            ) : filteredTransactions.length ? (
-              filteredTransactions.map((tx) => {
+            ) : transactions.length ? (
+              transactions.map((tx) => {
                 const account = accountDictionary[String(tx.account_id)];
                 const accountLabel =
                   account?.name ??
@@ -73,7 +59,7 @@ export default function TransactionsTable() {
                     ? categoryValue
                     : categoryValue && typeof categoryValue === 'object'
                       ? (categoryValue as any).description ?? 'Sin categoría'
-                      : categoryDictionary[String(tx.category_id)]?.description ?? 'Sin categoría';
+                      : 'Sin categoría';
                 const currency = account?.currency ?? 'ARS';
 
                 return (
@@ -119,6 +105,14 @@ export default function TransactionsTable() {
             )}
           </tbody>
         </table>
+      </Box>
+      <Box className="pt-4">
+        <Paginator
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          isLoading={isFetching}
+        />
       </Box>
     </Card>
   );

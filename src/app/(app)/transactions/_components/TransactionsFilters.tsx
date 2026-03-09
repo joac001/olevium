@@ -34,9 +34,9 @@ export default function TransactionsFilters() {
   const categoryOptionsWithAll: DropMenuOption[] = [
     { value: 'all', label: 'Todas' },
     ...categories.map((category) => ({
-      value: category.description,
-      label: category.description
-    }))
+      value: category.category_id,
+      label: category.description,
+    })),
   ];
 
   return (

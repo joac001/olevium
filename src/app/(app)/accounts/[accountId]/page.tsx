@@ -44,7 +44,6 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
           <AccountDetailProvider
             accountId={accountId}
             initialAccount={data.account}
-            initialTransactions={data.transactions}
             initialAccountTypes={data.accountTypes}
           >
             <Box className="flex w-full max-w-6xl flex-col gap-6">
