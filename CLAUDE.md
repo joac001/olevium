@@ -153,6 +153,56 @@ export async function getDashboardPageData() {
 
 ---
 
+## Design System
+
+### CSS Custom Properties
+
+```css
+/* Backgrounds */
+var(--surface-base), var(--surface-muted), var(--surface-highlight), var(--surface-overlay), var(--background)
+
+/* State colors */
+var(--color-primary), var(--color-secondary), var(--color-accent)
+var(--color-success), var(--color-warning), var(--color-danger), var(--color-info)
+/* Variantes: -dark, -light, -soft, -strong */
+
+/* Text */
+var(--text-primary), var(--text-secondary), var(--text-muted), var(--foreground)
+
+/* Borders */
+var(--border-soft), var(--border-strong)
+
+/* Fields */
+var(--field-surface), var(--field-border), var(--field-hover), var(--field-active)
+```
+
+### Componentes — siempre preferir sobre HTML nativo
+
+| En lugar de | Usar |
+|---|---|
+| `<h1>`, `<h2>`, `<p>`, `<span>` | `<Typography variant="h1\|h2\|subtitle\|body\|caption">` |
+| `<button>` | `<Button>` o `<ActionButton>` (icon-only) |
+| `<input>`, `<select>` | `<Input>`, `<DateInput>`, `<DropMenu>` |
+| `<div>` estructural | `<Card>`, `<Box>`, `<Container>` |
+| `<a>` | `<AppLink>` o `<Link>` |
+| Modal custom | `<ModalWrapper>` |
+| Campo de formulario | `<FieldWrapper>` |
+
+Typography variants: `h1`, `h2`, `subtitle` (→ h3), `body` (→ p), `link` (→ span), `caption` (→ p)
+
+Button `type` prop (`ColorKey`): `primary`, `secondary`, `success`, `accent`, `warning`, `error`, `danger`, `info`, `neutral`
+
+---
+
+## SEO
+
+- **Páginas públicas** (`/landing`, `/`): metadata completo con OG + Twitter Card
+- **Páginas autenticadas** (`(app)/`): `robots: { index: false, follow: false }` obligatorio
+- `<html lang="es">` en root layout
+- Siempre `next/image` para imágenes, `next/font` para fuentes
+
+---
+
 ## Comandos frecuentes
 
 ```bash
