@@ -76,15 +76,18 @@ export default function WhatsAppWidget() {
   };
 
   const handleGenerateToken = async () => {
+    // iOS Safari blocks window.open() from async contexts — must open synchronously
+    // within the user gesture, then navigate once the token is ready.
+    const newWindow = window.open('', '_blank');
     try {
       const token = await getOrCreateToken();
-      window.open(
-        `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola mi token es ct-${token}`)}`,
-        '_blank',
-        'noopener,noreferrer',
-      );
+      const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola mi token es ct-${token}`)}`;
+      if (newWindow) {
+        newWindow.location.href = url;
+      }
       setIsOpen(false);
     } catch (error) {
+      newWindow?.close();
       showError(error, {
         operation: 'create',
         resource: 'token',
