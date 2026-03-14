@@ -6,7 +6,7 @@ export const contentType = 'image/png';
 
 export default async function Image() {
   const manropeBold = await fetch(
-    new URL('https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggqxSuXd.woff2')
+    new URL('https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4aE-_F.ttf')
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
