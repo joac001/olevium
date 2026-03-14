@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+
+export const metadata: Metadata = {
+  title: 'Detalle de cuenta | Olevium',
+};
 import { ArrowLeft } from 'lucide-react';
 import { Container, Box, AppLink } from '@/components/shared/ui';
 import { requireAuth, withAuthProtection, handleProtectedResult } from '@/lib/server-auth';
@@ -44,7 +49,6 @@ export default async function AccountDetailPage({ params }: AccountDetailPagePro
           <AccountDetailProvider
             accountId={accountId}
             initialAccount={data.account}
-            initialTransactions={data.transactions}
             initialAccountTypes={data.accountTypes}
           >
             <Box className="flex w-full max-w-6xl flex-col gap-6">

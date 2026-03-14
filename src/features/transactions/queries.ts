@@ -1,44 +1,58 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import {
   deleteTransaction,
-  getAccountTransactions,
+  getDashboardStats,
   getTransactions,
   getTransactionTypes,
   postTransaction,
   putTransaction,
 } from '@/lib/api';
 import { accountsKeys } from '@/features/accounts/queries';
-import type { Transaction, ApiTransactionType } from '@/types';
+import type { ApiTransactionType, PaginatedResult, Transaction, TransactionQueryParams } from '@/types';
 import type { CreateTransactionPayload, UpdateTransactionPayload } from '@/lib/types';
+import type { DashboardStats } from '@/lib/api';
 
 export const transactionsKeys = {
   all: ['transactions'] as const,
-  list: () => [...transactionsKeys.all] as const,
-  byAccount: (accountId: string) => [...transactionsKeys.all, accountId] as const,
-  detail: (id: string) => [...transactionsKeys.all, id] as const,
+  list: (params: TransactionQueryParams) => [...transactionsKeys.all, params] as const,
+};
+
+export const dashboardStatsKeys = {
+  all: ['dashboardStats'] as const,
+  filtered: (params?: { startDate?: string; endDate?: string }) =>
+    [...dashboardStatsKeys.all, params ?? {}] as const,
 };
 
 export const transactionTypesKeys = {
   all: ['transactionTypes'] as const,
 };
 
-type TransactionsQueryOptions = Omit<UseQueryOptions<Transaction[], Error>, 'queryKey' | 'queryFn'>;
-type TransactionTypesQueryOptions = Omit<UseQueryOptions<ApiTransactionType[], Error>, 'queryKey' | 'queryFn'>;
+type TransactionsQueryOptions = Omit<
+  UseQueryOptions<PaginatedResult<Transaction>, Error>,
+  'queryKey' | 'queryFn'
+>;
+type TransactionTypesQueryOptions = Omit<
+  UseQueryOptions<ApiTransactionType[], Error>,
+  'queryKey' | 'queryFn'
+>;
 
-export function useTransactionsQuery(options?: TransactionsQueryOptions) {
-  return useQuery<Transaction[], Error>({
-    queryKey: transactionsKeys.list(),
-    queryFn: () => getTransactions().then(r => r.data),
+export function useTransactionsQuery(
+  params: TransactionQueryParams,
+  options?: TransactionsQueryOptions
+) {
+  return useQuery<PaginatedResult<Transaction>, Error>({
+    queryKey: transactionsKeys.list(params),
+    queryFn: () => getTransactions(params),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }
 
-export function useAccountTransactionsQuery(accountId: string, options?: TransactionsQueryOptions) {
-  return useQuery<Transaction[], Error>({
-    queryKey: transactionsKeys.byAccount(accountId),
-    queryFn: () => getAccountTransactions(accountId).then(r => r.data),
-    ...options,
+export function useDashboardStatsQuery(params?: { startDate?: string; endDate?: string }) {
+  return useQuery<DashboardStats, Error>({
+    queryKey: dashboardStatsKeys.filtered(params),
+    queryFn: () => getDashboardStats(params),
   });
 }
 
@@ -57,8 +71,7 @@ export function useCreateTransactionMutation() {
     onSuccess: async (_, variables) => {
       const accountId = variables.account_id;
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: transactionsKeys.list() }),
-        queryClient.invalidateQueries({ queryKey: transactionsKeys.byAccount(accountId) }),
+        queryClient.invalidateQueries({ queryKey: transactionsKeys.all }),
         queryClient.invalidateQueries({ queryKey: accountsKeys.list() }),
         queryClient.invalidateQueries({ queryKey: accountsKeys.detail(accountId) }),
       ]);
@@ -76,13 +89,10 @@ export function useUpdateTransactionMutation(transactionId: string | null) {
     onSuccess: async (_, variables) => {
       const accountId = variables.account_id;
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: transactionsKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: transactionsKeys.all }),
         queryClient.invalidateQueries({ queryKey: accountsKeys.list() }),
         ...(accountId
-          ? [
-              queryClient.invalidateQueries({ queryKey: transactionsKeys.byAccount(accountId) }),
-              queryClient.invalidateQueries({ queryKey: accountsKeys.detail(accountId) }),
-            ]
+          ? [queryClient.invalidateQueries({ queryKey: accountsKeys.detail(accountId) })]
           : []),
       ]);
     },
@@ -97,8 +107,7 @@ export function useDeleteTransactionMutation() {
     onSuccess: async (_, variables) => {
       const { accountId } = variables;
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: transactionsKeys.list() }),
-        queryClient.invalidateQueries({ queryKey: transactionsKeys.byAccount(accountId) }),
+        queryClient.invalidateQueries({ queryKey: transactionsKeys.all }),
         queryClient.invalidateQueries({ queryKey: accountsKeys.list() }),
         queryClient.invalidateQueries({ queryKey: accountsKeys.detail(accountId) }),
       ]);

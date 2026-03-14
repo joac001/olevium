@@ -7,13 +7,12 @@ import { Box, FormWrapper, Input, Typography, AppLink } from '@/components/share
 import type { ButtonProps } from '@/components/shared/ui';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuthErrorHandler } from '@/lib/hooks/useErrorHandler';
-import { useAuthStore } from '@/lib/stores/auth';
+import { login } from '@/lib/auth';
 
 export default function LoginForm() {
   const router = useRouter();
   const { showNotification } = useNotification();
   const { handleLogin } = useAuthErrorHandler();
-  const login = useAuthStore(state => state.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buttons: ButtonProps[] = useMemo(
@@ -55,7 +54,7 @@ export default function LoginForm() {
 
       setIsSubmitting(false);
     },
-    [login, router, showNotification, handleLogin]
+    [router, showNotification, handleLogin]
   );
 
   return (

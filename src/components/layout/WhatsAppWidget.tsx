@@ -11,7 +11,6 @@ import {
   useRegenerateChatTokenMutation,
 } from '@/features/user/mutations';
 import { useNotification } from '@/context/NotificationContext';
-import { useAuthStore } from '@/lib/stores/auth';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
 
 const CHAT_TOKEN_STORAGE_KEY = 'olevium_chat_token';
@@ -36,9 +35,7 @@ export default function WhatsAppWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { showError } = useNotification();
 
-  const storeToken = useAuthStore(state => state.accessToken);
-  // El store arranca vacío hasta que se hidrata — leemos las cookies como fallback
-  const isAuthenticated = Boolean(storeToken || tokenStorage.read().accessToken);
+  const isAuthenticated = Boolean(tokenStorage.read().accessToken);
 
   const createToken = useCreateChatTokenMutation();
   const regenerateToken = useRegenerateChatTokenMutation();
@@ -122,7 +119,7 @@ export default function WhatsAppWidget() {
     },
     {
       key: 'chat',
-      text: 'Chatear',
+      text: 'Chatea con Oli',
       icon: <MessageCircle className="h-4 w-4" />,
       onClick: handleChat,
       disabled: false,
@@ -170,22 +167,24 @@ export default function WhatsAppWidget() {
         )}
       </AnimatePresence>
 
-      <ActionButton
-        icon={<WhatsAppIcon className="h-5 w-5" />}
-        type="success"
-        tooltip="WhatsApp"
-        onClick={() => {
-          if (!isAuthenticated) {
-            window.open(`https://wa.me/${WA_NUMBER}`, '_blank', 'noopener,noreferrer');
-            return;
-          }
-          setIsOpen(prev => !prev);
-        }}
-        className={clsx(
-          'h-11 w-11 rounded-full shadow-lg transition-shadow',
-          isOpen && 'ring-2 ring-(--color-success) ring-offset-2 ring-offset-background'
-        )}
-      />
+      <div id="onboarding-whatsapp">
+        <ActionButton
+          icon={<WhatsAppIcon className="h-5 w-5" />}
+          type="success"
+          tooltip="WhatsApp"
+          onClick={() => {
+            if (!isAuthenticated) {
+              window.open(`https://wa.me/${WA_NUMBER}`, '_blank', 'noopener,noreferrer');
+              return;
+            }
+            setIsOpen(prev => !prev);
+          }}
+          className={clsx(
+            'h-11 w-11 rounded-full shadow-lg transition-shadow',
+            isOpen && 'ring-2 ring-(--color-success) ring-offset-2 ring-offset-background'
+          )}
+        />
+      </div>
     </div>
   );
 }

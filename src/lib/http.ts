@@ -1,4 +1,3 @@
-import { useAuthStore } from '@/lib/stores/auth';
 import { tokenStorage } from '@/lib/utils/tokenStorage';
 
 const RAW_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
@@ -50,10 +49,10 @@ function buildUrl(path: string): string {
 }
 
 /**
- * Get auth token from cookies (server) or Zustand store (client)
+ * Get auth token from cookies (server-side via Next.js, client-side via tokenStorage)
  */
 async function getAuthToken(): Promise<string | null> {
-  // Check if we're on the server
+  // Server-side: read from Next.js cookies
   if (typeof window === 'undefined') {
     try {
       const { cookies } = await import('next/headers');
@@ -64,14 +63,7 @@ async function getAuthToken(): Promise<string | null> {
     }
   }
 
-  // Client-side: intentar primero del store, luego de las cookies
-  // Esto es importante porque al recargar la página, el store puede estar vacío
-  const storeToken = useAuthStore.getState().accessToken;
-  if (storeToken) {
-    return storeToken;
-  }
-
-  // Fallback a las cookies si el store está vacío
+  // Client-side: read from cookies
   const storedTokens = tokenStorage.read();
   return storedTokens.accessToken;
 }
@@ -92,14 +84,9 @@ async function tryRefreshToken(): Promise<boolean> {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const authState = useAuthStore.getState();
-
-      // Intentar obtener el refresh token del store primero, luego de las cookies
-      // Esto es importante porque al recargar la página, el store puede estar vacío
-      // pero las cookies aún tienen los tokens válidos
       const storedTokens = tokenStorage.read();
-      const refreshToken = authState.refreshToken || storedTokens.refreshToken;
-      const accessToken = authState.accessToken || storedTokens.accessToken;
+      const refreshToken = storedTokens.refreshToken;
+      const accessToken = storedTokens.accessToken;
 
       // Si no hay refresh token en ningún lado, no podemos refrescar
       if (!refreshToken) {
@@ -126,7 +113,7 @@ async function tryRefreshToken(): Promise<boolean> {
         const tokenType = data.token_type ?? data.tokenType ?? 'bearer';
 
         if (newAccessToken) {
-          useAuthStore.getState().setTokens({
+          tokenStorage.save({
             accessToken: newAccessToken,
             refreshToken: newRefreshToken,
             tokenType,
@@ -153,7 +140,8 @@ async function tryRefreshToken(): Promise<boolean> {
 function handleLogout(): void {
   if (typeof window === 'undefined') return;
 
-  useAuthStore.getState().clearSession();
+  tokenStorage.clear();
+  void fetch('/api/auth/clear-session', { method: 'GET', cache: 'no-store' }).catch(() => {});
   window.location.href = '/auth';
 }
 

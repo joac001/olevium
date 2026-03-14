@@ -1,16 +1,18 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { Card } from '@/components/shared/ui';
 import { useModal } from '@/context/ModalContext';
 import { useAccountDetailQuery } from '@/features/accounts/queries';
-import { useAccountTransactionsQuery } from '@/features/transactions/queries';
+import { useTransactionsQuery } from '@/features/transactions/queries';
 import type { Account, AccountType, AccountTransaction } from '@/types';
 import type { Transaction } from '@/lib/types';
 import EditAccountForm from '../../_components/EditAccountForm';
 import DeleteAccountForm from '../../_components/DeleteAccountForm';
 import CreateTransactionForm from '../../_components/CreateTransactionForm';
+
+const PAGE_SIZE = 15;
 
 function normalizeTransaction(tx: Transaction): AccountTransaction {
   const categoryRaw = tx.category;
@@ -53,6 +55,9 @@ type AccountDetailContextValue = {
   accountTypes: AccountType[];
   normalizedTransactions: AccountTransaction[];
   loadingTransactions: boolean;
+  page: number;
+  totalPages: number;
+  setPage: (page: number) => void;
   typeLabel: string;
   handleOpenEdit: () => void;
   handleOpenDelete: () => void;
@@ -72,7 +77,6 @@ export function useAccountDetail() {
 interface AccountDetailProviderProps {
   accountId: string;
   initialAccount: Account;
-  initialTransactions: Transaction[];
   initialAccountTypes: AccountType[];
   children: ReactNode;
 }
@@ -80,16 +84,23 @@ interface AccountDetailProviderProps {
 export default function AccountDetailProvider({
   accountId,
   initialAccount,
-  initialTransactions,
   initialAccountTypes,
   children,
 }: AccountDetailProviderProps) {
   const { showModal, hideModal } = useModal();
+  const [page, setPage] = useState(1);
 
   const { data: account = initialAccount } = useAccountDetailQuery(accountId, { initialData: initialAccount });
-  const { data: transactions = initialTransactions, isFetching: loadingTransactions } =
-    useAccountTransactionsQuery(accountId, { initialData: initialTransactions });
+  const { data: transactionsResult, isFetching: loadingTransactions } = useTransactionsQuery({
+    page,
+    limit: PAGE_SIZE,
+    accountId,
+  });
   const accountTypes = initialAccountTypes;
+
+  const transactions = transactionsResult?.items ?? [];
+  const total = transactionsResult?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const typeLabel = useMemo(() => {
     const type = accountTypes.find(item => item.typeId === account?.typeId);
@@ -147,6 +158,9 @@ export default function AccountDetailProvider({
         accountTypes,
         normalizedTransactions,
         loadingTransactions,
+        page,
+        totalPages,
+        setPage,
         typeLabel,
         handleOpenEdit,
         handleOpenDelete,

@@ -13,7 +13,7 @@ import { LogOut } from 'lucide-react';
 
 import Box from '@/components/shared/ui/content/Box';
 import Typography from '@/components/shared/ui/text/Typography';
-import { useAuthStore } from '@/lib/stores/auth';
+import { logout } from '@/lib/auth';
 import { useNotification } from '@/context/NotificationContext';
 import { createOperationContext } from '@/lib/utils/errorSystem';
 
@@ -35,7 +35,6 @@ function NavBar({ title, links }: NavBarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const logout = useAuthStore(state => state.logout);
   const { showSuccess, showError } = useNotification();
 
   const handleOpen = () => setIsOpen(v => !v);
@@ -133,6 +132,7 @@ function NavBar({ title, links }: NavBarProps) {
           <Box className="flex items-center gap-3">
             {/* Botón hamburguesa */}
             <button
+              id="onboarding-menu"
               onClick={handleOpen}
               aria-expanded={isOpen}
               aria-controls="app-sidemenu"

@@ -5,7 +5,7 @@ import { createContext, useContext, useState, useMemo, type ReactNode } from 're
 import type { Transaction } from '@/lib/types';
 import type { Account } from '@/types';
 import { useAccountsQuery } from '@/features/accounts/queries';
-import { useTransactionsQuery } from '@/features/transactions/queries';
+import { useDashboardStatsQuery } from '@/features/transactions/queries';
 import { toSignedAmount } from '@/lib/utils/transactions';
 import type { DropMenuOption } from '@/components/shared/ui/inputs/DropMenu';
 
@@ -82,17 +82,16 @@ export function useDashboard() {
 
 interface DashboardProviderProps {
   initialAccounts: Account[];
-  initialTransactions: Transaction[];
   children: ReactNode;
 }
 
 export default function DashboardProvider({
   initialAccounts,
-  initialTransactions,
   children,
 }: DashboardProviderProps) {
   const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
-  const { data: transactions = initialTransactions } = useTransactionsQuery({ initialData: initialTransactions });
+  const { data: dashboardStats } = useDashboardStatsQuery();
+  const transactions = dashboardStats?.transactions ?? [];
 
   const now = new Date();
   const [period, setPeriod] = useState<Period>('365d');

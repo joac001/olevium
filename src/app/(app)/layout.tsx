@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Home, Wallet, Tags, Table2, RefreshCw, User } from 'lucide-react';
 import { NavBar, NavLink } from '@/components/layout/';
 import FloatingActions from '@/components/layout/FloatingActions';
+import OnboardingTour from '@/components/layout/OnboardingTour';
 import { Typography } from '@/components/shared/ui';
 import { ClientProviders } from '@/components/providers/ClientProviders';
 
@@ -14,7 +15,11 @@ const links: NavLink[] = [
   { icon: <Wallet className="h-5 w-5 shrink-0" />, label: 'Cuentas', href: '/accounts' },
   { icon: <Tags className="h-5 w-5 shrink-0" />, label: 'Categorías', href: '/categories' },
   { icon: <Table2 className="h-5 w-5 shrink-0" />, label: 'Transacciones', href: '/transactions' },
-  { icon: <RefreshCw className="h-5 w-5 shrink-0" />, label: 'Recurrentes', href: '/recurring-transactions' },
+  {
+    icon: <RefreshCw className="h-5 w-5 shrink-0" />,
+    label: 'Recurrentes',
+    href: '/recurring-transactions',
+  },
   { icon: <User className="h-5 w-5 shrink-0" />, label: 'Perfil', href: '/profile' },
 ];
 
@@ -24,9 +29,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <NavBar title="Olevium" links={links} />
       <main>{children}</main>
       <Typography variant="caption" className="block text-center mt-8 mb-4">
-        &copy; {new Date().getFullYear()} Olevium - v0.2.2
+        &copy; {new Date().getFullYear()} Olevium - v0.3.1
       </Typography>
       <FloatingActions />
+      <OnboardingTour />
     </ClientProviders>
   );
 }

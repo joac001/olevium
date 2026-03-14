@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -21,9 +22,8 @@ import { useAccountsQuery } from '@/features/accounts/queries';
 import { useCategoriesQuery } from '@/features/categories/queries';
 import { exportTransactionsCsv } from '@/lib/api';
 import { formatAccountName } from '@/lib/format';
-import { toSignedAmount } from '@/lib/utils/transactions';
 import type { Category, Transaction } from '@/lib/types';
-import type { Account } from '@/types';
+import type { Account, TransactionQueryParams } from '@/types';
 import type { DateFilter, TypeFilter, TransactionsSummary } from '../_components/types';
 
 const TransactionFormModal = dynamic(() => import('../_components/TransactionFormModal'), {
@@ -35,6 +35,32 @@ const TransactionFormModal = dynamic(() => import('../_components/TransactionFor
   ),
 });
 
+const PAGE_SIZE = 15;
+const FILTERS_KEY = 'olevium_tx_filters';
+
+type StoredFilters = {
+  typeFilter: TypeFilter;
+  categoryFilter: string;
+  dateFilter: DateFilter;
+  searchTerm: string;
+};
+
+function readStoredFilters(): Partial<StoredFilters> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(FILTERS_KEY);
+    return raw ? (JSON.parse(raw) as Partial<StoredFilters>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredFilters(filters: StoredFilters) {
+  try {
+    localStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+  } catch {}
+}
+
 function buildAccountDictionary(accounts: Account[]): Record<string, Account> {
   return accounts.reduce<Record<string, Account>>((acc, account) => {
     acc[String(account.accountId)] = account;
@@ -42,75 +68,34 @@ function buildAccountDictionary(accounts: Account[]): Record<string, Account> {
   }, {});
 }
 
-function buildCategoryDictionary(categories: Category[]): Record<string, Category> {
-  return categories.reduce<Record<string, Category>>((acc, category) => {
-    acc[String(category.category_id)] = category;
-    return acc;
-  }, {});
-}
-
-function filterTransactions(
-  transactions: Transaction[],
-  typeFilter: TypeFilter,
-  categoryFilter: string,
-  dateFilter: DateFilter,
-  searchTerm: string,
-  categoryDictionary: Record<string, Category>
-) {
+function dateFilterToRange(dateFilter: DateFilter): { startDate?: string; endDate?: string } {
   const now = new Date();
-  const threshold = new Date(now);
-  if (dateFilter === '30d') {
-    threshold.setDate(now.getDate() - 30);
-  } else if (dateFilter === '90d') {
-    threshold.setDate(now.getDate() - 90);
-  } else {
-    threshold.setFullYear(now.getFullYear() - 10);
+  if (dateFilter === '30d' || dateFilter === '90d') {
+    const days = dateFilter === '30d' ? 30 : 90;
+    const from = new Date(now);
+    from.setDate(now.getDate() - days);
+    return {
+      startDate: from.toISOString().slice(0, 10),
+      endDate: now.toISOString().slice(0, 10),
+    };
   }
-  const term = searchTerm.trim().toLowerCase();
-
-  return transactions.filter((tx) => {
-    const signedAmount = toSignedAmount(tx.amount, tx.type_id);
-    const isIncome = signedAmount >= 0;
-    const isExpense = signedAmount < 0;
-    if (typeFilter === 'income' && !isIncome) return false;
-    if (typeFilter === 'expense' && !isExpense) return false;
-
-    const categoryRecord = categoryDictionary[String(tx.category_id ?? '')];
-    const categoryName =
-      typeof tx.category === 'string'
-        ? tx.category
-        : tx.category && typeof tx.category === 'object' && 'description' in tx.category
-          ? String((tx.category as any).description ?? '')
-          : categoryRecord
-            ? [categoryRecord.icon, categoryRecord.description].filter(Boolean).join(' ').trim()
-            : '';
-
-    if (categoryFilter !== 'all' && categoryName.toLowerCase() !== categoryFilter.toLowerCase()) {
-      return false;
-    }
-
-    if (term) {
-      const haystack = `${tx.description ?? ''} ${categoryName}`.toLowerCase();
-      if (!haystack.includes(term)) return false;
-    }
-
-    const txDate = new Date(tx.date);
-    if (txDate < threshold) return false;
-    return true;
-  });
+  return {};
 }
 
 type TransactionsContextValue = {
-  filteredTransactions: Transaction[];
+  transactions: Transaction[];
   accountDictionary: Record<string, Account>;
-  categoryDictionary: Record<string, Category>;
   categoryOptions: Category[];
   summary: TransactionsSummary;
+  page: number;
+  totalPages: number;
+  isFetching: boolean;
   typeFilter: TypeFilter;
   categoryFilter: string;
   dateFilter: DateFilter;
   searchTerm: string;
   isExporting: boolean;
+  setPage: (page: number) => void;
   setTypeFilter: (v: TypeFilter) => void;
   setCategoryFilter: (v: string) => void;
   setDateFilter: (v: DateFilter) => void;
@@ -133,14 +118,12 @@ export function useTransactionsPage() {
 }
 
 interface TransactionsProviderProps {
-  initialTransactions: Transaction[];
   initialAccounts: Account[];
   initialCategories: Category[];
   children: ReactNode;
 }
 
 export default function TransactionsProvider({
-  initialTransactions,
   initialAccounts,
   initialCategories,
   children,
@@ -148,50 +131,93 @@ export default function TransactionsProvider({
   const { showModal, hideModal } = useModal();
   const { showNotification } = useNotification();
 
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<DateFilter>('90d');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilterState] = useState<TypeFilter>('all');
+  const [categoryFilter, setCategoryFilterState] = useState<string>('all');
+  const [dateFilter, setDateFilterState] = useState<DateFilter>('90d');
+  const [searchTerm, setSearchTermState] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPageState] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data: transactions = initialTransactions } = useTransactionsQuery({ initialData: initialTransactions });
+  // Hydrate filters from localStorage on mount (client-only)
+  useEffect(() => {
+    const stored = readStoredFilters();
+    if (stored.typeFilter) setTypeFilterState(stored.typeFilter);
+    if (stored.categoryFilter) setCategoryFilterState(stored.categoryFilter);
+    if (stored.dateFilter) setDateFilterState(stored.dateFilter);
+    if (stored.searchTerm !== undefined) {
+      setSearchTermState(stored.searchTerm);
+      setDebouncedSearch(stored.searchTerm);
+    }
+  }, []);
+
+  // Persist filters whenever they change
+  useEffect(() => {
+    writeStoredFilters({ typeFilter, categoryFilter, dateFilter, searchTerm });
+  }, [typeFilter, categoryFilter, dateFilter, searchTerm]);
+
+  // Debounce search: only update the query value 400ms after the user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPageState(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const queryParams = useMemo((): TransactionQueryParams => {
+    const { startDate, endDate } = dateFilterToRange(dateFilter);
+    const typeId = typeFilter === 'income' ? 2 : typeFilter === 'expense' ? 1 : undefined;
+    return {
+      page,
+      limit: PAGE_SIZE,
+      typeId,
+      categoryId: categoryFilter !== 'all' ? categoryFilter : undefined,
+      startDate,
+      endDate,
+      search: debouncedSearch.trim() || undefined,
+    };
+  }, [page, typeFilter, categoryFilter, dateFilter, debouncedSearch]);
+
+  const { data: transactionsResult, isFetching } = useTransactionsQuery(queryParams);
   const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
   const { data: categories = initialCategories } = useCategoriesQuery({ initialData: initialCategories });
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
-
   const accountDictionary = useMemo(() => buildAccountDictionary(accounts), [accounts]);
-  const categoryDictionary = useMemo(() => buildCategoryDictionary(categories), [categories]);
-
   const categoryOptions = useMemo(
     () => categories.slice().sort((a, b) => a.description.localeCompare(b.description)),
     [categories]
   );
 
-  const filteredTransactions = useMemo(
-    () => filterTransactions(transactions, typeFilter, categoryFilter, dateFilter, searchTerm, categoryDictionary),
-    [transactions, typeFilter, categoryFilter, dateFilter, searchTerm, categoryDictionary]
-  );
+  const transactions = transactionsResult?.items ?? [];
+  const total = transactionsResult?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const summary = useMemo<TransactionsSummary>(() => {
-    const totals = filteredTransactions.reduce(
-      (acc, tx) => {
-        const signedAmount = toSignedAmount(tx.amount, tx.type_id);
-        if (signedAmount >= 0) acc.incomeTotal += Math.abs(signedAmount);
-        else acc.expenseTotal += Math.abs(signedAmount);
-        acc.netTotal += signedAmount;
-        return acc;
-      },
-      { incomeTotal: 0, expenseTotal: 0, netTotal: 0 }
-    );
-    return { ...totals, count: filteredTransactions.length };
-  }, [filteredTransactions]);
+    if (!transactionsResult?.summary) {
+      return { incomeTotal: 0, expenseTotal: 0, netTotal: 0, count: 0 };
+    }
+    return {
+      incomeTotal: transactionsResult.summary.incomeTotal,
+      expenseTotal: transactionsResult.summary.expenseTotal,
+      netTotal: transactionsResult.summary.netTotal,
+      count: total,
+    };
+  }, [transactionsResult, total]);
 
+  const setPage = useCallback((p: number) => setPageState(p), []);
+  const setTypeFilter = useCallback((v: TypeFilter) => { setTypeFilterState(v); setPageState(1); }, []);
+  const setCategoryFilter = useCallback((v: string) => { setCategoryFilterState(v); setPageState(1); }, []);
+  const setDateFilter = useCallback((v: DateFilter) => { setDateFilterState(v); setPageState(1); }, []);
+  const setSearchTerm = useCallback((v: string) => { setSearchTermState(v); }, []);
   const clearFilters = useCallback(() => {
-    setTypeFilter('all');
-    setCategoryFilter('all');
-    setDateFilter('90d');
-    setSearchTerm('');
+    setTypeFilterState('all');
+    setCategoryFilterState('all');
+    setDateFilterState('90d');
+    setSearchTermState('');
+    setDebouncedSearch('');
+    setPageState(1);
   }, []);
 
   const handleCreateTransaction = useCallback(() => {
@@ -209,61 +235,46 @@ export default function TransactionsProvider({
     );
   }, [accounts, categories, hideModal, showModal, showNotification]);
 
-  const handleEditTransaction = useCallback(
-    (transaction: Transaction) => {
-      showModal(
-        <TransactionFormModal
-          mode="edit"
-          transaction={transaction}
-          accounts={accounts}
-          categories={categories}
-          onCancel={hideModal}
-          onCompleted={() => {
-            hideModal();
-            showNotification(<Pencil className="h-5 w-5" />, 'success', 'Transacción actualizada', 'Los cambios se guardaron correctamente.');
-          }}
-        />
-      );
-    },
-    [accounts, categories, hideModal, showModal, showNotification]
-  );
+  const handleEditTransaction = useCallback((transaction: Transaction) => {
+    showModal(
+      <TransactionFormModal
+        mode="edit"
+        transaction={transaction}
+        accounts={accounts}
+        categories={categories}
+        onCancel={hideModal}
+        onCompleted={() => {
+          hideModal();
+          showNotification(<Pencil className="h-5 w-5" />, 'success', 'Transacción actualizada', 'Los cambios se guardaron correctamente.');
+        }}
+      />
+    );
+  }, [accounts, categories, hideModal, showModal, showNotification]);
 
-  const handleDeleteTransaction = useCallback(
-    async (transaction: Transaction) => {
-      const account = accountDictionary[transaction.account_id];
-      const label = transaction.description ?? transaction.date;
-      const currencyLabel = account?.currency ?? 'ARS';
-      const confirmed = window.confirm(
-        `¿Eliminar la transacción "${label}" de ${account ? formatAccountName(account.name, currencyLabel) : 'la cuenta seleccionada'}?`
-      );
-      if (!confirmed) return;
-      try {
-        await deleteTransactionMutation.mutateAsync({
-          transactionId: transaction.transaction_id,
-          accountId: transaction.account_id,
-        });
-        showNotification(<Trash2 className="h-5 w-5" />, 'accent', 'Transacción eliminada', 'El movimiento se eliminó correctamente.');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción';
-        showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
-      }
-    },
-    [accountDictionary, deleteTransactionMutation, showNotification]
-  );
+  const handleDeleteTransaction = useCallback(async (transaction: Transaction) => {
+    const account = accountDictionary[transaction.account_id];
+    const label = transaction.description ?? transaction.date;
+    const currencyLabel = account?.currency ?? 'ARS';
+    const confirmed = window.confirm(
+      `¿Eliminar la transacción "${label}" de ${account ? formatAccountName(account.name, currencyLabel) : 'la cuenta seleccionada'}?`
+    );
+    if (!confirmed) return;
+    try {
+      await deleteTransactionMutation.mutateAsync({
+        transactionId: transaction.transaction_id,
+        accountId: transaction.account_id,
+      });
+      showNotification(<Trash2 className="h-5 w-5" />, 'accent', 'Transacción eliminada', 'El movimiento se eliminó correctamente.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo eliminar la transacción';
+      showNotification(<AlertTriangle className="h-5 w-5" />, 'danger', 'Error', message);
+    }
+  }, [accountDictionary, deleteTransactionMutation, showNotification]);
 
   const handleExportCsv = useCallback(async () => {
     try {
       setIsExporting(true);
-      const now = new Date();
-      let startDate: string | undefined;
-      let endDate: string | undefined;
-      if (dateFilter === '30d' || dateFilter === '90d') {
-        const days = dateFilter === '30d' ? 30 : 90;
-        const from = new Date(now);
-        from.setDate(now.getDate() - days);
-        startDate = from.toISOString().slice(0, 10);
-        endDate = now.toISOString().slice(0, 10);
-      }
+      const { startDate, endDate } = dateFilterToRange(dateFilter);
       const blob = await exportTransactionsCsv({ startDate, endDate });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -286,16 +297,19 @@ export default function TransactionsProvider({
   return (
     <TransactionsContext.Provider
       value={{
-        filteredTransactions,
+        transactions,
         accountDictionary,
-        categoryDictionary,
         categoryOptions,
         summary,
+        page,
+        totalPages,
+        isFetching,
         typeFilter,
         categoryFilter,
         dateFilter,
         searchTerm,
         isExporting,
+        setPage,
         setTypeFilter,
         setCategoryFilter,
         setDateFilter,

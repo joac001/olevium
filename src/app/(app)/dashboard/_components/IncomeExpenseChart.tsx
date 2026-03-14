@@ -69,21 +69,43 @@ export default function IncomeExpenseChart() {
     const expensePoints: number[] = [];
 
     if (grouping === 'monthly') {
-      const buckets = new Map<string, { income: number; expense: number }>();
+      const monthBuckets = new Map<string, { income: number; expense: number }>();
+
+      // Pre-fill all months in the selected range (same pattern as daily mode)
+      if (period === 'month' && selectedMonth && selectedYear) {
+        const key = `${selectedYear}-${String(Number(selectedMonth)).padStart(2, '0')}`;
+        monthBuckets.set(key, { income: 0, expense: 0 });
+      } else {
+        const now = new Date();
+        const range = period === '10d' ? 10 : period === '30d' ? 30 : 365;
+        const start = new Date(now);
+        start.setDate(now.getDate() - (range - 1));
+        start.setHours(0, 0, 0, 0);
+        const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+        const endMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cursor <= endMonth) {
+          const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+          monthBuckets.set(key, { income: 0, expense: 0 });
+          cursor.setMonth(cursor.getMonth() + 1);
+        }
+      }
+
+      // Accumulate transactions into pre-filled buckets
       currencyTransactions.forEach(tx => {
         const d = new Date(tx.date);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        if (!buckets.has(key)) buckets.set(key, { income: 0, expense: 0 });
-        const bucket = buckets.get(key)!;
+        if (!monthBuckets.has(key)) return;
+        const bucket = monthBuckets.get(key)!;
         const signedAmount = toSignedAmount(tx.amount, tx.type_id);
         const amount = Math.abs(signedAmount);
         if (signedAmount >= 0) bucket.income += amount;
         else bucket.expense += amount;
       });
-      const orderedKeys = Array.from(buckets.keys()).sort();
+
+      const orderedKeys = Array.from(monthBuckets.keys()).sort();
       orderedKeys.forEach(key => {
         chartLabels.push(key);
-        const bucket = buckets.get(key)!;
+        const bucket = monthBuckets.get(key)!;
         incomePoints.push(bucket.income);
         expensePoints.push(bucket.expense);
       });
