@@ -49,3 +49,10 @@ export {
   type User,
   type FeedbackPayload,
 } from './user';
+
+// Re-export user tasks functions
+export {
+  getUserTasks,
+  completeTutorial,
+  type UserTasks,
+} from './userTasks';

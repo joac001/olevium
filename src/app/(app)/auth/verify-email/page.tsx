@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { Container, Box, Card, Typography } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Verificar email | Olevium',
+};
 import VerifyEmailHandler from './_components/VerifyEmailHandler';
 
 type VerifyEmailPageProps = {

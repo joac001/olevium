@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { Box, Container } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Recuperar contraseña | Olevium',
+};
 import ForgotPasswordForm from './_components/ForgotPasswordForm';
 
 export default function ForgotPasswordPage() {

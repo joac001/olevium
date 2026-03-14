@@ -15,14 +15,15 @@ const setCookie = (name: string, value: string, options: CookieOptions = {}) => 
   }
 
   const { maxAge = ONE_DAY_SECONDS } = options;
-  const segments = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'SameSite=Lax'];
+  const segments = [
+    `${name}=${encodeURIComponent(value)}`,
+    'Path=/',
+    'SameSite=Lax',
+    'Secure',
+  ];
 
   if (maxAge >= 0) {
     segments.push(`Max-Age=${maxAge}`);
-  }
-
-  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-    segments.push('Secure');
   }
 
   document.cookie = segments.join('; ');
@@ -33,7 +34,7 @@ const removeCookie = (name: string) => {
     return;
   }
 
-  document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+  document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax; Secure`;
 };
 
 const readCookie = (name: string): string | null => {

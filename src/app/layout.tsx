@@ -6,6 +6,7 @@ import { Manrope } from 'next/font/google';
 const manrope = Manrope({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://olevium.com'),
   title: 'Olevium',
   description: 'Asistente financiero inteligente',
   icons: {

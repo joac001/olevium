@@ -1,6 +1,11 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { Container, Box } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Olevium',
+};
 import DashboardSkeleton from './_skeletons/DashboardSkeleton';
 import { getDashboardPageData } from './_api';
 import {

@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { Container, Box, Typography, PageHeader } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Acceso | Olevium',
+};
 import { redirectIfAuthenticated } from '@/lib/server-auth';
 import AuthSwitcher from './_components/AuthSwitcher';
 

@@ -24,6 +24,7 @@ function ActionCore({
   alwaysShowText = false,
   onClick,
   variant,
+  ariaLabel,
   className = '',
   disabled = false,
 }: {
@@ -32,6 +33,7 @@ function ActionCore({
   alwaysShowText?: boolean;
   onClick?: () => void;
   variant: ColorKey;
+  ariaLabel?: string;
   className?: string;
   disabled?: boolean;
 }) {
@@ -46,7 +48,7 @@ function ActionCore({
         className
       )}
       leadingIcon={<span className="text-base md:text-lg leading-none" aria-hidden="true">{icon}</span>}
-      ariaLabel={text || 'Acción'}
+      ariaLabel={text || ariaLabel || 'Acción'}
     >
       {text && (
         <span className={clsx('whitespace-nowrap text-sm', !alwaysShowText && 'hidden md:inline')}>
@@ -74,6 +76,7 @@ export default function ActionButton({
       alwaysShowText={alwaysShowText}
       onClick={onClick}
       variant={type}
+      ariaLabel={tooltip}
       className={className}
       disabled={disabled}
     />

@@ -44,10 +44,7 @@ export function CTASection() {
             { icon: FileText, text: 'Sin letra chica' },
             { icon: Clock, text: 'Setup en 2 minutos' },
           ].map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 text-[var(--text-muted)]"
-            >
+            <div key={index} className="flex items-center gap-2 text-[var(--text-muted)]">
               <item.icon className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm">{item.text}</span>
             </div>
@@ -95,7 +92,7 @@ export function CTASection() {
         className="absolute bottom-6 text-center"
       >
         <Typography variant="body" className="text-xs text-[var(--text-muted)] opacity-50">
-          Olevium v0.2.2
+          Olevium v0.3.1
         </Typography>
       </motion.div>
     </section>
