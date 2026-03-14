@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { Container } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Perfil | Olevium',
+};
 import {
   requireAuth,
   withAuthProtection,

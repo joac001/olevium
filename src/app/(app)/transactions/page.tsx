@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Container } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Transacciones | Olevium',
+};
 import {
   requireAuth,
   withAuthProtection,

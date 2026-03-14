@@ -132,6 +132,7 @@ function NavBar({ title, links }: NavBarProps) {
           <Box className="flex items-center gap-3">
             {/* Botón hamburguesa */}
             <button
+              id="onboarding-menu"
               onClick={handleOpen}
               aria-expanded={isOpen}
               aria-controls="app-sidemenu"

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type { StoredProfile } from '@/lib/auth';
+import { completeTutorial } from '@/lib/api/userTasks';
 import { userKeys } from './queries';
 
 type UpdateProfilePayload = {
@@ -94,5 +95,15 @@ export const useCreateChatTokenMutation = () => {
 export const useRegenerateChatTokenMutation = () => {
   return useMutation({
     mutationFn: regenerateChatToken,
+  });
+};
+
+export const useCompleteTutorialMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: completeTutorial,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.tasks });
+    },
   });
 };

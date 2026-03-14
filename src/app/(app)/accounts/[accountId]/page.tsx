@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+
+export const metadata: Metadata = {
+  title: 'Detalle de cuenta | Olevium',
+};
 import { ArrowLeft } from 'lucide-react';
 import { Container, Box, AppLink } from '@/components/shared/ui';
 import { requireAuth, withAuthProtection, handleProtectedResult } from '@/lib/server-auth';

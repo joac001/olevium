@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Box, Container } from '@/components/shared/ui';
+
+export const metadata: Metadata = {
+  title: 'Restablecer contraseña | Olevium',
+};
 import ResetPasswordForm from './_components/ResetPasswordForm';
 
 function ResetPasswordLoading() {

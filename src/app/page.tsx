@@ -17,21 +17,12 @@ export const metadata: Metadata = {
       'Registrá tus gastos en segundos con un mensaje. Sin planillas, sin complicaciones.',
     type: 'website',
     url: APP_URL,
-    images: [
-      {
-        url: `${APP_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'Olevium — Organizá tus finanzas personales',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Olevium — Organizá tus finanzas personales',
     description:
       'Registrá tus gastos en segundos con un mensaje. Sin planillas, sin complicaciones.',
-    images: [`${APP_URL}/og-image.png`],
   },
 };
 
