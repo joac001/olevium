@@ -137,14 +137,17 @@ export async function postTransaction(payload: CreateTransactionPayload): Promis
 
   const response = await apiRequest('/transactions/', {
     method: 'POST',
-    body: JSON.stringify(safePayload),
+    body: JSON.stringify([safePayload]),
   });
   if (!response.ok) {
     const detail = await parseErrorMessage(response);
     throw new Error(detail ?? `No se pudo crear la transacción (status ${response.status})`);
   }
-  const raw = (await response.json()) as ApiUserTransaction;
-  return normalizeTransaction(raw);
+  const body = await response.json() as { created: ApiUserTransaction[]; errors: { index: number; detail: string }[] };
+  if (body.created.length === 0) {
+    throw new Error(body.errors[0]?.detail ?? 'No se pudo crear la transacción');
+  }
+  return normalizeTransaction(body.created[0]);
 }
 
 export async function putTransaction(
