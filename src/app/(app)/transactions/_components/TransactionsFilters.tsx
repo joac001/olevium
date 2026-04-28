@@ -9,13 +9,13 @@ import { useTransactionsPage } from '../_context/TransactionsContext';
 const TYPE_OPTIONS: DropMenuOption[] = [
   { value: 'all', label: 'Todos' },
   { value: 'income', label: 'Ingresos' },
-  { value: 'expense', label: 'Salidas' }
+  { value: 'expense', label: 'Salidas' },
 ];
 
 const DATE_OPTIONS: DropMenuOption[] = [
   { value: '30d', label: 'Últimos 30 días' },
   { value: '90d', label: 'Últimos 90 días' },
-  { value: 'all', label: 'Todo el historial' }
+  { value: 'all', label: 'Todo el historial' },
 ];
 
 export default function TransactionsFilters() {
@@ -33,7 +33,7 @@ export default function TransactionsFilters() {
   } = useTransactionsPage();
   const categoryOptionsWithAll: DropMenuOption[] = [
     { value: 'all', label: 'Todas' },
-    ...categories.map((category) => ({
+    ...categories.map(category => ({
       value: category.category_id,
       label: category.description,
     })),
@@ -45,25 +45,25 @@ export default function TransactionsFilters() {
         label="Tipo"
         options={TYPE_OPTIONS}
         value={typeFilter}
-        onValueChange={(value) => onTypeFilterChange((value as TypeFilter) ?? 'all')}
+        onValueChange={value => onTypeFilterChange((value as TypeFilter) ?? 'all')}
       />
       <DropMenu
         label="Categoría"
         options={categoryOptionsWithAll}
         value={categoryFilter}
-        onValueChange={(value) => onCategoryFilterChange(value != null ? String(value) : 'all')}
+        onValueChange={value => onCategoryFilterChange(value != null ? String(value) : 'all')}
       />
       <DropMenu
         label="Periodo"
         options={DATE_OPTIONS}
         value={dateFilter}
-        onValueChange={(value) => onDateFilterChange((value as DateFilter) ?? '90d')}
+        onValueChange={value => onDateFilterChange((value as DateFilter) ?? '90d')}
       />
       <Input
         label="Buscar"
         value={searchTerm}
-        onValueChange={(value) => onSearchTermChange(String(value ?? ''))}
-        placeholder="Descripción o categoría"
+        onValueChange={value => onSearchTermChange(String(value ?? ''))}
+        placeholder="Descripción"
       />
       <Box className="md:col-span-4">
         <ActionButton
