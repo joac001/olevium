@@ -29,7 +29,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <NavBar title="Olevium" links={links} />
       <main>{children}</main>
       <Typography variant="caption" className="block text-center mt-8 mb-4">
-        &copy; {new Date().getFullYear()} Olevium - v0.3.1
+        &copy; {new Date().getFullYear()} Olevium - v0.3.2
       </Typography>
       <FloatingActions />
       <OnboardingTour />
