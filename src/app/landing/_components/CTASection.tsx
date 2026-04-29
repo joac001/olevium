@@ -92,7 +92,7 @@ export function CTASection() {
         className="absolute bottom-6 text-center"
       >
         <Typography variant="body" className="text-xs text-[var(--text-muted)] opacity-50">
-          Olevium v0.3.1
+          Olevium v0.3.2
         </Typography>
       </motion.div>
     </section>
