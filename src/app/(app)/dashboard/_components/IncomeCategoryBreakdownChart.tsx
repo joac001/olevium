@@ -87,14 +87,12 @@ export default function IncomeCategoryBreakdownChart() {
           </Box>
         </Box>
         <Box className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-          <Box className="h-52">
+          <Box className="relative h-52">
             <Doughnut
               data={doughnutData}
               options={{
                 plugins: {
-                  legend: {
-                    display: false,
-                  },
+                  legend: { display: false },
                   tooltip: {
                     callbacks: {
                       label: tooltipItem => {
@@ -107,8 +105,20 @@ export default function IncomeCategoryBreakdownChart() {
                   },
                 },
                 cutout: '65%',
+                maintainAspectRatio: false,
               }}
             />
+            {categorySlices.length > 0 && (
+              <Box className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                <Typography variant="caption" className="text-[10px] text-muted">Total</Typography>
+                <Typography variant="body" as="p" className="text-sm font-semibold text-white leading-tight">
+                  {formatCurrency(
+                    incomesByCurrency[categorySlices[0]?.currency ?? 'ARS'] ?? 0,
+                    categorySlices[0]?.currency ?? 'ARS'
+                  )}
+                </Typography>
+              </Box>
+            )}
           </Box>
           <Box className="space-y-3">
             {categorySlices.map((slice, index) => {

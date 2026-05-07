@@ -21,6 +21,9 @@ import IncomeCategoryBreakdownChart from './_components/IncomeCategoryBreakdownC
 import CategoryBreakdownChart from './_components/CategoryBreakdownChart';
 import AccountsBalanceList from './_components/AccountsBalanceList';
 import RecentTransactionsList from './_components/RecentTransactionsList';
+import TopSpendingCategories from './_components/TopSpendingCategories';
+import UpcomingRecurrences from './_components/UpcomingRecurrences';
+import ConfigurableCategories from './_components/ConfigurableCategories';
 
 export default async function DashboardPage() {
   await requireAuth();
@@ -41,9 +44,14 @@ export default async function DashboardPage() {
               <CategoryBreakdownChart />
             </Box>
           </section>
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <section className="grid gap-6 lg:grid-cols-3">
             <AccountsBalanceList />
+            <TopSpendingCategories />
+            <ConfigurableCategories />
+          </section>
+          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <RecentTransactionsList />
+            <UpcomingRecurrences />
           </section>
         </Container>
       </DashboardProvider>

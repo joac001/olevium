@@ -16,6 +16,7 @@ export {
 export {
   getTransactions,
   getDashboardStats,
+  getCategoryStats,
   getTransactionsByDateRange,
   getTransactionTypes,
   postTransaction,
@@ -24,6 +25,7 @@ export {
   exportTransactionsCsv,
   type TransactionsExportParams,
   type DashboardStats,
+  type CategoryStat,
 } from './transactions';
 
 // Re-export categories functions
@@ -46,8 +48,11 @@ export {
 export {
   getCurrentUser,
   postFeedback,
+  getUserSettings,
+  patchUserSettings,
   type User,
   type FeedbackPayload,
+  type UserSettings,
 } from './user';
 
 // Re-export user tasks functions

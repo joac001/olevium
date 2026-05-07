@@ -2,6 +2,12 @@ import { apiRequest, parseErrorMessage } from '@/lib/http';
 import type { User, FeedbackPayload } from '@/types';
 import type { ApiCollectionResult } from './types';
 
+export interface UserSettings {
+  user_id: string;
+  language: string;
+  tracked_categories: string[];
+}
+
 export type { User, FeedbackPayload };
 
 export async function getCurrentUser(): Promise<ApiCollectionResult<User>> {
@@ -18,6 +24,21 @@ export async function getCurrentUser(): Promise<ApiCollectionResult<User>> {
     updated_at: String(raw['updated_at'] ?? raw['updatedAt'] ?? ''),
   };
   return { data: normalized };
+}
+
+export async function getUserSettings(): Promise<UserSettings> {
+  const response = await apiRequest('/users/settings/');
+  if (!response.ok) throw new Error(`status ${response.status}`);
+  return response.json() as Promise<UserSettings>;
+}
+
+export async function patchUserSettings(patch: Partial<Pick<UserSettings, 'language' | 'tracked_categories'>>): Promise<UserSettings> {
+  const response = await apiRequest('/users/settings/', {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) throw new Error(`status ${response.status}`);
+  return response.json() as Promise<UserSettings>;
 }
 
 export async function postFeedback(payload: FeedbackPayload): Promise<void> {

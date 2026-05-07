@@ -12,13 +12,12 @@ import type {
 
 type TransactionType = ApiTransactionType;
 
+type RawSummary = { income_total: number; expense_total: number; net_total: number };
+
 type RawDashboardStats = {
   transactions: ApiUserTransaction[];
-  summary: {
-    income_total: number;
-    expense_total: number;
-    net_total: number;
-  };
+  summary: RawSummary;
+  prev_summary?: RawSummary | null;
 };
 
 type RawPaginatedResponse = {
@@ -88,32 +87,86 @@ export async function getTransactions(
 export interface DashboardStats {
   transactions: Transaction[];
   summary: TransactionSummary;
+  prevSummary: TransactionSummary | null;
 }
+
+export interface CategoryStat {
+  categoryId: string;
+  description: string;
+  color: string | null;
+  currentTotal: number;
+  prevTotal: number;
+  typeId: number;
+}
+
+const normalizeSummary = (raw?: RawSummary | null): TransactionSummary | null => {
+  if (!raw) return null;
+  return {
+    incomeTotal: raw.income_total ?? 0,
+    expenseTotal: raw.expense_total ?? 0,
+    netTotal: raw.net_total ?? 0,
+  };
+};
 
 export async function getDashboardStats(params?: {
   startDate?: string;
   endDate?: string;
+  prevStartDate?: string;
+  prevEndDate?: string;
 }): Promise<DashboardStats> {
   const searchParams = new URLSearchParams();
   if (params?.startDate) searchParams.set('start_date', params.startDate);
   if (params?.endDate) searchParams.set('end_date', params.endDate);
+  if (params?.prevStartDate) searchParams.set('prev_start_date', params.prevStartDate);
+  if (params?.prevEndDate) searchParams.set('prev_end_date', params.prevEndDate);
   const query = searchParams.toString();
   const response = await apiRequest(`/transactions/dashboard${query ? `?${query}` : ''}`);
   if (!response.ok) {
     return {
       transactions: [],
       summary: { incomeTotal: 0, expenseTotal: 0, netTotal: 0 },
+      prevSummary: null,
     };
   }
   const raw = (await response.json()) as RawDashboardStats;
   return {
     transactions: (raw.transactions ?? []).map(normalizeTransaction),
-    summary: {
-      incomeTotal: raw.summary?.income_total ?? 0,
-      expenseTotal: raw.summary?.expense_total ?? 0,
-      netTotal: raw.summary?.net_total ?? 0,
-    },
+    summary: normalizeSummary(raw.summary) ?? { incomeTotal: 0, expenseTotal: 0, netTotal: 0 },
+    prevSummary: normalizeSummary(raw.prev_summary ?? null),
   };
+}
+
+export async function getCategoryStats(params: {
+  categoryIds: string[];
+  startDate: string;
+  endDate: string;
+  prevStartDate?: string;
+  prevEndDate?: string;
+}): Promise<CategoryStat[]> {
+  const searchParams = new URLSearchParams();
+  params.categoryIds.forEach(id => searchParams.append('category_ids', id));
+  searchParams.set('start_date', params.startDate);
+  searchParams.set('end_date', params.endDate);
+  if (params.prevStartDate) searchParams.set('prev_start_date', params.prevStartDate);
+  if (params.prevEndDate) searchParams.set('prev_end_date', params.prevEndDate);
+  const response = await apiRequest(`/transactions/category-stats?${searchParams.toString()}`);
+  if (!response.ok) return [];
+  const raw = (await response.json()) as Array<{
+    category_id: string;
+    description: string;
+    color: string | null;
+    current_total: number;
+    prev_total: number;
+    type_id: number;
+  }>;
+  return raw.map(r => ({
+    categoryId: r.category_id,
+    description: r.description,
+    color: r.color,
+    currentTotal: r.current_total,
+    prevTotal: r.prev_total,
+    typeId: r.type_id,
+  }));
 }
 
 export async function getTransactionsByDateRange(

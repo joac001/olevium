@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useMemo, type ReactNode } from 're
 
 import type { Transaction } from '@/lib/types';
 import type { Account } from '@/types';
+import type { TransactionSummary } from '@/types';
 import { useAccountsQuery } from '@/features/accounts/queries';
 import { useDashboardStatsQuery } from '@/features/transactions/queries';
 import { toSignedAmount } from '@/lib/utils/transactions';
@@ -50,6 +51,55 @@ export const YEAR_OPTIONS = generateYearOptions();
 type Period = '10d' | '30d' | '365d' | 'month';
 type Grouping = 'daily' | 'monthly';
 
+type DateRange = {
+  startDate: string;
+  endDate: string;
+  prevStartDate: string;
+  prevEndDate: string;
+};
+
+function toISODate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+function computeDateRange(
+  period: Period,
+  selectedMonth: string,
+  selectedYear: string
+): DateRange {
+  const now = new Date();
+  const today = toISODate(now);
+
+  if (period === 'month') {
+    const year = Number(selectedYear);
+    const month = Number(selectedMonth);
+    const startDate = toISODate(new Date(year, month - 1, 1));
+    const endDate = toISODate(new Date(year, month, 0));
+    const prevStartDate = toISODate(new Date(year - 1, month - 1, 1));
+    const prevEndDate = toISODate(new Date(year - 1, month, 0));
+    return { startDate, endDate, prevStartDate, prevEndDate };
+  }
+
+  const daysMap: Record<string, number> = { '10d': 9, '30d': 29, '365d': 364 };
+  const days = daysMap[period] ?? 29;
+
+  const start = new Date(now);
+  start.setDate(now.getDate() - days);
+  start.setHours(0, 0, 0, 0);
+
+  const prevEnd = new Date(start);
+  prevEnd.setDate(start.getDate() - 1);
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevEnd.getDate() - days);
+
+  return {
+    startDate: toISODate(start),
+    endDate: today,
+    prevStartDate: toISODate(prevStart),
+    prevEndDate: toISODate(prevEnd),
+  };
+}
+
 type DashboardContextValue = {
   accounts: Account[];
   filteredTransactions: Transaction[];
@@ -58,6 +108,11 @@ type DashboardContextValue = {
   incomesByCurrency: Record<string, number>;
   expensesByCurrency: Record<string, number>;
   transactionsCountPeriod: number;
+  prevSummary: TransactionSummary | null;
+  startDate: string;
+  endDate: string;
+  prevStartDate: string;
+  prevEndDate: string;
   period: Period;
   setPeriod: (v: Period) => void;
   selectedMonth: string;
@@ -89,44 +144,30 @@ export default function DashboardProvider({
   initialAccounts,
   children,
 }: DashboardProviderProps) {
-  const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
-  const { data: dashboardStats } = useDashboardStatsQuery();
-  const transactions = dashboardStats?.transactions ?? [];
-
   const now = new Date();
   const [period, setPeriod] = useState<Period>('365d');
   const [selectedMonth, setSelectedMonth] = useState<string>(String(now.getMonth() + 1));
   const [selectedYear, setSelectedYear] = useState<string>(String(now.getFullYear()));
   const [grouping, setGrouping] = useState<Grouping>('daily');
 
+  const { startDate, endDate, prevStartDate, prevEndDate } = useMemo(
+    () => computeDateRange(period, selectedMonth, selectedYear),
+    [period, selectedMonth, selectedYear]
+  );
+
+  const { data: accounts = initialAccounts } = useAccountsQuery({ initialData: initialAccounts });
+  const { data: dashboardStats } = useDashboardStatsQuery({
+    startDate,
+    endDate,
+    prevStartDate,
+    prevEndDate,
+  });
+
+  // El backend ya devuelve las transacciones filtradas por fecha
+  const filteredTransactions: Transaction[] = dashboardStats?.transactions ?? [];
+
   const groupingAllowed = period === '365d';
   const effectiveGrouping: Grouping = groupingAllowed ? grouping : 'daily';
-
-  const filteredTransactions = useMemo(() => {
-    const now = new Date();
-    const start = new Date(now);
-
-    if (period === '10d') start.setDate(now.getDate() - 9);
-    if (period === '30d') start.setDate(now.getDate() - 29);
-    if (period === '365d') start.setFullYear(now.getFullYear() - 1);
-
-    if (period === 'month' && selectedMonth && selectedYear) {
-      const year = Number(selectedYear);
-      const month = Number(selectedMonth);
-      const monthStart = new Date(year, month - 1, 1);
-      const monthEnd = new Date(year, month, 0, 23, 59, 59, 999);
-      return transactions.filter(tx => {
-        const txDate = new Date(tx.date);
-        return txDate >= monthStart && txDate <= monthEnd;
-      });
-    }
-
-    start.setHours(0, 0, 0, 0);
-    return transactions.filter(tx => {
-      const txDate = new Date(tx.date);
-      return txDate >= start && txDate <= now;
-    });
-  }, [transactions, period, selectedMonth, selectedYear]);
 
   const accountCurrencyMap = useMemo<Record<string, string>>(() => {
     return accounts.reduce<Record<string, string>>((acc, account) => {
@@ -175,6 +216,11 @@ export default function DashboardProvider({
         incomesByCurrency,
         expensesByCurrency,
         transactionsCountPeriod,
+        prevSummary: dashboardStats?.prevSummary ?? null,
+        startDate,
+        endDate,
+        prevStartDate,
+        prevEndDate,
         period,
         setPeriod,
         selectedMonth,

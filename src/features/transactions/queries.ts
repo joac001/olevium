@@ -3,6 +3,7 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import {
   deleteTransaction,
   getDashboardStats,
+  getCategoryStats,
   getTransactions,
   getTransactionTypes,
   postTransaction,
@@ -11,17 +12,37 @@ import {
 import { accountsKeys } from '@/features/accounts/queries';
 import type { ApiTransactionType, PaginatedResult, Transaction, TransactionQueryParams } from '@/types';
 import type { CreateTransactionPayload, UpdateTransactionPayload } from '@/lib/types';
-import type { DashboardStats } from '@/lib/api';
+import type { DashboardStats, CategoryStat } from '@/lib/api';
 
 export const transactionsKeys = {
   all: ['transactions'] as const,
   list: (params: TransactionQueryParams) => [...transactionsKeys.all, params] as const,
 };
 
+type DashboardStatsParams = {
+  startDate?: string;
+  endDate?: string;
+  prevStartDate?: string;
+  prevEndDate?: string;
+};
+
 export const dashboardStatsKeys = {
   all: ['dashboardStats'] as const,
-  filtered: (params?: { startDate?: string; endDate?: string }) =>
+  filtered: (params?: DashboardStatsParams) =>
     [...dashboardStatsKeys.all, params ?? {}] as const,
+};
+
+type CategoryStatsParams = {
+  categoryIds: string[];
+  startDate: string;
+  endDate: string;
+  prevStartDate?: string;
+  prevEndDate?: string;
+};
+
+export const categoryStatsKeys = {
+  all: ['categoryStats'] as const,
+  filtered: (params: CategoryStatsParams) => [...categoryStatsKeys.all, params] as const,
 };
 
 export const transactionTypesKeys = {
@@ -49,10 +70,18 @@ export function useTransactionsQuery(
   });
 }
 
-export function useDashboardStatsQuery(params?: { startDate?: string; endDate?: string }) {
+export function useDashboardStatsQuery(params?: DashboardStatsParams) {
   return useQuery<DashboardStats, Error>({
     queryKey: dashboardStatsKeys.filtered(params),
     queryFn: () => getDashboardStats(params),
+  });
+}
+
+export function useCategoryStatsQuery(params: CategoryStatsParams | null) {
+  return useQuery<CategoryStat[], Error>({
+    queryKey: params ? categoryStatsKeys.filtered(params) : ['categoryStats', 'disabled'],
+    queryFn: () => (params ? getCategoryStats(params) : Promise.resolve([])),
+    enabled: params !== null && params.categoryIds.length > 0,
   });
 }
 

@@ -1,59 +1,75 @@
 'use client';
 
 import { useMemo } from 'react';
-
-import { Card, Box, Typography } from '@/components/shared/ui';
+import { AppLink, Card, Box, Typography } from '@/components/shared/ui';
 import { formatCurrency } from '@/lib/format';
 import { useDashboard } from '../_context/DashboardContext';
 
+const ACCOUNT_TYPE_LABELS: Record<number, string> = {
+  1: 'Banco',
+  2: 'Billetera',
+  3: 'Efectivo',
+  4: 'Tarjeta',
+  5: 'Inversión',
+};
+
 export default function AccountsBalanceList() {
   const { accounts } = useDashboard();
-  const balancesByCurrency = useMemo(() => {
-    return accounts.reduce<Record<string, { total: number; count: number }>>((acc, account) => {
-      const currency = account.currency ?? 'ARS';
-      const current = acc[currency] ?? { total: 0, count: 0 };
-      acc[currency] = {
-        total: current.total + Number(account.balance ?? 0),
-        count: current.count + 1,
-      };
-      return acc;
-    }, {});
-  }, [accounts]);
+
+  const topAccounts = useMemo(
+    () =>
+      [...accounts]
+        .filter(a => !a.deleted)
+        .sort((a, b) => Math.abs(Number(b.balance)) - Math.abs(Number(a.balance)))
+        .slice(0, 5),
+    [accounts]
+  );
 
   return (
     <Card>
       <Box className="flex items-center justify-between">
-        <Box>
-          <Typography variant="h2">Cuentas destacadas</Typography>
-          {/* <Typography variant="body" className="text-[color:var(--text-muted)]">
-            Saldo por moneda (sin conversión)
-          </Typography> */}
-        </Box>
+        <Typography variant="h2">Tus cuentas</Typography>
+        <AppLink
+          href="/accounts"
+          variant="unstyled"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+        >
+          Ver todas →
+        </AppLink>
       </Box>
-      <Box className="space-y-4">
-        {Object.entries(balancesByCurrency).map(([currency, { total, count }]) => (
-          <Box
-            key={currency}
-            className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
-          >
-            <Box className="flex flex-col">
-              <Typography variant="body" as="span" className="text-xs text-muted">
-                {currency}
-              </Typography>
+
+      <Box className="space-y-2">
+        {topAccounts.map(account => {
+          const balance = Number(account.balance ?? 0);
+          const currency = account.currency ?? 'ARS';
+          const typeLabel = ACCOUNT_TYPE_LABELS[account.typeId] ?? 'Cuenta';
+          return (
+            <Box
+              key={account.accountId}
+              className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+            >
+              <Box className="flex items-center gap-3">
+                <Box className="flex flex-col">
+                  <Typography variant="body" as="span" className="text-sm font-medium text-white">
+                    {account.name}
+                  </Typography>
+                  <Typography variant="caption" as="span" className="text-xs text-muted">
+                    {typeLabel}
+                  </Typography>
+                </Box>
+              </Box>
               <Typography
                 variant="body"
                 as="span"
-                className={`text-lg font-semibold ${total >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                className={`text-sm font-semibold ${balance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
               >
-                {formatCurrency(total, currency)}
+                {currency === 'ARS' ? `ARS ${formatCurrency(balance, currency)}` : formatCurrency(balance, currency)}
               </Typography>
             </Box>
-            <Typography variant="body" as="span" className="text-xs text-slate-500">
-              {count} {count === 1 ? 'cuenta' : 'cuentas'}
-            </Typography>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
+
     </Card>
   );
 }

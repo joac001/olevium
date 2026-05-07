@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { Card, Box, Typography, AppLink } from '@/components/shared/ui';
-import { formatCurrency, formatDateWithTime } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { toSignedAmount } from '@/lib/utils/transactions';
 import { useDashboard } from '../_context/DashboardContext';
 
@@ -49,7 +49,7 @@ export default function RecentTransactionsList() {
                   {tx.description ?? category ?? 'Movimiento'}
                 </Typography>
                 <Typography variant="body" as="p" className="text-xs text-muted" suppressHydrationWarning>
-                  {formatDateWithTime(tx.date)}
+                  {formatDate(tx.date)}
                 </Typography>
               </Box>
               <Box className="text-right">
